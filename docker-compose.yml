@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pozdravlyashka-postgres
+    environment:
+      POSTGRES_DB: pozdravlyashka
+      POSTGRES_USER: pozdravlyashka
+      POSTGRES_PASSWORD: pozdravlyashka
+    ports:
+      - "5432:5432"
+    volumes:
+      - pozdravlyashka-postgres-data:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: pozdravlyashka-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  pozdravlyashka-postgres-data:

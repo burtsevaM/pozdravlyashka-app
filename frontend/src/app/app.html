@@ -1,0 +1,46 @@
+<div class="app-shell">
+  <header class="app-header">
+    <mat-toolbar class="top-bar">
+      <div class="brand">
+        <mat-icon aria-hidden="true">celebration</mat-icon>
+        <span class="brand-title">Поздравляшка</span>
+      </div>
+    </mat-toolbar>
+
+    <nav class="mobile-nav" aria-label="Основная навигация">
+      @for (item of navigationItems; track item.path) {
+        <a
+          mat-button
+          [routerLink]="item.path"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+        >
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </header>
+
+  <div class="app-body">
+    <aside class="desktop-nav" aria-label="Основная навигация">
+      <mat-nav-list>
+        @for (item of navigationItems; track item.path) {
+          <a
+            mat-list-item
+            [routerLink]="item.path"
+            routerLinkActive="active-link"
+            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+          >
+            <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </aside>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

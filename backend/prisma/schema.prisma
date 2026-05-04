@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum EventStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ContributionStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum NotificationChannel {
+  APP
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id              String             @id @default(uuid())
+  name            String
+  email           String             @unique
+  passwordHash    String
+  createdAt       DateTime           @default(now())
+  createdTeams    Team[]             @relation("TeamCreator")
+  teamMembers     TeamMember[]
+  organizedEvents CelebrationEvent[] @relation("EventOrganizer")
+  deputyEvents    CelebrationEvent[] @relation("EventDeputy")
+  giftIdeas       GiftIdea[]
+  votes           Vote[]
+  contributions   Contribution[]
+  delegationsFrom Delegation[]       @relation("DelegationFrom")
+  delegationsTo   Delegation[]       @relation("DelegationTo")
+  notifications   Notification[]
+}
+
+model Team {
+  id          String             @id @default(uuid())
+  name        String
+  createdById String
+  createdAt   DateTime           @default(now())
+  createdBy   User               @relation("TeamCreator", fields: [createdById], references: [id])
+  members     TeamMember[]
+  people      Person[]
+  events      CelebrationEvent[]
+  delegations Delegation[]
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model Person {
+  id          String             @id @default(uuid())
+  teamId      String
+  fullName    String
+  email       String?
+  birthDate   DateTime
+  department  String?
+  status      PersonStatus       @default(ACTIVE)
+  preferences String?
+  notes       String?
+  createdAt   DateTime           @default(now())
+  team        Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  giftHistory GiftHistory[]
+  events      CelebrationEvent[]
+}
+
+model GiftHistory {
+  id            String   @id @default(uuid())
+  personId      String
+  year          Int
+  occasion      String
+  giftName      String
+  amount        Decimal? @db.Decimal(10, 2)
+  organizerName String?
+  comment       String?
+  person        Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+model CelebrationEvent {
+  id            String         @id @default(uuid())
+  teamId        String
+  personId      String
+  date          DateTime
+  status        EventStatus    @default(PLANNED)
+  organizerId   String?
+  deputyId      String?
+  budget        Decimal?       @db.Decimal(10, 2)
+  createdAt     DateTime       @default(now())
+  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  person        Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organizer     User?          @relation("EventOrganizer", fields: [organizerId], references: [id])
+  deputy        User?          @relation("EventDeputy", fields: [deputyId], references: [id])
+  giftIdeas     GiftIdea[]
+  contributions Contribution[]
+  notifications Notification[]
+}
+
+model GiftIdea {
+  id           String           @id @default(uuid())
+  eventId      String
+  title        String
+  description  String?
+  price        Decimal?         @db.Decimal(10, 2)
+  link         String?
+  proposedById String?
+  event        CelebrationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  proposedBy   User?            @relation(fields: [proposedById], references: [id])
+  votes        Vote[]
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  ideaId    String
+  userId    String
+  createdAt DateTime @default(now())
+  idea      GiftIdea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ideaId, userId])
+}
+
+model Contribution {
+  id        String             @id @default(uuid())
+  eventId   String
+  userId    String
+  amount    Decimal            @db.Decimal(10, 2)
+  status    ContributionStatus @default(PENDING)
+  comment   String?
+  createdAt DateTime           @default(now())
+  event     CelebrationEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Delegation {
+  id         String   @id @default(uuid())
+  teamId     String
+  fromUserId String
+  toUserId   String
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  active     Boolean  @default(true)
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  fromUser   User     @relation("DelegationFrom", fields: [fromUserId], references: [id])
+  toUser     User     @relation("DelegationTo", fields: [toUserId], references: [id])
+}
+
+model Notification {
+  id        String              @id @default(uuid())
+  userId    String
+  eventId   String?
+  type      String
+  message   String
+  channel   NotificationChannel @default(APP)
+  status    NotificationStatus  @default(PENDING)
+  createdAt DateTime            @default(now())
+  sentAt    DateTime?
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     CelebrationEvent?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
