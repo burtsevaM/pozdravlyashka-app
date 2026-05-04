@@ -83,6 +83,36 @@ Available endpoints:
 - `POST /api/auth/login` - checks email and password and returns `accessToken`.
 - `GET /api/auth/me` - returns current user by bearer token.
 
+## Teams And People MVP
+
+This stage adds protected team and people management. A user can create a team,
+become its owner, switch the active team in frontend and manage people attached
+to that team. `Person` records are not system users.
+
+Protected team endpoints:
+
+- `POST /api/teams` - create team and current user's `TeamMember`.
+- `GET /api/teams` - list teams where current user is a member.
+- `GET /api/teams/:teamId` - get one accessible team with current user's role.
+
+Protected people endpoints:
+
+- `POST /api/teams/:teamId/people` - manually add an active person.
+- `GET /api/teams/:teamId/people` - list active people, with `includeArchived=true`.
+- `GET /api/teams/:teamId/people/:personId` - get one team person.
+- `PATCH /api/teams/:teamId/people/:personId` - update passed person fields.
+- `PATCH /api/teams/:teamId/people/:personId/archive` - set `ARCHIVED` status.
+- `GET /api/teams/:teamId/people/upcoming-birthdays?days=30` - active birthdays.
+
+Manual check:
+
+1. Run `docker compose up -d postgres`.
+2. Start backend with `npm run start:dev` in `backend`.
+3. Start frontend with `npm start` in `frontend`.
+4. Register or log in.
+5. Create a team, add a person, edit and archive the person.
+6. Confirm archived people are hidden and dashboard shows upcoming birthdays.
+
 ## Future Excel Format
 
 ```text
