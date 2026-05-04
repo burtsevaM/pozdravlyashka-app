@@ -12,6 +12,10 @@
   <p class="error-message">{{ message }}</p>
 }
 
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
+
 @if (!teamContext.activeTeamId()) {
   <section class="empty-panel">
     <mat-icon aria-hidden="true">groups</mat-icon>
