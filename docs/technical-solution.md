@@ -31,15 +31,16 @@ PWA нужна, чтобы приложение было удобно откры
 ## Local Run
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
 
 ```bash
 cd backend
 cp .env.example .env
 npm install
-npx prisma generate
+npx prisma validate
 npx prisma migrate dev
+npx prisma generate
 npm run start:dev
 ```
 
@@ -54,12 +55,18 @@ npm start
 ```bash
 cd backend
 cp .env.example .env
+npx prisma validate
 npx prisma generate
 npx prisma migrate dev
 ```
 
 PostgreSQL starts from `docker-compose.yml`. Local `DATABASE_URL` is documented in
 `backend/.env.example`.
+
+Database health check:
+
+- `GET http://localhost:3000/api/health`
+- `GET http://localhost:3000/api/health/db`
 
 ## Authorization
 
