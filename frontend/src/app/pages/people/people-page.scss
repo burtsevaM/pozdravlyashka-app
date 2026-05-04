@@ -28,13 +28,23 @@ dt {
   color: #657084;
 }
 
+.success-message,
 .error-message {
   margin-bottom: 16px;
   padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.success-message {
+  color: #23533f;
+  background: #edf8f1;
+  border: 1px solid #b9e0c8;
+}
+
+.error-message {
   color: #8a1f1f;
   background: #fff0f0;
   border: 1px solid #f1c7c7;
-  border-radius: 8px;
 }
 
 .toolbar {

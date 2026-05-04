@@ -1,14 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {
-  CreatePersonRequest,
-  Person,
-  UpdatePersonRequest,
-} from '../../core/models/person.models';
+import { CreatePersonRequest, Person, UpdatePersonRequest } from '../../core/models/person.models';
 
 type PersonDialogData = {
   person?: Person;
@@ -29,65 +25,48 @@ type PersonDialogResult = CreatePersonRequest | UpdatePersonRequest;
   styleUrl: './person-dialog.component.scss',
 })
 export class PersonDialogComponent {
-  private readonly dialogRef = inject<
-    MatDialogRef<PersonDialogComponent, PersonDialogResult>
-  >(MatDialogRef);
-  private readonly data = inject<PersonDialogData>(MAT_DIALOG_DATA);
+  private readonly dialogRef =
+    inject<MatDialogRef<PersonDialogComponent, PersonDialogResult>>(MatDialogRef);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly data =
+    inject<PersonDialogData | null>(MAT_DIALOG_DATA, {
+      optional: true,
+    }) ?? {};
 
   protected readonly title = this.data.person ? 'Редактировать участника' : 'Добавить участника';
 
-  protected readonly fullNameControl = new FormControl(this.data.person?.fullName ?? '', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(160)],
+  protected readonly form = this.formBuilder.group({
+    fullName: [this.data.person?.fullName ?? '', [Validators.required, Validators.maxLength(160)]],
+    birthDate: [this.data.person?.birthDate ?? '', [Validators.required]],
+    email: [this.data.person?.email ?? '', [Validators.email]],
+    department: [this.data.person?.department ?? '', [Validators.maxLength(120)]],
+    preferences: [this.data.person?.preferences ?? '', [Validators.maxLength(1000)]],
+    notes: [this.data.person?.notes ?? '', [Validators.maxLength(1000)]],
   });
 
-  protected readonly birthDateControl = new FormControl(this.data.person?.birthDate ?? '', {
-    nonNullable: true,
-    validators: [Validators.required],
-  });
-
-  protected readonly emailControl = new FormControl(this.data.person?.email ?? '', {
-    nonNullable: true,
-    validators: [Validators.email],
-  });
-
-  protected readonly departmentControl = new FormControl(this.data.person?.department ?? '', {
-    nonNullable: true,
-    validators: [Validators.maxLength(120)],
-  });
-
-  protected readonly preferencesControl = new FormControl(this.data.person?.preferences ?? '', {
-    nonNullable: true,
-    validators: [Validators.maxLength(1000)],
-  });
-
-  protected readonly notesControl = new FormControl(this.data.person?.notes ?? '', {
-    nonNullable: true,
-    validators: [Validators.maxLength(1000)],
-  });
+  protected readonly controls = this.form.controls;
 
   protected save(): void {
-    const controls = [
-      this.fullNameControl,
-      this.birthDateControl,
-      this.emailControl,
-      this.departmentControl,
-      this.preferencesControl,
-      this.notesControl,
-    ];
+    const fullName = this.controls.fullName.value.trim();
 
-    if (controls.some((control) => control.invalid)) {
-      controls.forEach((control) => control.markAsTouched());
+    if (!fullName) {
+      this.controls.fullName.setErrors({ required: true });
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
     this.dialogRef.close({
-      fullName: this.fullNameControl.value.trim(),
-      birthDate: this.birthDateControl.value,
-      ...this.optionalField('email', this.emailControl.value),
-      ...this.optionalField('department', this.departmentControl.value),
-      ...this.optionalField('preferences', this.preferencesControl.value),
-      ...this.optionalField('notes', this.notesControl.value),
+      fullName,
+      birthDate: this.controls.birthDate.value,
+      ...this.optionalField('email', this.controls.email.value),
+      ...this.optionalField('department', this.controls.department.value),
+      ...this.optionalField('preferences', this.controls.preferences.value),
+      ...this.optionalField('notes', this.controls.notes.value),
     });
   }
 

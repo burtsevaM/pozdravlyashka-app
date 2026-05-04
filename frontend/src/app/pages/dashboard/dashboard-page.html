@@ -29,26 +29,28 @@
       </mat-form-field>
     }
 
-    <form class="create-team-form" (ngSubmit)="createTeam()">
+    <form class="create-team-form" [formGroup]="teamForm" (ngSubmit)="createTeam()">
       <mat-form-field appearance="outline">
         <mat-label>Название коллектива</mat-label>
-        <input matInput type="text" [formControl]="teamNameControl" maxlength="120" />
-        @if (teamNameControl.hasError('required')) {
+        <input matInput type="text" formControlName="name" maxlength="120" autocomplete="off" />
+        @if (teamNameControl.touched && teamNameControl.hasError('required')) {
           <mat-error>Введите название</mat-error>
         }
+        @if (teamNameControl.touched && teamNameControl.hasError('maxlength')) {
+          <mat-error>Максимум 120 символов</mat-error>
+        }
       </mat-form-field>
-      <button
-        mat-flat-button
-        color="primary"
-        type="submit"
-        [disabled]="isCreatingTeam()"
-      >
+      <button mat-flat-button color="primary" type="submit" [disabled]="isCreatingTeam()">
         <mat-icon aria-hidden="true">add</mat-icon>
         <span>Создать</span>
       </button>
     </form>
   </div>
 </section>
+
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
 
 @if (errorMessage(); as message) {
   <p class="error-message">{{ message }}</p>

@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,18 +38,20 @@ type DashboardCard = {
 })
 export class DashboardPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly peopleService = inject(PeopleService);
   protected readonly teamContext = inject(TeamContextService);
 
-  protected readonly teamNameControl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(120)],
+  protected readonly teamForm = this.formBuilder.group({
+    name: ['', [Validators.required, Validators.maxLength(120)]],
   });
 
+  protected readonly teamNameControl = this.teamForm.controls.name;
   protected readonly upcomingBirthdays = signal<UpcomingBirthday[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly isCreatingTeam = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly successMessage = signal<string | null>(null);
 
   protected readonly cards: DashboardCard[] = [
     {
@@ -76,20 +79,22 @@ export class DashboardPage implements OnInit {
   }
 
   protected createTeam(): void {
-    if (this.teamNameControl.invalid) {
-      this.teamNameControl.markAsTouched();
-      return;
-    }
-
     const name = this.teamNameControl.value.trim();
 
     if (!name) {
       this.teamNameControl.setErrors({ required: true });
+      this.teamForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.teamForm.invalid) {
+      this.teamForm.markAllAsTouched();
       return;
     }
 
     this.isCreatingTeam.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.teamContext
       .createTeam(name)
@@ -99,10 +104,13 @@ export class DashboardPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.teamNameControl.reset('');
+          this.teamForm.reset({ name: '' });
+          this.successMessage.set('Коллектив создан');
           this.loadUpcomingBirthdays();
         },
-        error: () => this.errorMessage.set('Не удалось создать коллектив'),
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getCreateTeamErrorMessage(error));
+        },
       });
   }
 
@@ -172,5 +180,25 @@ export class DashboardPage implements OnInit {
         next: (birthdays) => this.upcomingBirthdays.set(birthdays),
         error: () => this.errorMessage.set('Не удалось загрузить ближайшие дни рождения'),
       });
+  }
+
+  private getCreateTeamErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Не удалось создать коллектив: frontend не смог отправить запрос.';
+    }
+
+    if (error.status === 0) {
+      return 'Не удалось создать коллектив: backend недоступен или нет сети.';
+    }
+
+    if (error.status === 400) {
+      return 'Не удалось создать коллектив: проверьте название.';
+    }
+
+    if (error.status === 401) {
+      return 'Не удалось создать коллектив: войдите в аккаунт заново.';
+    }
+
+    return 'Не удалось создать коллектив: запрос завершился ошибкой.';
   }
 }
