@@ -105,7 +105,7 @@ model Person {
 model GiftHistory {
   id            String   @id @default(uuid())
   personId      String
-  year          Int
+  year          Int?
   occasion      String
   giftName      String
   amount        Decimal? @db.Decimal(10, 2)

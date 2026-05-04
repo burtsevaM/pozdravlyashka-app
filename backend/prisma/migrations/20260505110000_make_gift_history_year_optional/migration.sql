@@ -1,0 +1,1 @@
+ALTER TABLE "GiftHistory" ALTER COLUMN "year" DROP NOT NULL;
