@@ -23,15 +23,16 @@ docker-compose.yml PostgreSQL and Mailpit
 ## Quick Start
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
 
 ```bash
-cp backend/.env.example backend/.env
 cd backend
+cp .env.example .env
 npm install
-npx prisma generate
+npx prisma validate
 npx prisma migrate dev
+npx prisma generate
 npm run start:dev
 ```
 
@@ -51,6 +52,8 @@ Auth endpoints:
 - `GET /api/auth/me`
 
 Backend `.env` must contain `DATABASE_URL`, `JWT_SECRET` and `JWT_EXPIRES_IN`.
+Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
+`npm run prisma:generate`, `npm run prisma:studio`.
 
 ## Docs
 
