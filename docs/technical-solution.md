@@ -39,6 +39,7 @@ cd backend
 cp .env.example .env
 npm install
 npx prisma generate
+npx prisma migrate dev
 npm run start:dev
 ```
 
@@ -52,9 +53,28 @@ npm start
 
 ```bash
 cd backend
+cp .env.example .env
 npx prisma generate
 npx prisma migrate dev
 ```
+
+PostgreSQL starts from `docker-compose.yml`. Local `DATABASE_URL` is documented in
+`backend/.env.example`.
+
+## Authorization
+
+Required backend variables:
+
+```env
+JWT_SECRET=change-me-in-local-env
+JWT_EXPIRES_IN=1d
+```
+
+Available endpoints:
+
+- `POST /api/auth/register` - creates a user and returns `accessToken`.
+- `POST /api/auth/login` - checks email and password and returns `accessToken`.
+- `GET /api/auth/me` - returns current user by bearer token.
 
 ## Future Excel Format
 
