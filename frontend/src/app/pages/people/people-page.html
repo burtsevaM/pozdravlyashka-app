@@ -1,0 +1,88 @@
+<section class="page-header">
+  <p class="eyebrow">Участники</p>
+  <h1>Люди коллектива</h1>
+  @if (teamContext.activeTeam(); as activeTeam) {
+    <p>Активный коллектив: {{ activeTeam.name }}</p>
+  } @else {
+    <p>Сначала создайте или выберите коллектив.</p>
+  }
+</section>
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+@if (!teamContext.activeTeamId()) {
+  <section class="empty-panel">
+    <mat-icon aria-hidden="true">groups</mat-icon>
+    <h2>Сначала создайте или выберите коллектив</h2>
+    <p>Коллектив можно создать на главной панели.</p>
+  </section>
+} @else {
+  <section class="toolbar" aria-label="Действия с участниками">
+    <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      <span>Добавить участника</span>
+    </button>
+    <button mat-button type="button" (click)="loadPeople()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      <span>Обновить</span>
+    </button>
+  </section>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (people().length === 0) {
+    <section class="empty-panel">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      <h2>В коллективе пока нет участников</h2>
+      <p>Добавьте первого человека вручную, чтобы видеть его в списке и на dashboard.</p>
+    </section>
+  } @else {
+    <section class="people-list" aria-label="Список участников">
+      @for (person of people(); track person.id) {
+        <mat-card appearance="outlined" class="person-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
+            <mat-card-title>{{ person.fullName }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ person.department || 'Группа или отдел не указаны' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <dl>
+              <div>
+                <dt>Дата рождения</dt>
+                <dd>{{ formatBirthDate(person.birthDate) }}</dd>
+              </div>
+              <div>
+                <dt>Email</dt>
+                <dd>{{ person.email || 'Не указан' }}</dd>
+              </div>
+              <div>
+                <dt>Предпочтения</dt>
+                <dd>{{ person.preferences || 'Не указаны' }}</dd>
+              </div>
+              <div>
+                <dt>Комментарий</dt>
+                <dd>{{ person.notes || 'Нет комментария' }}</dd>
+              </div>
+            </dl>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-button type="button" (click)="openEditDialog(person)">
+              <mat-icon aria-hidden="true">edit</mat-icon>
+              <span>Редактировать</span>
+            </button>
+            <button mat-button type="button" class="archive-button" (click)="archivePerson(person)">
+              <mat-icon aria-hidden="true">archive</mat-icon>
+              <span>Архивировать</span>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </section>
+  }
+}

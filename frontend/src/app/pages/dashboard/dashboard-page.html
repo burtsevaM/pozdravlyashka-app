@@ -1,10 +1,95 @@
 <section class="page-header">
   <p class="eyebrow">MVP-панель</p>
   <h1>Главная панель</h1>
-  <p>Короткий обзор ближайших поздравлений, подарков, голосований и напоминаний.</p>
+  <p>Короткий обзор ближайших поздравлений и активного коллектива.</p>
 </section>
 
-<section class="dashboard-grid" aria-label="Сводка">
+<section class="team-section" aria-label="Активный коллектив">
+  <div>
+    <p class="eyebrow">Коллектив</p>
+    @if (teamContext.activeTeam(); as activeTeam) {
+      <h2>Активный коллектив: {{ activeTeam.name }}</h2>
+    } @else {
+      <h2>Создайте первый коллектив</h2>
+    }
+  </div>
+
+  <div class="team-actions">
+    @if (teamContext.teams().length > 0) {
+      <mat-form-field appearance="outline">
+        <mat-label>Выбрать коллектив</mat-label>
+        <mat-select
+          [value]="teamContext.activeTeamId()"
+          (selectionChange)="selectTeam($event.value)"
+        >
+          @for (team of teamContext.teams(); track team.id) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <form class="create-team-form" (ngSubmit)="createTeam()">
+      <mat-form-field appearance="outline">
+        <mat-label>Название коллектива</mat-label>
+        <input matInput type="text" [formControl]="teamNameControl" maxlength="120" />
+        @if (teamNameControl.hasError('required')) {
+          <mat-error>Введите название</mat-error>
+        }
+      </mat-form-field>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="isCreatingTeam()"
+      >
+        <mat-icon aria-hidden="true">add</mat-icon>
+        <span>Создать</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+<section class="birthdays-section" aria-label="Ближайшие дни рождения">
+  <div class="section-heading">
+    <mat-icon aria-hidden="true">cake</mat-icon>
+    <div>
+      <h2>Ближайшие дни рождения</h2>
+      <p>Период: 30 дней</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else if (!teamContext.activeTeamId()) {
+    <p class="empty-state">Создайте или выберите коллектив, чтобы увидеть ближайшие даты.</p>
+  } @else if (upcomingBirthdays().length === 0) {
+    <p class="empty-state">В ближайшие 30 дней дней рождения нет.</p>
+  } @else {
+    <div class="birthday-list">
+      @for (birthday of upcomingBirthdays(); track birthday.id) {
+        <article class="birthday-item">
+          <div>
+            <h3>{{ birthday.fullName }}</h3>
+            <p>{{ birthday.department || 'Группа или отдел не указаны' }}</p>
+          </div>
+          <div class="birthday-date">
+            <strong>{{ formatBirthdayDate(birthday.nextBirthday) }}</strong>
+            <span>{{ getDaysLabel(birthday.daysUntil) }}</span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<section class="dashboard-grid" aria-label="Будущие разделы">
   @for (card of cards; track card.title) {
     <mat-card appearance="outlined">
       <mat-card-header>

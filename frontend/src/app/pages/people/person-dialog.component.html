@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<mat-dialog-content>
+  <form class="person-form">
+    <mat-form-field appearance="outline">
+      <mat-label>ФИО</mat-label>
+      <input matInput type="text" [formControl]="fullNameControl" maxlength="160" />
+      @if (fullNameControl.hasError('required')) {
+        <mat-error>Введите ФИО</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Дата рождения</mat-label>
+      <input matInput type="date" [formControl]="birthDateControl" />
+      @if (birthDateControl.hasError('required')) {
+        <mat-error>Укажите дату рождения</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [formControl]="emailControl" />
+      @if (emailControl.hasError('email')) {
+        <mat-error>Введите корректный email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Группа/отдел</mat-label>
+      <input matInput type="text" [formControl]="departmentControl" maxlength="120" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Предпочтения</mat-label>
+      <textarea matInput rows="3" [formControl]="preferencesControl" maxlength="1000"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Комментарий</mat-label>
+      <textarea matInput rows="3" [formControl]="notesControl" maxlength="1000"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Отмена</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Сохранить</button>
+</mat-dialog-actions>
