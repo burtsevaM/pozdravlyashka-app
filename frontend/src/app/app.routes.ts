@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { DashboardPage } from './pages/dashboard/dashboard-page';
+import { PeoplePage } from './pages/people/people-page';
 import { SimplePage } from './pages/simple-page/simple-page';
 
 export const routes: Routes = [
@@ -18,12 +19,8 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardPage, canActivate: [authGuard] },
   {
     path: 'people',
-    component: SimplePage,
+    component: PeoplePage,
     canActivate: [authGuard],
-    data: {
-      title: 'Участники',
-      description: 'База людей, дат рождения, отделов и полезных заметок для будущих поздравлений.',
-    },
   },
   {
     path: 'events',

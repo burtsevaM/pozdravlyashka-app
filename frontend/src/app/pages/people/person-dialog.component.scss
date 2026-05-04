@@ -1,0 +1,10 @@
+.person-form {
+  display: grid;
+  min-width: min(100%, 520px);
+  gap: 12px;
+  padding-top: 8px;
+}
+
+textarea {
+  resize: vertical;
+}

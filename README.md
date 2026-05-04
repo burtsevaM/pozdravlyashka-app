@@ -51,9 +51,43 @@ Auth endpoints:
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 
+Teams endpoints:
+
+- `POST /api/teams`
+- `GET /api/teams`
+- `GET /api/teams/:teamId`
+
+People endpoints:
+
+- `POST /api/teams/:teamId/people`
+- `GET /api/teams/:teamId/people`
+- `GET /api/teams/:teamId/people/:personId`
+- `PATCH /api/teams/:teamId/people/:personId`
+- `PATCH /api/teams/:teamId/people/:personId/archive`
+- `GET /api/teams/:teamId/people/upcoming-birthdays?days=30`
+
 Backend `.env` must contain `DATABASE_URL`, `JWT_SECRET` and `JWT_EXPIRES_IN`.
 Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
 `npm run prisma:generate`, `npm run prisma:studio`.
+
+## MVP Teams And People
+
+Implemented in this stage:
+
+- user teams with membership-based access;
+- manual people management inside a team;
+- archived people hidden from active lists;
+- upcoming birthdays for the active team on dashboard.
+
+Manual check:
+
+1. Run PostgreSQL with `docker compose up -d postgres`.
+2. Start backend and frontend.
+3. Register or log in.
+4. Create a team on dashboard.
+5. Add a person on `/people`.
+6. Edit and archive the person.
+7. Check that dashboard shows upcoming birthdays for the active team.
 
 ## Docs
 
