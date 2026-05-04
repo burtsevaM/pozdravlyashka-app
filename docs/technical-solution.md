@@ -6,7 +6,7 @@
 - NestJS and TypeScript for backend API.
 - PostgreSQL and Prisma for data storage.
 - Nodemailer for email.
-- exceljs for future Excel import.
+- exceljs for Excel import.
 - Docker Compose for local PostgreSQL and Mailpit.
 
 ## Choices
@@ -113,8 +113,44 @@ Manual check:
 5. Create a team, add a person, edit and archive the person.
 6. Confirm archived people are hidden and dashboard shows upcoming birthdays.
 
-## Future Excel Format
+## Excel Import Format
 
-```text
-ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий
-```
+The MVP supports one fixed `.xlsx` template on `/import`. The backend parses
+the first worksheet from memory, validates rows, returns preview and saves only
+valid rows after user confirmation.
+
+Expected columns:
+
+| ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий |
+|---|---|---|---|---|---|---|
+| Иванова Анна | 15.05.2005 | anna@example.com | Группа 102-43 | Сертификат Ozon | 2025 | Подарок от группы |
+
+Protected import endpoints:
+
+- `POST /api/teams/:teamId/imports/people/preview` - upload `.xlsx`, validate rows and return preview without database writes.
+- `POST /api/teams/:teamId/imports/people/commit` - save valid preview rows as `Person` and optional `GiftHistory`.
+
+Import rules:
+
+- JWT is required and the user must be a member of the team from URL.
+- Maximum file size is 5 MB.
+- Required columns are `ФИО` and `Дата рождения`.
+- Birth date supports Excel date, `DD.MM.YYYY` and `YYYY-MM-DD`.
+- Empty rows are ignored.
+- Rows without full name or birth date are invalid.
+- Email is optional, but validated when present.
+- Gift year is optional, but must be numeric when present.
+- Previous gift creates `GiftHistory`; empty gift name does not.
+- Duplicate people by full name and birth date are skipped.
+
+Manual check:
+
+1. Start PostgreSQL, backend and frontend.
+2. Register or log in.
+3. Create or select a team.
+4. Open `/import`, choose `.xlsx`, click `Проверить файл`.
+5. Check preview statistics and row errors.
+6. Click `Сохранить валидные строки`.
+7. Confirm people appear on `/people`.
+8. Confirm dashboard shows upcoming birthdays for imported people.
+9. Confirm previous gifts are written to `GiftHistory`.
