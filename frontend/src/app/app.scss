@@ -1,0 +1,107 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  color: #1d2430;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  background: #f6f7fb;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe4ec;
+}
+
+.top-bar {
+  min-height: 64px;
+  color: #ffffff;
+  background: #2f5d50;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.brand-title {
+  font-size: 1.1rem;
+}
+
+.mobile-nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  scrollbar-width: thin;
+}
+
+.mobile-nav a {
+  flex: 0 0 auto;
+  min-height: 40px;
+  color: #384252;
+}
+
+.mobile-nav mat-icon {
+  margin-right: 6px;
+}
+
+.app-body {
+  display: flex;
+  width: 100%;
+}
+
+.desktop-nav {
+  display: none;
+}
+
+.content {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+}
+
+.active-link {
+  color: #2f5d50;
+  background: #e2efe9;
+}
+
+@media (min-width: 840px) {
+  .app-header {
+    border-bottom: 0;
+  }
+
+  .mobile-nav {
+    display: none;
+  }
+
+  .app-body {
+    align-items: stretch;
+  }
+
+  .desktop-nav {
+    position: sticky;
+    top: 64px;
+    display: block;
+    width: 256px;
+    height: calc(100dvh - 64px);
+    padding: 16px 12px;
+    background: #ffffff;
+    border-right: 1px solid #dfe4ec;
+  }
+
+  .desktop-nav a {
+    border-radius: 8px;
+  }
+
+  .content {
+    padding: 32px;
+  }
+}
