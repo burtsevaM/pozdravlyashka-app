@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { DashboardPage } from './pages/dashboard/dashboard-page';
+import { ImportPage } from './pages/import/import-page';
 import { PeoplePage } from './pages/people/people-page';
 import { SimplePage } from './pages/simple-page/simple-page';
 
@@ -33,12 +34,8 @@ export const routes: Routes = [
   },
   {
     path: 'import',
-    component: SimplePage,
+    component: ImportPage,
     canActivate: [authGuard],
-    data: {
-      title: 'Импорт Excel',
-      description: 'Загрузка списка участников и истории подарков из таблицы Excel.',
-    },
   },
   {
     path: 'reminders',

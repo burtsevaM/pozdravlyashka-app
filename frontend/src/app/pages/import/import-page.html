@@ -1,0 +1,198 @@
+<section class="page-header">
+  <p class="eyebrow">Импорт Excel</p>
+  <h1>Импорт участников</h1>
+  @if (teamContext.activeTeam(); as activeTeam) {
+    <p>Активный коллектив: {{ activeTeam.name }}</p>
+  } @else {
+    <p>Сначала создайте или выберите коллектив на главной панели.</p>
+  }
+</section>
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
+
+@if (!teamContext.activeTeamId()) {
+  <section class="empty-panel">
+    <mat-icon aria-hidden="true">groups</mat-icon>
+    <h2>Сначала создайте или выберите коллектив на главной панели</h2>
+    <p>После выбора коллектива здесь появится загрузка Excel-файла.</p>
+  </section>
+} @else {
+  <mat-card appearance="outlined" class="upload-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">upload_file</mat-icon>
+      <mat-card-title>Файл импорта</mat-card-title>
+      <mat-card-subtitle>Только .xlsx, до 5 МБ</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="template-block">
+        <h2>Ожидаемые колонки</h2>
+        <p>ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий</p>
+      </div>
+
+      <div class="file-actions">
+        <input
+          #fileInput
+          class="file-input"
+          type="file"
+          accept=".xlsx"
+          (change)="onFileSelected($event)"
+        />
+        <button mat-stroked-button type="button" (click)="fileInput.click()">
+          <mat-icon aria-hidden="true">attach_file</mat-icon>
+          <span>Выбрать .xlsx</span>
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="isPreviewLoading() || isCommitLoading()"
+          (click)="previewFile()"
+        >
+          <mat-icon aria-hidden="true">fact_check</mat-icon>
+          <span>Проверить файл</span>
+        </button>
+      </div>
+
+      @if (selectedFile(); as file) {
+        <p class="selected-file">{{ file.name }}</p>
+      } @else {
+        <p class="hint">Выберите файл, подготовленный по фиксированному шаблону.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (isPreviewLoading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Проверка файла" />
+  }
+
+  @if (preview(); as previewResult) {
+    <section class="preview-section" aria-label="Предпросмотр импорта">
+      <div class="section-heading">
+        <mat-icon aria-hidden="true">table_view</mat-icon>
+        <div>
+          <h2>Предпросмотр</h2>
+          <p>Сохранены будут только валидные строки.</p>
+        </div>
+      </div>
+
+      <div class="stats-grid" aria-label="Статистика импорта">
+        <div>
+          <span>Всего строк</span>
+          <strong>{{ previewResult.totalRows }}</strong>
+        </div>
+        <div>
+          <span>Валидных</span>
+          <strong>{{ previewResult.validRows }}</strong>
+        </div>
+        <div>
+          <span>С ошибками</span>
+          <strong>{{ previewResult.invalidRows }}</strong>
+        </div>
+      </div>
+
+      <div class="preview-list">
+        @for (row of previewResult.rows; track row.rowNumber) {
+          <article class="preview-row" [class.invalid-row]="!row.valid">
+            <div class="row-heading">
+              <div>
+                <span class="row-number">Строка {{ row.rowNumber }}</span>
+                <h3>{{ row.person?.fullName || 'ФИО не указано' }}</h3>
+              </div>
+              <strong>{{ getRowStatus(row) }}</strong>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Дата рождения</dt>
+                <dd>{{ row.person?.birthDate || 'Не указана' }}</dd>
+              </div>
+              <div>
+                <dt>Email</dt>
+                <dd>{{ row.person?.email || 'Не указан' }}</dd>
+              </div>
+              <div>
+                <dt>Группа/отдел</dt>
+                <dd>{{ row.person?.department || 'Не указаны' }}</dd>
+              </div>
+              <div>
+                <dt>Прошлый подарок</dt>
+                <dd>{{ formatGiftHistory(row) }}</dd>
+              </div>
+            </dl>
+
+            @if (row.errors.length > 0) {
+              <ul class="row-errors">
+                @for (error of row.errors; track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
+            }
+          </article>
+        }
+      </div>
+
+      <div class="commit-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="!hasValidRows(previewResult) || isCommitLoading()"
+          (click)="commitValidRows()"
+        >
+          <mat-icon aria-hidden="true">save</mat-icon>
+          <span>Сохранить валидные строки</span>
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (isCommitLoading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Сохранение строк" />
+  }
+
+  @if (commitResult(); as result) {
+    <section class="result-section" aria-label="Результат сохранения">
+      <div class="section-heading">
+        <mat-icon aria-hidden="true">done_all</mat-icon>
+        <div>
+          <h2>Результат сохранения</h2>
+          <p>Данные уже отправлены в выбранный коллектив.</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div>
+          <span>Создано участников</span>
+          <strong>{{ result.createdPeople }}</strong>
+        </div>
+        <div>
+          <span>История подарков</span>
+          <strong>{{ result.createdGiftHistory }}</strong>
+        </div>
+        <div>
+          <span>Пропущено строк</span>
+          <strong>{{ result.skippedRows }}</strong>
+        </div>
+      </div>
+
+      @if (result.errors.length > 0) {
+        <ul class="row-errors result-errors">
+          @for (error of result.errors; track error.message) {
+            <li>
+              @if (error.rowNumber) {
+                Строка {{ error.rowNumber }}:
+              }
+              {{ error.message }}
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+}
