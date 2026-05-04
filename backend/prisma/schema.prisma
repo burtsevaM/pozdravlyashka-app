@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -49,6 +50,7 @@ model User {
   email           String             @unique
   passwordHash    String
   createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
   createdTeams    Team[]             @relation("TeamCreator")
   teamMembers     TeamMember[]
   organizedEvents CelebrationEvent[] @relation("EventOrganizer")

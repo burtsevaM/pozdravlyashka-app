@@ -24,10 +24,14 @@ docker-compose.yml PostgreSQL and Mailpit
 
 ```bash
 docker compose up -d
+```
+
+```bash
 cp backend/.env.example backend/.env
 cd backend
 npm install
 npx prisma generate
+npx prisma migrate dev
 npm run start:dev
 ```
 
@@ -38,6 +42,15 @@ npm start
 ```
 
 API health check: `GET http://localhost:3000/api/health`.
+Database health check: `GET http://localhost:3000/api/health/db`.
+
+Auth endpoints:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+
+Backend `.env` must contain `DATABASE_URL`, `JWT_SECRET` and `JWT_EXPIRES_IN`.
 
 ## Docs
 

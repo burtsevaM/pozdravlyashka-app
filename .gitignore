@@ -8,5 +8,4 @@ coverage/
 npm-debug.log*
 generated/
 backend/generated/
-backend/prisma/migrations/
 .DS_Store

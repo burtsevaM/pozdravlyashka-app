@@ -34,6 +34,29 @@
   font-size: 1.1rem;
 }
 
+.top-bar-spacer {
+  flex: 1 1 auto;
+}
+
+.current-user {
+  display: none;
+  max-width: 240px;
+  margin-right: 8px;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button {
+  color: #ffffff;
+}
+
+.logout-button mat-icon {
+  margin-right: 6px;
+}
+
 .mobile-nav {
   display: flex;
   gap: 4px;
@@ -103,5 +126,9 @@
 
   .content {
     padding: 32px;
+  }
+
+  .current-user {
+    display: inline-block;
   }
 }

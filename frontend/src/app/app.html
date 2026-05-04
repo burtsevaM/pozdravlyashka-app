@@ -1,46 +1,61 @@
-<div class="app-shell">
-  <header class="app-header">
-    <mat-toolbar class="top-bar">
-      <div class="brand">
-        <mat-icon aria-hidden="true">celebration</mat-icon>
-        <span class="brand-title">Поздравляшка</span>
-      </div>
-    </mat-toolbar>
+@if (isAuthenticated()) {
+  <div class="app-shell">
+    <header class="app-header">
+      <mat-toolbar class="top-bar">
+        <div class="brand">
+          <mat-icon aria-hidden="true">celebration</mat-icon>
+          <span class="brand-title">Поздравляшка</span>
+        </div>
 
-    <nav class="mobile-nav" aria-label="Основная навигация">
-      @for (item of navigationItems; track item.path) {
-        <a
-          mat-button
-          [routerLink]="item.path"
-          routerLinkActive="active-link"
-          [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-        >
-          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-    </nav>
-  </header>
+        <span class="top-bar-spacer"></span>
 
-  <div class="app-body">
-    <aside class="desktop-nav" aria-label="Основная навигация">
-      <mat-nav-list>
+        @if (currentUser(); as user) {
+          <span class="current-user">{{ user.name || user.email }}</span>
+        }
+
+        <button mat-button type="button" class="logout-button" (click)="logout()">
+          <mat-icon aria-hidden="true">logout</mat-icon>
+          <span>Выйти</span>
+        </button>
+      </mat-toolbar>
+
+      <nav class="mobile-nav" aria-label="Основная навигация">
         @for (item of navigationItems; track item.path) {
           <a
-            mat-list-item
+            mat-button
             [routerLink]="item.path"
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
           >
-            <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
-            <span matListItemTitle>{{ item.label }}</span>
+            <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
           </a>
         }
-      </mat-nav-list>
-    </aside>
+      </nav>
+    </header>
 
-    <main class="content">
-      <router-outlet />
-    </main>
+    <div class="app-body">
+      <aside class="desktop-nav" aria-label="Основная навигация">
+        <mat-nav-list>
+          @for (item of navigationItems; track item.path) {
+            <a
+              mat-list-item
+              [routerLink]="item.path"
+              routerLinkActive="active-link"
+              [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+            >
+              <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          }
+        </mat-nav-list>
+      </aside>
+
+      <main class="content">
+        <router-outlet />
+      </main>
+    </div>
   </div>
-</div>
+} @else {
+  <router-outlet />
+}
