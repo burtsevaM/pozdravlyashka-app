@@ -1,0 +1,169 @@
+<h2 mat-dialog-title>Карточка участника</h2>
+
+<mat-dialog-content class="person-card-dialog-content">
+  @if (isLoading()) {
+    <div class="dialog-loading">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (errorMessage(); as message) {
+    <p class="error-message">{{ message }}</p>
+  } @else if (person(); as person) {
+    <section class="dialog-header">
+      <div>
+        <p class="eyebrow">Участник поздравления</p>
+        <h3>{{ person.fullName }}</h3>
+        <p>{{ person.department || 'Группа или отдел не указаны' }}</p>
+      </div>
+      <mat-chip-set aria-label="Статус участника">
+        <mat-chip highlighted class="status-chip">
+          {{ getPersonStatusLabel(person.status) }}
+        </mat-chip>
+      </mat-chip-set>
+    </section>
+
+    <section class="details-grid" aria-label="Карточка участника">
+      <mat-card appearance="outlined" class="detail-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
+          <mat-card-title>Участник</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <dl>
+            <div>
+              <dt>ФИО</dt>
+              <dd>{{ person.fullName }}</dd>
+            </div>
+            <div>
+              <dt>Дата рождения</dt>
+              <dd>{{ formatDate(person.birthDate) }}</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>{{ person.email || 'Не указан' }}</dd>
+            </div>
+            <div>
+              <dt>Группа/отдел</dt>
+              <dd>{{ person.department || 'Не указан' }}</dd>
+            </div>
+            <div>
+              <dt>Статус</dt>
+              <dd>{{ getPersonStatusLabel(person.status) }}</dd>
+            </div>
+            <div>
+              <dt>Предпочтения</dt>
+              <dd>{{ person.preferences || 'Не указаны' }}</dd>
+            </div>
+            <div>
+              <dt>Комментарий</dt>
+              <dd>{{ person.notes || 'Нет комментария' }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (currentEvent; as event) {
+        <mat-card appearance="outlined" class="detail-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
+            <mat-card-title>Текущая инициатива</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <dl>
+              <div>
+                <dt>Дата события</dt>
+                <dd>{{ formatDate(event.date) }}</dd>
+              </div>
+              <div>
+                <dt>Статус</dt>
+                <dd>{{ getEventStatusLabel(event.status) }}</dd>
+              </div>
+              <div>
+                <dt>Бюджет</dt>
+                <dd>{{ formatMoney(event.budget) }}</dd>
+              </div>
+              <div>
+                <dt>Организатор</dt>
+                <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+              </div>
+              <div>
+                <dt>Подарок</dt>
+                <dd>{{ getCurrentEventTitle(event) }}</dd>
+              </div>
+              <div>
+                <dt>Идеи и голоса</dt>
+                <dd>
+                  Идей: {{ event.giftIdeas.length }}, голосов: {{ getTotalVotesCount(event) }}
+                </dd>
+              </div>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card appearance="outlined" class="detail-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar aria-hidden="true">redeem</mat-icon>
+          <mat-card-title>История подарков</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (giftHistory.length > 0) {
+            <div class="item-list">
+              @for (gift of giftHistory; track gift.id) {
+                <article class="detail-item">
+                  <h4>{{ gift.giftName }}</h4>
+                  <p>{{ formatGiftYear(gift.year) }}</p>
+                  @if (gift.occasion) {
+                    <p>Повод: {{ gift.occasion }}</p>
+                  }
+                  @if (gift.amount !== null) {
+                    <p>Сумма: {{ formatMoney(gift.amount) }}</p>
+                  }
+                  @if (gift.organizerName) {
+                    <p>Организатор: {{ gift.organizerName }}</p>
+                  }
+                  @if (gift.comment) {
+                    <p>{{ gift.comment }}</p>
+                  }
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="empty-text">История подарков пока не добавлена.</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="detail-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar aria-hidden="true">celebration</mat-icon>
+          <mat-card-title>Инициативы поздравлений</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (celebrationEvents.length > 0) {
+            <div class="item-list">
+              @for (event of celebrationEvents; track event.id) {
+                <article class="detail-item" [class.current-item]="event.id === currentEvent?.id">
+                  <h4>{{ formatDate(event.date) }}</h4>
+                  <p>{{ getEventStatusLabel(event.status) }}</p>
+                  <p>Бюджет: {{ formatMoney(event.budget) }}</p>
+                  <p>Организатор: {{ event.organizer?.name || 'Не указан' }}</p>
+                  @if (event.selectedGiftIdea) {
+                    <p>Итоговый подарок: {{ event.selectedGiftIdea.title }}</p>
+                  }
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="empty-text">Инициативы поздравлений пока не созданы.</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+  } @else {
+    <p class="empty-text">Участник не найден.</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" mat-dialog-close type="button">Закрыть</button>
+</mat-dialog-actions>

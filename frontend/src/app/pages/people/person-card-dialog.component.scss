@@ -1,0 +1,161 @@
+.person-card-dialog-content {
+  display: grid;
+  gap: 16px;
+  max-height: min(74vh, 760px);
+  padding-bottom: 8px;
+}
+
+.dialog-loading {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #2f5d50;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+h3 {
+  color: #1d2430;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.dialog-header p:last-child,
+.empty-text,
+dt {
+  color: #657084;
+}
+
+.status-chip {
+  color: #23533f;
+  background: #edf8f1;
+  border: 1px solid #b9e0c8;
+}
+
+.error-message {
+  margin: 0;
+  padding: 12px 14px;
+  color: #8a1f1f;
+  background: #fff0f0;
+  border: 1px solid #f1c7c7;
+  border-radius: 8px;
+}
+
+.details-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.detail-card {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.detail-card mat-card-content {
+  flex: 1;
+}
+
+.detail-card mat-card-title {
+  font-size: 1rem;
+}
+
+mat-icon[mat-card-avatar] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #2f5d50;
+  background: #e2efe9;
+}
+
+dl,
+.item-list {
+  display: grid;
+  gap: 12px;
+}
+
+dl {
+  margin: 14px 0 0;
+}
+
+dt {
+  margin-bottom: 3px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+  color: #1d2430;
+  overflow-wrap: anywhere;
+}
+
+.detail-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  background: #f7f9fb;
+  border: 1px solid #e1e7ee;
+  border-radius: 8px;
+}
+
+.detail-item.current-item {
+  border-color: #2f5d50;
+  box-shadow: inset 4px 0 0 #2f5d50;
+}
+
+.detail-item h4 {
+  color: #1d2430;
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.detail-item p {
+  color: #394456;
+  overflow-wrap: anywhere;
+}
+
+mat-dialog-actions {
+  padding-top: 4px;
+}
+
+@media (min-width: 900px) {
+  .details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 560px) {
+  .person-card-dialog-content {
+    max-height: min(78vh, 720px);
+  }
+}

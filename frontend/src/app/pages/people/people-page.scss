@@ -234,7 +234,6 @@ dd {
   padding-top: 4px;
 }
 
-.person-actions a,
 .person-actions button {
   flex: 0 0 auto;
 }
@@ -254,7 +253,6 @@ dd {
 }
 
 @media (max-width: 560px) {
-  .person-actions a,
   .person-actions button {
     flex: 1 1 170px;
     max-width: 240px;
