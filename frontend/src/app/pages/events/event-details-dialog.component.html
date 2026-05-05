@@ -1,0 +1,145 @@
+<h2 mat-dialog-title>Детали инициативы</h2>
+
+<mat-dialog-content class="details-dialog-content">
+  <section class="dialog-header">
+    <div>
+      <p class="eyebrow">Карточка участника</p>
+      <h3>{{ data.person.fullName }}</h3>
+      <p>{{ data.person.department || 'Группа или отдел не указаны' }}</p>
+    </div>
+    <mat-chip-set aria-label="Статус инициативы">
+      <mat-chip highlighted>{{ getStatusLabel(data.event.status) }}</mat-chip>
+    </mat-chip-set>
+  </section>
+
+  <section class="details-grid">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
+        <mat-card-title>Участник</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl>
+          <div>
+            <dt>Дата рождения</dt>
+            <dd>{{ formatDate(data.person.birthDate) }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ data.person.email || 'Не указан' }}</dd>
+          </div>
+          <div>
+            <dt>Группа/отдел</dt>
+            <dd>{{ data.person.department || 'Не указан' }}</dd>
+          </div>
+          <div>
+            <dt>Предпочтения</dt>
+            <dd>{{ data.person.preferences || 'Не указаны' }}</dd>
+          </div>
+          <div>
+            <dt>Комментарий</dt>
+            <dd>{{ data.person.notes || 'Нет комментария' }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
+        <mat-card-title>Текущая инициатива</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl>
+          <div>
+            <dt>Дата события</dt>
+            <dd>{{ formatDate(data.event.date) }}</dd>
+          </div>
+          <div>
+            <dt>Статус</dt>
+            <dd>{{ getStatusLabel(data.event.status) }}</dd>
+          </div>
+          <div>
+            <dt>Бюджет</dt>
+            <dd>{{ formatMoney(data.event.budget) }}</dd>
+          </div>
+          <div>
+            <dt>Организатор</dt>
+            <dd>{{ data.event.organizer?.name || 'Не указан' }}</dd>
+          </div>
+          <div>
+            <dt>Подарок</dt>
+            <dd>{{ getEventTitle(data.event) }}</dd>
+          </div>
+          <div>
+            <dt>Идеи и голоса</dt>
+            <dd>
+              Идей: {{ data.event.giftIdeas.length }}, голосов: {{ getTotalVotesCount(data.event) }}
+            </dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <section class="details-grid">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">redeem</mat-icon>
+        <mat-card-title>История подарков</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (giftHistory.length > 0) {
+          <div class="item-list">
+            @for (gift of giftHistory; track getGiftHistoryTrackBy($index, gift)) {
+              <article class="detail-item">
+                <h4>{{ gift.giftName }}</h4>
+                <p>{{ formatGiftYear(gift.year) }}</p>
+                @if (gift.occasion) {
+                  <p>Повод: {{ gift.occasion }}</p>
+                }
+                @if (gift.amount !== null) {
+                  <p>Сумма: {{ formatMoney(gift.amount) }}</p>
+                }
+                @if (gift.comment) {
+                  <p>{{ gift.comment }}</p>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="empty-text">История подарков пока не добавлена.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">celebration</mat-icon>
+        <mat-card-title>Инициативы участника</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (celebrationEvents.length > 0) {
+          <div class="item-list">
+            @for (event of celebrationEvents; track event.id) {
+              <article class="detail-item" [class.current-item]="event.id === data.event.id">
+                <h4>{{ formatDate(event.date) }}</h4>
+                <p>{{ getStatusLabel(event.status) }}</p>
+                <p>Бюджет: {{ formatMoney(event.budget) }}</p>
+                @if (event.selectedGiftIdea) {
+                  <p>Итоговый подарок: {{ event.selectedGiftIdea.title }}</p>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="empty-text">Инициативы поздравлений пока не созданы.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" mat-dialog-close type="button">Закрыть</button>
+</mat-dialog-actions>

@@ -1,0 +1,173 @@
+.gift-dialog-content {
+  display: grid;
+  gap: 16px;
+  max-height: min(74vh, 780px);
+  padding-bottom: 8px;
+}
+
+.dialog-summary,
+.actions-row,
+.gift-idea-heading,
+mat-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #2f5d50;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h3,
+p {
+  margin: 0;
+}
+
+h3 {
+  font-size: 1.16rem;
+  line-height: 1.2;
+}
+
+.dialog-summary p:last-child,
+.actions-row p,
+.empty-panel p,
+dt {
+  color: #657084;
+}
+
+.success-message,
+.error-message {
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.success-message {
+  color: #23533f;
+  background: #edf8f1;
+  border: 1px solid #b9e0c8;
+}
+
+.error-message {
+  color: #8a1f1f;
+  background: #fff0f0;
+  border: 1px solid #f1c7c7;
+}
+
+.selection-panel,
+.empty-panel,
+.gift-idea-form {
+  padding: 14px;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
+  background: #f8faf9;
+}
+
+.selection-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.selected-panel {
+  border-color: #2f5d50;
+  background: #edf8f1;
+}
+
+.actions-row {
+  align-items: center;
+}
+
+.actions-row button mat-icon,
+.form-actions mat-icon,
+mat-card-actions mat-icon {
+  margin-right: 6px;
+}
+
+.gift-idea-form,
+.gift-ideas-list,
+.empty-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gift-idea-card {
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.gift-idea-card.selected-gift {
+  border-color: #2f5d50;
+  box-shadow: inset 4px 0 0 #2f5d50;
+}
+
+.gift-idea-heading {
+  margin-bottom: 12px;
+}
+
+.gift-idea-heading p,
+.gift-description {
+  color: #394456;
+}
+
+.gift-description {
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+
+.gift-link {
+  display: inline-flex;
+  margin-top: 12px;
+  color: #2f5d50;
+  font-weight: 600;
+}
+
+.gift-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+}
+
+dt {
+  margin-bottom: 3px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+  color: #1d2430;
+  overflow-wrap: anywhere;
+}
+
+.delete-button {
+  color: #8a1f1f;
+}
+
+.empty-panel mat-icon {
+  color: #2f5d50;
+}
+
+@media (min-width: 820px) {
+  .gift-idea-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gift-idea-form mat-form-field:nth-child(2),
+  .gift-idea-form mat-form-field:nth-child(4),
+  .form-actions {
+    grid-column: 1 / -1;
+  }
+}

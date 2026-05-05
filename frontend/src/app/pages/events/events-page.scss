@@ -12,6 +12,7 @@
 
 h1,
 h2,
+h3,
 p {
   margin: 0;
 }
@@ -24,7 +25,7 @@ h1 {
 
 .page-header p:last-child,
 .empty-panel p,
-.empty-text,
+.gift-summary p,
 dt {
   color: #657084;
 }
@@ -78,14 +79,12 @@ mat-icon[mat-card-avatar] {
   color: #2f5d50;
 }
 
-.events-layout,
 .events-list {
   display: grid;
   gap: 14px;
 }
 
-.event-card,
-.event-details mat-card {
+.event-card {
   border-radius: 8px;
   background: #ffffff;
 }
@@ -97,7 +96,12 @@ mat-icon[mat-card-avatar] {
   background: #e2efe9;
 }
 
-dl {
+.card-content-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.event-meta {
   display: grid;
   gap: 12px;
   margin: 16px 0 0;
@@ -127,96 +131,30 @@ dd {
   font-weight: 700;
 }
 
-.gift-ideas-section {
-  display: grid;
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.section-title h2 {
-  font-size: 1.2rem;
-}
-
-.section-title p {
-  margin-top: 4px;
-  color: #657084;
-}
-
-.gift-idea-form,
-.gift-ideas-list {
+.gift-summary {
   display: grid;
   gap: 12px;
-}
-
-.gift-idea-form {
   padding: 14px;
   background: #f8faf9;
   border: 1px solid #dfe4ec;
   border-radius: 8px;
 }
 
-.gift-form-actions,
-.gift-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.gift-idea-card {
+.gift-summary-heading {
   display: grid;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid #dfe4ec;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.gift-idea-card.selected-gift {
-  border-color: #2f5d50;
-  box-shadow: inset 4px 0 0 #2f5d50;
-}
-
-.gift-idea-heading {
-  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
 }
 
-.gift-idea-heading h3 {
-  margin: 0 0 4px;
-  font-size: 1rem;
-}
-
-.gift-description,
-.gift-link {
-  overflow-wrap: anywhere;
-}
-
-.gift-description {
-  color: #394456;
-}
-
-.gift-link {
+.gift-summary-heading mat-icon {
   color: #2f5d50;
-  font-weight: 600;
 }
 
-.gift-meta {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-}
-
-.delete-button {
-  color: #8a1f1f;
-}
-
-.delete-button:disabled {
-  color: #9ba4b3;
+.gift-summary h3 {
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 mat-card-actions {
@@ -229,33 +167,23 @@ mat-card-actions {
   width: min(100%, 220px);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 760px) {
+  .card-content-grid {
+    grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 1000px) {
   h1 {
     font-size: 2.35rem;
   }
 
-  .events-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-    align-items: start;
-  }
-
-  .event-details {
-    position: sticky;
-    top: 96px;
-  }
-
-  .gift-idea-form {
+  .events-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .gift-idea-form mat-form-field:nth-child(2),
-  .gift-idea-form mat-form-field:nth-child(4),
-  .gift-form-actions {
-    grid-column: 1 / -1;
-  }
-
-  .gift-idea-heading {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+  .event-card {
+    min-width: 0;
   }
 }

@@ -51,17 +51,20 @@
       <p>Создайте первую инициативу для участника коллектива.</p>
     </section>
   } @else {
-    <section class="events-layout">
-      <div class="events-list" aria-label="Список инициатив">
-        @for (event of events(); track event.id) {
-          <mat-card appearance="outlined" class="event-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
-              <mat-card-title>{{ event.person.fullName }}</mat-card-title>
-              <mat-card-subtitle>{{ event.person.department || 'Группа или отдел не указаны' }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <dl>
+    <section class="events-list" aria-label="Список инициатив">
+      @for (event of events(); track event.id) {
+        <mat-card appearance="outlined" class="event-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
+            <mat-card-title>{{ event.person.fullName }}</mat-card-title>
+            <mat-card-subtitle>{{
+              event.person.department || 'Группа или отдел не указаны'
+            }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="card-content-grid">
+              <dl class="event-meta">
                 <div>
                   <dt>Дата события</dt>
                   <dd>{{ formatDate(event.date) }} · {{ getDaysUntilLabel(event.date) }}</dd>
@@ -80,219 +83,50 @@
                   <dt>Организатор</dt>
                   <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
                 </div>
-                @if (event.selectedGiftIdea; as selectedGiftIdea) {
-                  <div>
-                    <dt>Итоговый подарок</dt>
-                    <dd>{{ selectedGiftIdea.title }}</dd>
-                  </div>
-                }
-              </dl>
-            </mat-card-content>
-            <mat-card-actions align="end">
-              <button mat-button type="button" (click)="openEvent(event)">
-                <mat-icon aria-hidden="true">visibility</mat-icon>
-                <span>Открыть</span>
-              </button>
-              <button mat-button type="button" (click)="openEditDialog(event)">
-                <mat-icon aria-hidden="true">edit</mat-icon>
-                <span>Редактировать</span>
-              </button>
-              <mat-form-field appearance="outline" class="status-field">
-                <mat-label>Статус</mat-label>
-                <mat-select
-                  [value]="event.status"
-                  (selectionChange)="updateEventStatus(event, $event.value)"
-                >
-                  @for (option of statusOptions; track option.value) {
-                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </mat-card-actions>
-          </mat-card>
-        }
-      </div>
-
-      <aside class="event-details" aria-label="Детали инициативы">
-        @if (selectedEvent(); as event) {
-          <mat-card appearance="outlined">
-            <mat-card-header>
-              <mat-icon mat-card-avatar aria-hidden="true">info</mat-icon>
-              <mat-card-title>Детали инициативы</mat-card-title>
-              <mat-card-subtitle>{{ event.person.fullName }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <dl>
-                <div>
-                  <dt>Дата</dt>
-                  <dd>{{ formatDate(event.date) }}</dd>
-                </div>
-                <div>
-                  <dt>Статус</dt>
-                  <dd>{{ getStatusLabel(event.status) }}</dd>
-                </div>
-                <div>
-                  <dt>Бюджет</dt>
-                  <dd>{{ formatMoney(event.budget) }}</dd>
-                </div>
-                <div>
-                  <dt>Организатор</dt>
-                  <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
-                </div>
-                <div>
-                  <dt>Дата рождения</dt>
-                  <dd>{{ formatDate(event.person.birthDate) }}</dd>
-                </div>
-                <div>
-                  <dt>Итоговый подарок</dt>
-                  <dd>{{ event.selectedGiftIdea?.title || 'Пока не выбран' }}</dd>
-                </div>
               </dl>
 
-              <section class="gift-ideas-section" aria-label="Идеи подарков">
-                <div class="section-title">
+              <section class="gift-summary" aria-label="Сводка по подаркам">
+                <div class="gift-summary-heading">
+                  <mat-icon aria-hidden="true">redeem</mat-icon>
                   <div>
-                    <h2>Идеи подарков</h2>
+                    <h3>{{ getGiftSummaryTitle(event) }}</h3>
+                    <p>{{ getGiftSummaryDescription(event) }}</p>
                   </div>
                 </div>
-
-                <form class="gift-idea-form" [formGroup]="giftIdeaForm" (ngSubmit)="submitGiftIdea()">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Название подарка</mat-label>
-                    <input matInput type="text" formControlName="title" maxlength="160" />
-                    @if (giftIdeaForm.controls.title.touched && giftIdeaForm.controls.title.hasError('required')) {
-                      <mat-error>Укажите название подарка</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Описание</mat-label>
-                    <textarea matInput rows="3" formControlName="description" maxlength="1000"></textarea>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Примерная цена</mat-label>
-                    <input matInput type="number" min="0" formControlName="price" />
-                    @if (giftIdeaForm.controls.price.touched && giftIdeaForm.controls.price.hasError('min')) {
-                      <mat-error>Цена не может быть отрицательной</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Ссылка</mat-label>
-                    <input matInput type="url" formControlName="link" maxlength="500" />
-                  </mat-form-field>
-
-                  <div class="gift-form-actions">
-                    <button
-                      mat-flat-button
-                      color="primary"
-                      type="submit"
-                      [disabled]="isGiftIdeaSaving()"
-                    >
-                      <mat-icon aria-hidden="true">{{ editingGiftIdeaId() ? 'save' : 'add' }}</mat-icon>
-                      <span>{{ editingGiftIdeaId() ? 'Сохранить' : 'Добавить идею' }}</span>
-                    </button>
-                    @if (editingGiftIdeaId()) {
-                      <button mat-button type="button" (click)="cancelGiftIdeaEditing()">
-                        <mat-icon aria-hidden="true">close</mat-icon>
-                        <span>Отмена</span>
-                      </button>
-                    }
-                  </div>
-                </form>
-
-                @if (event.giftIdeas.length > 0) {
-                  <div class="gift-ideas-list">
-                    @for (idea of event.giftIdeas; track idea.id) {
-                      <article class="gift-idea-card" [class.selected-gift]="idea.isSelected">
-                        <div class="gift-idea-heading">
-                          <div>
-                            <h3>{{ idea.title }}</h3>
-                            <p>{{ formatOptionalMoney(idea.price) }}</p>
-                          </div>
-                          <mat-chip-set aria-label="Статусы идеи подарка">
-                            @if (idea.isSelected) {
-                              <mat-chip highlighted>Итоговый подарок</mat-chip>
-                            }
-                            @if (idea.votedByCurrentUser) {
-                              <mat-chip>Ваш голос</mat-chip>
-                            }
-                          </mat-chip-set>
-                        </div>
-
-                        @if (idea.description) {
-                          <p class="gift-description">{{ idea.description }}</p>
-                        }
-
-                        @if (idea.link) {
-                          <a class="gift-link" [href]="idea.link" target="_blank" rel="noopener noreferrer">
-                            {{ idea.link }}
-                          </a>
-                        }
-
-                        <dl class="gift-meta">
-                          <div>
-                            <dt>Автор</dt>
-                            <dd>{{ idea.proposedByName || 'Не указан' }}</dd>
-                          </div>
-                          <div>
-                            <dt>Голоса</dt>
-                            <dd>{{ idea.voteCount }}</dd>
-                          </div>
-                        </dl>
-
-                        <div class="gift-actions">
-                          @if (idea.votedByCurrentUser) {
-                            <button mat-button type="button" (click)="removeVote()">
-                              <mat-icon aria-hidden="true">how_to_vote</mat-icon>
-                              <span>Снять голос</span>
-                            </button>
-                          } @else {
-                            <button mat-button type="button" (click)="voteForGiftIdea(idea)">
-                              <mat-icon aria-hidden="true">how_to_vote</mat-icon>
-                              <span>Голосовать</span>
-                            </button>
-                          }
-
-                          @if (!idea.isSelected) {
-                            <button mat-button type="button" (click)="selectFinalGift(idea)">
-                              <mat-icon aria-hidden="true">check_circle</mat-icon>
-                              <span>Выбрать итоговым</span>
-                            </button>
-                          }
-
-                          <button mat-button type="button" (click)="editGiftIdea(idea)">
-                            <mat-icon aria-hidden="true">edit</mat-icon>
-                            <span>Редактировать</span>
-                          </button>
-                          <button
-                            mat-button
-                            type="button"
-                            class="delete-button"
-                            (click)="deleteGiftIdea(idea)"
-                          >
-                            <mat-icon aria-hidden="true">delete</mat-icon>
-                            <span>Удалить</span>
-                          </button>
-                        </div>
-                      </article>
-                    }
-                  </div>
-                } @else {
-                  <p class="empty-text">Идей подарков пока нет. Добавьте первый вариант для голосования.</p>
-                }
+                <mat-chip-set aria-label="Количество идей и голосов">
+                  <mat-chip>{{ getGiftSummaryMeta(event) }}</mat-chip>
+                </mat-chip-set>
               </section>
-            </mat-card-content>
-          </mat-card>
-        } @else {
-          <mat-card appearance="outlined">
-            <mat-card-content>
-              <p class="empty-text">Откройте инициативу, чтобы увидеть детали.</p>
-            </mat-card-content>
-          </mat-card>
-        }
-      </aside>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button mat-button type="button" (click)="openEvent(event)">
+              <mat-icon aria-hidden="true">visibility</mat-icon>
+              <span>Открыть</span>
+            </button>
+            <button mat-button type="button" (click)="openGiftIdeas(event)">
+              <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+              <span>Идеи подарков</span>
+            </button>
+            <button mat-button type="button" (click)="openEditDialog(event)">
+              <mat-icon aria-hidden="true">edit</mat-icon>
+              <span>Редактировать</span>
+            </button>
+            <mat-form-field appearance="outline" class="status-field">
+              <mat-label>Статус</mat-label>
+              <mat-select
+                [value]="event.status"
+                (selectionChange)="updateEventStatus(event, $event.value)"
+              >
+                @for (option of statusOptions; track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-actions>
+        </mat-card>
+      }
     </section>
   }
 }

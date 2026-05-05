@@ -132,6 +132,14 @@ Gift ideas and votes are persisted with Prisma. `Vote.eventId` plus a unique
 `CelebrationEvent.selectedGiftIdeaId` stores the final gift. Deleting a selected
 gift idea is blocked with a conflict error.
 
+The `/events` page is an overview of celebration initiatives. Each initiative
+card shows the person, department, event date, status, budget, organizer and a
+gift summary: number of ideas, number of votes, current voting leader or final
+gift. Initiative details open in a centered Material dialog with the person
+card, gift history and related initiatives. Gift ideas, voting, editing and
+final gift selection are handled in a separate Material dialog; when it closes,
+the initiative card is refreshed from the updated backend response.
+
 Manual check:
 
 1. Run `docker compose up -d postgres`.
@@ -141,12 +149,16 @@ Manual check:
 5. Create a team, add a person, edit and archive the person.
 6. Open the person card, add/edit/delete a gift history record.
 7. Create a celebration initiative from the person card.
-8. Open `/events`, open the initiative, edit date/budget and change status.
-9. Add two gift ideas.
-10. Vote for the first idea, then vote for the second and confirm the vote moved.
-11. Select the second idea as final gift.
-12. Refresh the page and confirm the saved data remains.
-13. Confirm archived people are hidden and dashboard shows upcoming birthdays.
+8. Open `/events` and confirm there is no permanent right details panel.
+9. Confirm the initiative card shows gift ideas, votes, leader or final gift.
+10. Open initiative details from the card and check the dialog content.
+11. Open gift ideas from the card and add two gift ideas.
+12. Vote for the first idea, then vote for the second and confirm the vote moved.
+13. Select the second idea as final gift and close the dialog.
+14. Confirm the initiative card shows the selected final gift.
+15. Refresh the page and confirm the saved data remains.
+16. Try to delete the final gift and confirm the conflict message is shown.
+17. Confirm archived people are hidden and dashboard shows upcoming birthdays.
 
 ## Excel Import Format
 
