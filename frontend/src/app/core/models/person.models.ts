@@ -1,14 +1,7 @@
-export type PersonStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+import { PersonCelebrationEvent } from './event.models';
+import { GiftHistory } from './gift-history.models';
 
-export type GiftHistory = {
-  id: string;
-  year: number | null;
-  occasion: string | null;
-  giftName: string;
-  amount: number | null;
-  organizerName: string | null;
-  comment: string | null;
-};
+export type PersonStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 
 export type Person = {
   id: string;
@@ -22,6 +15,7 @@ export type Person = {
   notes: string | null;
   createdAt: string;
   giftHistory?: GiftHistory[];
+  celebrationEvents?: PersonCelebrationEvent[];
 };
 
 export type CreatePersonRequest = {

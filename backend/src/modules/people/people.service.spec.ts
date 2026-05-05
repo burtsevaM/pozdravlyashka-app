@@ -189,6 +189,12 @@ describe('PeopleService gift history responses', () => {
             { giftName: 'asc' },
           ],
         },
+        events: {
+          include: {
+            organizer: true,
+          },
+          orderBy: [{ date: 'asc' }, { createdAt: 'desc' }],
+        },
       },
     });
     expect(result.giftHistory[0]?.amount).toBe(1500.5);

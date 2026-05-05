@@ -26,6 +26,10 @@ export class PeopleService {
     return this.httpClient.get<Person>(`${this.getPeopleUrl(teamId)}/${personId}`);
   }
 
+  getPersonDetails(teamId: string, personId: string) {
+    return this.getPerson(teamId, personId);
+  }
+
   createPerson(teamId: string, data: CreatePersonRequest) {
     return this.httpClient.post<Person>(this.getPeopleUrl(teamId), data);
   }

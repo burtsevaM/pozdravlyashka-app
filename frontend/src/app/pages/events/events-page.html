@@ -1,0 +1,153 @@
+<section class="page-header">
+  <p class="eyebrow">Поздравления</p>
+  <h1>Инициативы поздравлений</h1>
+  @if (teamContext.activeTeam(); as activeTeam) {
+    <p>Активный коллектив: {{ activeTeam.name }}</p>
+  } @else {
+    <p>Сначала создайте или выберите коллектив.</p>
+  }
+</section>
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
+
+@if (!teamContext.activeTeamId()) {
+  <section class="empty-panel">
+    <mat-icon aria-hidden="true">groups</mat-icon>
+    <h2>Сначала создайте или выберите коллектив</h2>
+    <p>Коллектив можно создать на главной панели.</p>
+  </section>
+} @else {
+  <section class="toolbar" aria-label="Действия с инициативами">
+    <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      <span>Создать инициативу</span>
+    </button>
+    <button mat-button type="button" (click)="loadPageData()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      <span>Обновить</span>
+    </button>
+  </section>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (people().length === 0) {
+    <section class="empty-panel">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      <h2>В коллективе пока нет участников</h2>
+      <p>Добавьте участника, чтобы создать инициативу поздравления.</p>
+    </section>
+  } @else if (events().length === 0) {
+    <section class="empty-panel">
+      <mat-icon aria-hidden="true">event_available</mat-icon>
+      <h2>Инициативы пока не созданы</h2>
+      <p>Создайте первую инициативу для участника коллектива.</p>
+    </section>
+  } @else {
+    <section class="events-layout">
+      <div class="events-list" aria-label="Список инициатив">
+        @for (event of events(); track event.id) {
+          <mat-card appearance="outlined" class="event-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
+              <mat-card-title>{{ event.person.fullName }}</mat-card-title>
+              <mat-card-subtitle>{{ event.person.department || 'Группа или отдел не указаны' }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <dl>
+                <div>
+                  <dt>Дата события</dt>
+                  <dd>{{ formatDate(event.date) }} · {{ getDaysUntilLabel(event.date) }}</dd>
+                </div>
+                <div>
+                  <dt>Статус</dt>
+                  <dd>
+                    <span class="status-chip">{{ getStatusLabel(event.status) }}</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Бюджет</dt>
+                  <dd>{{ formatMoney(event.budget) }}</dd>
+                </div>
+                <div>
+                  <dt>Организатор</dt>
+                  <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+                </div>
+              </dl>
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <button mat-button type="button" (click)="openEvent(event)">
+                <mat-icon aria-hidden="true">visibility</mat-icon>
+                <span>Открыть</span>
+              </button>
+              <button mat-button type="button" (click)="openEditDialog(event)">
+                <mat-icon aria-hidden="true">edit</mat-icon>
+                <span>Редактировать</span>
+              </button>
+              <mat-form-field appearance="outline" class="status-field">
+                <mat-label>Статус</mat-label>
+                <mat-select
+                  [value]="event.status"
+                  (selectionChange)="updateEventStatus(event, $event.value)"
+                >
+                  @for (option of statusOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+
+      <aside class="event-details" aria-label="Детали инициативы">
+        @if (selectedEvent(); as event) {
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-icon mat-card-avatar aria-hidden="true">info</mat-icon>
+              <mat-card-title>Детали инициативы</mat-card-title>
+              <mat-card-subtitle>{{ event.person.fullName }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <dl>
+                <div>
+                  <dt>Дата</dt>
+                  <dd>{{ formatDate(event.date) }}</dd>
+                </div>
+                <div>
+                  <dt>Статус</dt>
+                  <dd>{{ getStatusLabel(event.status) }}</dd>
+                </div>
+                <div>
+                  <dt>Бюджет</dt>
+                  <dd>{{ formatMoney(event.budget) }}</dd>
+                </div>
+                <div>
+                  <dt>Организатор</dt>
+                  <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+                </div>
+                <div>
+                  <dt>Дата рождения</dt>
+                  <dd>{{ formatDate(event.person.birthDate) }}</dd>
+                </div>
+              </dl>
+            </mat-card-content>
+          </mat-card>
+        } @else {
+          <mat-card appearance="outlined">
+            <mat-card-content>
+              <p class="empty-text">Откройте инициативу, чтобы увидеть детали.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </aside>
+    </section>
+  }
+}

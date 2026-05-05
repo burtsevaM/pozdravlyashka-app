@@ -97,6 +97,10 @@
             </section>
           </mat-card-content>
           <mat-card-actions align="end">
+            <a mat-button [routerLink]="['/people', person.id]">
+              <mat-icon aria-hidden="true">open_in_new</mat-icon>
+              <span>Открыть карточку</span>
+            </a>
             <button mat-button type="button" (click)="openEditDialog(person)">
               <mat-icon aria-hidden="true">edit</mat-icon>
               <span>Редактировать</span>

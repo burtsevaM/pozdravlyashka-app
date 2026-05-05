@@ -3,20 +3,45 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { GiftHistory, Person, PersonStatus, Prisma } from '@prisma/client';
+import {
+  CelebrationEvent,
+  EventStatus,
+  GiftHistory,
+  Person,
+  PersonStatus,
+  Prisma,
+  User,
+} from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { TeamsService } from '../teams/teams.service';
+import { CreateGiftHistoryDto } from './dto/create-gift-history.dto';
 import { CreatePersonDto } from './dto/create-person.dto';
+import { UpdateGiftHistoryDto } from './dto/update-gift-history.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 
 export type GiftHistoryResponse = {
   id: string;
   year: number | null;
-  occasion: string;
+  occasion: string | null;
   giftName: string;
   amount: number | null;
   organizerName: string | null;
   comment: string | null;
+};
+
+export type PersonEventResponse = {
+  id: string;
+  teamId: string;
+  personId: string;
+  date: string;
+  status: EventStatus;
+  budget: number | null;
+  createdAt: Date;
+  organizer: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
 };
 
 export type PersonResponse = {
@@ -31,6 +56,7 @@ export type PersonResponse = {
   notes: string | null;
   createdAt: Date;
   giftHistory: GiftHistoryResponse[];
+  celebrationEvents: PersonEventResponse[];
 };
 
 export type UpcomingBirthdayResponse = {
@@ -51,6 +77,11 @@ type PersonWithBirthdayDistance = {
 
 type PersonWithGiftHistory = Person & {
   giftHistory?: GiftHistory[];
+  events?: PersonEvent[];
+};
+
+type PersonEvent = CelebrationEvent & {
+  organizer?: User | null;
 };
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -128,6 +159,106 @@ export class PeopleService {
     );
 
     return this.toPersonResponse(person);
+  }
+
+  async getGiftHistory(
+    teamId: string,
+    userId: string,
+    personId: string,
+  ): Promise<GiftHistoryResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamPersonOrThrow(teamId, personId);
+
+    const giftHistory = await this.prismaService.giftHistory.findMany({
+      where: { personId },
+      orderBy: this.giftHistoryOrderBy(),
+    });
+
+    return giftHistory.map((item) => this.toGiftHistoryResponse(item));
+  }
+
+  async createGiftHistory(
+    teamId: string,
+    userId: string,
+    personId: string,
+    createGiftHistoryDto: CreateGiftHistoryDto,
+  ): Promise<GiftHistoryResponse> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamPersonOrThrow(teamId, personId);
+
+    const giftHistory = await this.prismaService.giftHistory.create({
+      data: {
+        personId,
+        giftName: createGiftHistoryDto.giftName,
+        year: createGiftHistoryDto.year,
+        occasion: createGiftHistoryDto.occasion ?? '',
+        amount: createGiftHistoryDto.amount,
+        organizerName: createGiftHistoryDto.organizerName,
+        comment: createGiftHistoryDto.comment,
+      },
+    });
+
+    return this.toGiftHistoryResponse(giftHistory);
+  }
+
+  async updateGiftHistory(
+    teamId: string,
+    userId: string,
+    personId: string,
+    giftHistoryId: string,
+    updateGiftHistoryDto: UpdateGiftHistoryDto,
+  ): Promise<GiftHistoryResponse> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamPersonOrThrow(teamId, personId);
+    await this.findPersonGiftHistoryOrThrow(personId, giftHistoryId);
+
+    const data: Prisma.GiftHistoryUpdateInput = {};
+
+    if (updateGiftHistoryDto.giftName !== undefined) {
+      data.giftName = updateGiftHistoryDto.giftName;
+    }
+
+    if (updateGiftHistoryDto.year !== undefined) {
+      data.year = updateGiftHistoryDto.year;
+    }
+
+    if (updateGiftHistoryDto.occasion !== undefined) {
+      data.occasion = updateGiftHistoryDto.occasion ?? '';
+    }
+
+    if (updateGiftHistoryDto.amount !== undefined) {
+      data.amount = updateGiftHistoryDto.amount;
+    }
+
+    if (updateGiftHistoryDto.organizerName !== undefined) {
+      data.organizerName = updateGiftHistoryDto.organizerName;
+    }
+
+    if (updateGiftHistoryDto.comment !== undefined) {
+      data.comment = updateGiftHistoryDto.comment;
+    }
+
+    const giftHistory = await this.prismaService.giftHistory.update({
+      where: { id: giftHistoryId },
+      data,
+    });
+
+    return this.toGiftHistoryResponse(giftHistory);
+  }
+
+  async deleteGiftHistory(
+    teamId: string,
+    userId: string,
+    personId: string,
+    giftHistoryId: string,
+  ): Promise<void> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamPersonOrThrow(teamId, personId);
+    await this.findPersonGiftHistoryOrThrow(personId, giftHistoryId);
+
+    await this.prismaService.giftHistory.delete({
+      where: { id: giftHistoryId },
+    });
   }
 
   async updatePerson(
@@ -283,15 +414,13 @@ export class PeopleService {
       },
       include: {
         giftHistory: {
-          orderBy: [
-            {
-              year: {
-                sort: 'desc',
-                nulls: 'last',
-              },
-            },
-            { giftName: 'asc' },
-          ],
+          orderBy: this.giftHistoryOrderBy(),
+        },
+        events: {
+          include: {
+            organizer: true,
+          },
+          orderBy: [{ date: 'asc' }, { createdAt: 'desc' }],
         },
       },
     });
@@ -301,6 +430,24 @@ export class PeopleService {
     }
 
     return person;
+  }
+
+  private async findPersonGiftHistoryOrThrow(
+    personId: string,
+    giftHistoryId: string,
+  ): Promise<GiftHistory> {
+    const giftHistory = await this.prismaService.giftHistory.findFirst({
+      where: {
+        id: giftHistoryId,
+        personId,
+      },
+    });
+
+    if (!giftHistory) {
+      throw new NotFoundException('Запись истории подарков не найдена');
+    }
+
+    return giftHistory;
   }
 
   private parseUpcomingDays(rawDays: string | undefined): number {
@@ -351,6 +498,9 @@ export class PeopleService {
       giftHistory: (person.giftHistory ?? []).map((giftHistory) =>
         this.toGiftHistoryResponse(giftHistory),
       ),
+      celebrationEvents: (person.events ?? []).map((event) =>
+        this.toPersonEventResponse(event),
+      ),
     };
   }
 
@@ -358,12 +508,43 @@ export class PeopleService {
     return {
       id: giftHistory.id,
       year: giftHistory.year,
-      occasion: giftHistory.occasion,
+      occasion: giftHistory.occasion || null,
       giftName: giftHistory.giftName,
       amount: giftHistory.amount === null ? null : Number(giftHistory.amount),
       organizerName: giftHistory.organizerName,
       comment: giftHistory.comment,
     };
+  }
+
+  private toPersonEventResponse(event: PersonEvent): PersonEventResponse {
+    return {
+      id: event.id,
+      teamId: event.teamId,
+      personId: event.personId,
+      date: this.formatDateOnly(event.date),
+      status: event.status,
+      budget: event.budget === null ? null : Number(event.budget),
+      createdAt: event.createdAt,
+      organizer: event.organizer
+        ? {
+            id: event.organizer.id,
+            name: event.organizer.name,
+            email: event.organizer.email,
+          }
+        : null,
+    };
+  }
+
+  private giftHistoryOrderBy(): Prisma.GiftHistoryOrderByWithRelationInput[] {
+    return [
+      {
+        year: {
+          sort: 'desc',
+          nulls: 'last',
+        },
+      },
+      { giftName: 'asc' },
+    ];
   }
 
   private withBirthdayDistance(
