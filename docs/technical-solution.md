@@ -118,10 +118,19 @@ Protected celebration event endpoints:
 - `GET /api/teams/:teamId/events/:eventId` - get one team initiative.
 - `PATCH /api/teams/:teamId/events/:eventId` - update date or budget.
 - `PATCH /api/teams/:teamId/events/:eventId/status` - update status.
+- `GET /api/teams/:teamId/events/:eventId/gift-ideas` - list gift ideas with vote counts and current user's vote.
+- `POST /api/teams/:teamId/events/:eventId/gift-ideas` - create a gift idea for the initiative.
+- `PATCH /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId` - update title, description, price or link.
+- `DELETE /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId` - delete a non-selected gift idea.
+- `POST /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId/vote` - vote for one idea in the initiative.
+- `DELETE /api/teams/:teamId/events/:eventId/vote` - remove current user's vote in the initiative.
+- `PATCH /api/teams/:teamId/events/:eventId/selected-gift` - store the final gift idea on the initiative.
+- `DELETE /api/teams/:teamId/events/:eventId/selected-gift` - clear the final gift selection.
 
-The current Prisma schema already has the required `GiftHistory`,
-`CelebrationEvent` and `EventStatus` fields, so this stage does not add a new
-migration.
+Gift ideas and votes are persisted with Prisma. `Vote.eventId` plus a unique
+`eventId/userId` index enforces one active vote per user in one initiative.
+`CelebrationEvent.selectedGiftIdeaId` stores the final gift. Deleting a selected
+gift idea is blocked with a conflict error.
 
 Manual check:
 
@@ -133,8 +142,11 @@ Manual check:
 6. Open the person card, add/edit/delete a gift history record.
 7. Create a celebration initiative from the person card.
 8. Open `/events`, open the initiative, edit date/budget and change status.
-9. Refresh the page and confirm the saved data remains.
-10. Confirm archived people are hidden and dashboard shows upcoming birthdays.
+9. Add two gift ideas.
+10. Vote for the first idea, then vote for the second and confirm the vote moved.
+11. Select the second idea as final gift.
+12. Refresh the page and confirm the saved data remains.
+13. Confirm archived people are hidden and dashboard shows upcoming birthdays.
 
 ## Excel Import Format
 
