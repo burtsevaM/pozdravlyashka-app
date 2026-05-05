@@ -148,6 +148,10 @@ mat-card-content p {
   margin-top: 12px;
 }
 
+mat-card-content a {
+  margin-top: 8px;
+}
+
 @media (min-width: 720px) {
   h1 {
     font-size: 2.35rem;
