@@ -61,10 +61,25 @@ People endpoints:
 
 - `POST /api/teams/:teamId/people`
 - `GET /api/teams/:teamId/people`
-- `GET /api/teams/:teamId/people/:personId`
+- `GET /api/teams/:teamId/people/:personId` - full person card with gift history and related celebration initiatives
 - `PATCH /api/teams/:teamId/people/:personId`
 - `PATCH /api/teams/:teamId/people/:personId/archive`
 - `GET /api/teams/:teamId/people/upcoming-birthdays?days=30`
+
+Gift history endpoints:
+
+- `GET /api/teams/:teamId/people/:personId/gift-history`
+- `POST /api/teams/:teamId/people/:personId/gift-history`
+- `PATCH /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId`
+- `DELETE /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId`
+
+Celebration event endpoints:
+
+- `GET /api/teams/:teamId/events?status=PLANNED&personId=:personId`
+- `POST /api/teams/:teamId/events`
+- `GET /api/teams/:teamId/events/:eventId`
+- `PATCH /api/teams/:teamId/events/:eventId`
+- `PATCH /api/teams/:teamId/events/:eventId/status`
 
 Import endpoints:
 
@@ -128,6 +143,28 @@ Manual import check:
 7. Open `/people` and confirm imported people and their gift history are listed.
 8. Open dashboard and confirm upcoming birthdays appear when dates are within 30 days.
 9. Check `GiftHistory` in the database for rows with previous gifts.
+
+## Person Card, Gift History And Events MVP
+
+Implemented in this stage:
+
+- `/people/:personId` opens a real person card from backend and PostgreSQL;
+- gift history can be viewed, added, edited and deleted manually;
+- `/events` shows real celebration initiatives for the active team;
+- an initiative can be created for a person, opened, edited and moved through statuses;
+- all new endpoints require JWT and check that the user belongs to the team from URL.
+
+Manual check:
+
+1. Log in to the application.
+2. Create or select a team.
+3. Add or import a person.
+4. Open the person's card from `/people`.
+5. Add a gift history record.
+6. Create a celebration initiative from the person card.
+7. Open `/events` and confirm the initiative is listed.
+8. Change the initiative status.
+9. Refresh the page and confirm gift history and status are still saved.
 
 ## Docs
 

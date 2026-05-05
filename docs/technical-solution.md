@@ -99,10 +99,29 @@ Protected people endpoints:
 
 - `POST /api/teams/:teamId/people` - manually add an active person.
 - `GET /api/teams/:teamId/people` - list active people, with `includeArchived=true`.
-- `GET /api/teams/:teamId/people/:personId` - get one team person.
+- `GET /api/teams/:teamId/people/:personId` - get full person card with gift history and related celebration events.
 - `PATCH /api/teams/:teamId/people/:personId` - update passed person fields.
 - `PATCH /api/teams/:teamId/people/:personId/archive` - set `ARCHIVED` status.
 - `GET /api/teams/:teamId/people/upcoming-birthdays?days=30` - active birthdays.
+
+Protected gift history endpoints:
+
+- `GET /api/teams/:teamId/people/:personId/gift-history` - list one person's gifts.
+- `POST /api/teams/:teamId/people/:personId/gift-history` - add a gift history record.
+- `PATCH /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId` - update a record that belongs to the person.
+- `DELETE /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId` - delete a record that belongs to the person.
+
+Protected celebration event endpoints:
+
+- `GET /api/teams/:teamId/events` - list team initiatives, with optional `status` and `personId`.
+- `POST /api/teams/:teamId/events` - create an initiative for a team person.
+- `GET /api/teams/:teamId/events/:eventId` - get one team initiative.
+- `PATCH /api/teams/:teamId/events/:eventId` - update date or budget.
+- `PATCH /api/teams/:teamId/events/:eventId/status` - update status.
+
+The current Prisma schema already has the required `GiftHistory`,
+`CelebrationEvent` and `EventStatus` fields, so this stage does not add a new
+migration.
 
 Manual check:
 
@@ -111,7 +130,11 @@ Manual check:
 3. Start frontend with `npm start` in `frontend`.
 4. Register or log in.
 5. Create a team, add a person, edit and archive the person.
-6. Confirm archived people are hidden and dashboard shows upcoming birthdays.
+6. Open the person card, add/edit/delete a gift history record.
+7. Create a celebration initiative from the person card.
+8. Open `/events`, open the initiative, edit date/budget and change status.
+9. Refresh the page and confirm the saved data remains.
+10. Confirm archived people are hidden and dashboard shows upcoming birthdays.
 
 ## Excel Import Format
 
