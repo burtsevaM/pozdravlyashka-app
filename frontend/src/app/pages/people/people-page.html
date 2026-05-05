@@ -74,6 +74,27 @@
                 <dd>{{ person.notes || 'Нет комментария' }}</dd>
               </div>
             </dl>
+            <section class="gift-history" aria-label="История подарков участника">
+              <h3>История подарков</h3>
+              @if (getGiftHistory(person).length > 0) {
+                <ul>
+                  @for (gift of getGiftHistory(person); track gift.id) {
+                    <li>
+                      <p class="gift-title">
+                        <span>{{ formatGiftYear(gift.year) }}</span>
+                        <span aria-hidden="true">—</span>
+                        <strong>{{ gift.giftName }}</strong>
+                      </p>
+                      @if (gift.comment) {
+                        <p class="gift-comment">Комментарий: {{ gift.comment }}</p>
+                      }
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="gift-history-empty">История подарков пока не добавлена.</p>
+              }
+            </section>
           </mat-card-content>
           <mat-card-actions align="end">
             <button mat-button type="button" (click)="openEditDialog(person)">

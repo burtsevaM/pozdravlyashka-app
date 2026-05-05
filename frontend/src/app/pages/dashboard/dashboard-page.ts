@@ -56,8 +56,8 @@ export class DashboardPage implements OnInit {
   protected readonly cards: DashboardCard[] = [
     {
       title: 'История подарков',
-      subtitle: 'Прошлые идеи',
-      description: 'Будущая история поможет не повторять подарки и учитывать предпочтения.',
+      subtitle: 'Учет прошлых подарков',
+      description: 'История сохраняется после импорта Excel и помогает учитывать прошлые поздравления.',
       icon: 'redeem',
     },
     {
