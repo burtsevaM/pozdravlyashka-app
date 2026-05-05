@@ -139,6 +139,14 @@ export class PeoplePage implements OnInit {
     return person.giftHistory ?? [];
   }
 
+  protected getVisibleGiftHistory(person: Person): GiftHistory[] {
+    return this.getGiftHistory(person).slice(0, 2);
+  }
+
+  protected getHiddenGiftHistoryCount(person: Person): number {
+    return Math.max(this.getGiftHistory(person).length - 2, 0);
+  }
+
   protected formatGiftYear(year: number | null): string {
     return year === null ? 'Год не указан' : String(year);
   }
