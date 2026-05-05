@@ -115,46 +115,54 @@ model GiftHistory {
 }
 
 model CelebrationEvent {
-  id            String         @id @default(uuid())
-  teamId        String
-  personId      String
-  date          DateTime
-  status        EventStatus    @default(PLANNED)
-  organizerId   String?
-  deputyId      String?
-  budget        Decimal?       @db.Decimal(10, 2)
-  createdAt     DateTime       @default(now())
-  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  person        Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
-  organizer     User?          @relation("EventOrganizer", fields: [organizerId], references: [id])
-  deputy        User?          @relation("EventDeputy", fields: [deputyId], references: [id])
-  giftIdeas     GiftIdea[]
-  contributions Contribution[]
-  notifications Notification[]
+  id                 String         @id @default(uuid())
+  teamId             String
+  personId           String
+  date               DateTime
+  status             EventStatus    @default(PLANNED)
+  organizerId        String?
+  deputyId           String?
+  budget             Decimal?       @db.Decimal(10, 2)
+  selectedGiftIdeaId String?
+  createdAt          DateTime       @default(now())
+  team               Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  person             Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organizer          User?          @relation("EventOrganizer", fields: [organizerId], references: [id])
+  deputy             User?          @relation("EventDeputy", fields: [deputyId], references: [id])
+  selectedGiftIdea   GiftIdea?      @relation("SelectedGiftIdea", fields: [selectedGiftIdeaId], references: [id], onDelete: SetNull)
+  giftIdeas          GiftIdea[]
+  votes              Vote[]
+  contributions      Contribution[]
+  notifications      Notification[]
 }
 
 model GiftIdea {
-  id           String           @id @default(uuid())
-  eventId      String
-  title        String
-  description  String?
-  price        Decimal?         @db.Decimal(10, 2)
-  link         String?
-  proposedById String?
-  event        CelebrationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  proposedBy   User?            @relation(fields: [proposedById], references: [id])
-  votes        Vote[]
+  id                String             @id @default(uuid())
+  eventId           String
+  title             String
+  description       String?
+  price             Decimal?           @db.Decimal(10, 2)
+  link              String?
+  proposedById      String?
+  createdAt         DateTime           @default(now())
+  event             CelebrationEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  proposedBy        User?              @relation(fields: [proposedById], references: [id])
+  selectedForEvents CelebrationEvent[] @relation("SelectedGiftIdea")
+  votes             Vote[]
 }
 
 model Vote {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
+  eventId   String
   ideaId    String
   userId    String
-  createdAt DateTime @default(now())
-  idea      GiftIdea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  event     CelebrationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  idea      GiftIdea         @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([ideaId, userId])
+  @@unique([eventId, userId])
+  @@index([ideaId])
 }
 
 model Contribution {

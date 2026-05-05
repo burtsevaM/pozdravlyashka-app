@@ -192,6 +192,7 @@ describe('PeopleService gift history responses', () => {
         events: {
           include: {
             organizer: true,
+            selectedGiftIdea: true,
           },
           orderBy: [{ date: 'asc' }, { createdAt: 'desc' }],
         },
