@@ -54,77 +54,81 @@
     <section class="events-list" aria-label="Список инициатив">
       @for (event of events(); track event.id) {
         <mat-card appearance="outlined" class="event-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
-            <mat-card-title>{{ event.person.fullName }}</mat-card-title>
-            <mat-card-subtitle>{{
-              event.person.department || 'Группа или отдел не указаны'
-            }}</mat-card-subtitle>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="card-content-grid">
-              <dl class="event-meta">
-                <div>
-                  <dt>Дата события</dt>
-                  <dd>{{ formatDate(event.date) }} · {{ getDaysUntilLabel(event.date) }}</dd>
+          <mat-card-content class="event-card-content">
+            <div class="event-card-top">
+              <div class="event-identity">
+                <span class="event-avatar" aria-hidden="true">
+                  <mat-icon>event</mat-icon>
+                </span>
+                <div class="event-title-group">
+                  <h2>{{ event.person.fullName }}</h2>
+                  <p>{{ event.person.department || 'Группа или отдел не указаны' }}</p>
                 </div>
-                <div>
-                  <dt>Статус</dt>
-                  <dd>
+              </div>
+
+              <mat-form-field
+                appearance="outline"
+                class="status-field"
+                subscriptSizing="dynamic"
+              >
+                <mat-select
+                  aria-label="Статус инициативы"
+                  [value]="event.status"
+                  (selectionChange)="updateEventStatus(event, $event.value)"
+                >
+                  <mat-select-trigger>
                     <span class="status-chip">{{ getStatusLabel(event.status) }}</span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Бюджет</dt>
-                  <dd>{{ formatMoney(event.budget) }}</dd>
-                </div>
-                <div>
-                  <dt>Организатор</dt>
-                  <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
-                </div>
-              </dl>
+                  </mat-select-trigger>
+                  @for (option of statusOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-              <section class="gift-summary" aria-label="Сводка по подаркам">
-                <div class="gift-summary-heading">
-                  <mat-icon aria-hidden="true">redeem</mat-icon>
-                  <div>
-                    <h3>{{ getGiftSummaryTitle(event) }}</h3>
-                    <p>{{ getGiftSummaryDescription(event) }}</p>
-                  </div>
-                </div>
-                <mat-chip-set aria-label="Количество идей и голосов">
-                  <mat-chip>{{ getGiftSummaryMeta(event) }}</mat-chip>
-                </mat-chip-set>
-              </section>
+            <dl class="event-meta">
+              <div>
+                <dt>Дата события</dt>
+                <dd>{{ formatDate(event.date) }}</dd>
+              </div>
+              <div>
+                <dt>До события</dt>
+                <dd>{{ getDaysUntilLabel(event.date) }}</dd>
+              </div>
+              <div>
+                <dt>Бюджет</dt>
+                <dd>{{ formatMoney(event.budget) }}</dd>
+              </div>
+              <div>
+                <dt>Организатор</dt>
+                <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+              </div>
+            </dl>
+
+            <section class="gift-summary" aria-label="Сводка по подаркам">
+              <mat-icon aria-hidden="true">redeem</mat-icon>
+              <div class="gift-summary-copy">
+                <h3>{{ getGiftSummaryTitle(event) }}</h3>
+                <p>{{ getGiftSummaryDescription(event) }}</p>
+              </div>
+              <span class="gift-summary-meta">{{ getGiftSummaryMeta(event) }}</span>
+            </section>
+
+            <div class="event-actions" aria-label="Действия с инициативой">
+              <button mat-button type="button" (click)="openEvent(event)">
+                <mat-icon aria-hidden="true">visibility</mat-icon>
+                <span>Открыть</span>
+              </button>
+              <button mat-button type="button" (click)="openGiftIdeas(event)">
+                <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+                <span>Идеи подарков</span>
+              </button>
+              <button mat-button type="button" (click)="openEditDialog(event)">
+                <mat-icon aria-hidden="true">edit</mat-icon>
+                <span>Редактировать</span>
+              </button>
             </div>
           </mat-card-content>
-
-          <mat-card-actions align="end">
-            <button mat-button type="button" (click)="openEvent(event)">
-              <mat-icon aria-hidden="true">visibility</mat-icon>
-              <span>Открыть</span>
-            </button>
-            <button mat-button type="button" (click)="openGiftIdeas(event)">
-              <mat-icon aria-hidden="true">how_to_vote</mat-icon>
-              <span>Идеи подарков</span>
-            </button>
-            <button mat-button type="button" (click)="openEditDialog(event)">
-              <mat-icon aria-hidden="true">edit</mat-icon>
-              <span>Редактировать</span>
-            </button>
-            <mat-form-field appearance="outline" class="status-field">
-              <mat-label>Статус</mat-label>
-              <mat-select
-                [value]="event.status"
-                (selectionChange)="updateEventStatus(event, $event.value)"
-              >
-                @for (option of statusOptions; track option.value) {
-                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </mat-card-actions>
         </mat-card>
       }
     </section>

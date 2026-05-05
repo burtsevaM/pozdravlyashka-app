@@ -1,19 +1,21 @@
-<h2 mat-dialog-title>Детали инициативы</h2>
+<h2 mat-dialog-title>Карточка участника</h2>
 
 <mat-dialog-content class="details-dialog-content">
   <section class="dialog-header">
     <div>
-      <p class="eyebrow">Карточка участника</p>
+      <p class="eyebrow">Участник поздравления</p>
       <h3>{{ data.person.fullName }}</h3>
       <p>{{ data.person.department || 'Группа или отдел не указаны' }}</p>
     </div>
     <mat-chip-set aria-label="Статус инициативы">
-      <mat-chip highlighted>{{ getStatusLabel(data.event.status) }}</mat-chip>
+      <mat-chip highlighted class="dialog-status-chip">
+        {{ getStatusLabel(data.event.status) }}
+      </mat-chip>
     </mat-chip-set>
   </section>
 
   <section class="details-grid">
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="detail-card">
       <mat-card-header>
         <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
         <mat-card-title>Участник</mat-card-title>
@@ -44,7 +46,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="detail-card">
       <mat-card-header>
         <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
         <mat-card-title>Текущая инициатива</mat-card-title>
@@ -80,10 +82,8 @@
         </dl>
       </mat-card-content>
     </mat-card>
-  </section>
 
-  <section class="details-grid">
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="detail-card">
       <mat-card-header>
         <mat-icon mat-card-avatar aria-hidden="true">redeem</mat-icon>
         <mat-card-title>История подарков</mat-card-title>
@@ -113,7 +113,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="detail-card">
       <mat-card-header>
         <mat-icon mat-card-avatar aria-hidden="true">celebration</mat-icon>
         <mat-card-title>Инициативы участника</mat-card-title>
