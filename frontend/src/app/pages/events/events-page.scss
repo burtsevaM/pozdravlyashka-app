@@ -127,6 +127,98 @@ dd {
   font-weight: 700;
 }
 
+.gift-ideas-section {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-title h2 {
+  font-size: 1.2rem;
+}
+
+.section-title p {
+  margin-top: 4px;
+  color: #657084;
+}
+
+.gift-idea-form,
+.gift-ideas-list {
+  display: grid;
+  gap: 12px;
+}
+
+.gift-idea-form {
+  padding: 14px;
+  background: #f8faf9;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
+}
+
+.gift-form-actions,
+.gift-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gift-idea-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.gift-idea-card.selected-gift {
+  border-color: #2f5d50;
+  box-shadow: inset 4px 0 0 #2f5d50;
+}
+
+.gift-idea-heading {
+  display: grid;
+  gap: 10px;
+}
+
+.gift-idea-heading h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.gift-description,
+.gift-link {
+  overflow-wrap: anywhere;
+}
+
+.gift-description {
+  color: #394456;
+}
+
+.gift-link {
+  color: #2f5d50;
+  font-weight: 600;
+}
+
+.gift-meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.delete-button {
+  color: #8a1f1f;
+}
+
+.delete-button:disabled {
+  color: #9ba4b3;
+}
+
 mat-card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -150,5 +242,20 @@ mat-card-actions {
   .event-details {
     position: sticky;
     top: 96px;
+  }
+
+  .gift-idea-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gift-idea-form mat-form-field:nth-child(2),
+  .gift-idea-form mat-form-field:nth-child(4),
+  .gift-form-actions {
+    grid-column: 1 / -1;
+  }
+
+  .gift-idea-heading {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
   }
 }

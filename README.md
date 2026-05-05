@@ -80,6 +80,14 @@ Celebration event endpoints:
 - `GET /api/teams/:teamId/events/:eventId`
 - `PATCH /api/teams/:teamId/events/:eventId`
 - `PATCH /api/teams/:teamId/events/:eventId/status`
+- `GET /api/teams/:teamId/events/:eventId/gift-ideas`
+- `POST /api/teams/:teamId/events/:eventId/gift-ideas`
+- `PATCH /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId`
+- `DELETE /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId`
+- `POST /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId/vote`
+- `DELETE /api/teams/:teamId/events/:eventId/vote`
+- `PATCH /api/teams/:teamId/events/:eventId/selected-gift`
+- `DELETE /api/teams/:teamId/events/:eventId/selected-gift`
 
 Import endpoints:
 
@@ -165,6 +173,30 @@ Manual check:
 7. Open `/events` and confirm the initiative is listed.
 8. Change the initiative status.
 9. Refresh the page and confirm gift history and status are still saved.
+
+## Gift Ideas, Voting And Final Gift MVP
+
+Implemented in this stage:
+
+- gift ideas are stored in PostgreSQL for a concrete celebration initiative;
+- team members can add, edit and delete gift ideas on `/events`;
+- each user has one vote per initiative, and voting for another idea replaces the previous vote;
+- a team member can select one idea as the final gift, which is stored on the initiative;
+- selected final gifts are returned in event lists and person cards.
+
+Manual check:
+
+1. Log in to the application.
+2. Create or select a team.
+3. Create a person.
+4. Create a celebration initiative.
+5. Open the initiative on `/events`.
+6. Add several gift ideas.
+7. Vote for one idea.
+8. Vote for another idea and confirm the vote moved.
+9. Select the final gift.
+10. Refresh the page and confirm votes and final gift remain.
+11. Try to delete the final gift and confirm the app shows an error.
 
 ## Docs
 

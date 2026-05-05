@@ -7,16 +7,45 @@ import {
 import {
   CelebrationEvent,
   EventStatus,
+  GiftIdea,
   Person,
   Prisma,
   User,
+  Vote,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { TeamsService } from '../teams/teams.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { CreateGiftIdeaDto } from './dto/create-gift-idea.dto';
 import { GetEventsQueryDto } from './dto/get-events-query.dto';
+import { SelectGiftIdeaDto } from './dto/select-gift-idea.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateGiftIdeaDto } from './dto/update-gift-idea.dto';
+
+export type GiftIdeaResponse = {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number | null;
+  link: string | null;
+  proposedById: string | null;
+  proposedByName: string | null;
+  voteCount: number;
+  votedByCurrentUser: boolean;
+  isSelected: boolean;
+  createdAt: Date;
+};
+
+export type SelectedGiftIdeaResponse = {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number | null;
+  link: string | null;
+  proposedById: string | null;
+  proposedByName: string | null;
+} | null;
 
 export type CelebrationEventResponse = {
   id: string;
@@ -25,6 +54,7 @@ export type CelebrationEventResponse = {
   date: string;
   status: EventStatus;
   budget: number | null;
+  selectedGiftIdeaId: string | null;
   createdAt: Date;
   person: {
     id: string;
@@ -38,11 +68,23 @@ export type CelebrationEventResponse = {
     name: string;
     email: string;
   } | null;
+  selectedGiftIdea: SelectedGiftIdeaResponse;
+  giftIdeas: GiftIdeaResponse[];
 };
 
 type CelebrationEventWithRelations = CelebrationEvent & {
   person: Person;
   organizer?: User | null;
+  selectedGiftIdea?: GiftIdeaWithProposer | null;
+  giftIdeas?: GiftIdeaWithVotes[];
+};
+
+type GiftIdeaWithProposer = GiftIdea & {
+  proposedBy?: User | null;
+};
+
+type GiftIdeaWithVotes = GiftIdeaWithProposer & {
+  votes?: Vote[];
 };
 
 const ACTIVE_EVENT_STATUSES: EventStatus[] = [
@@ -74,14 +116,13 @@ export class EventsService {
         ...(query.status ? { status: query.status } : {}),
         ...(query.personId ? { personId: query.personId } : {}),
       },
-      include: {
-        person: true,
-        organizer: true,
-      },
+      include: this.eventInclude(),
       orderBy: [{ date: 'asc' }, { createdAt: 'desc' }],
     });
 
-    return events.map((event) => this.toCelebrationEventResponse(event));
+    return events.map((event) =>
+      this.toCelebrationEventResponse(event, userId),
+    );
   }
 
   async createEvent(
@@ -102,10 +143,7 @@ export class EventsService {
           in: ACTIVE_EVENT_STATUSES,
         },
       },
-      include: {
-        person: true,
-        organizer: true,
-      },
+      include: this.eventInclude(),
     });
 
     if (duplicateEvent) {
@@ -123,13 +161,10 @@ export class EventsService {
         organizerId: userId,
         status: EventStatus.PLANNED,
       },
-      include: {
-        person: true,
-        organizer: true,
-      },
+      include: this.eventInclude(),
     });
 
-    return this.toCelebrationEventResponse(event);
+    return this.toCelebrationEventResponse(event, userId);
   }
 
   async getEvent(
@@ -140,7 +175,7 @@ export class EventsService {
     await this.teamsService.ensureTeamMember(teamId, userId);
     const event = await this.findTeamEventOrThrow(teamId, eventId);
 
-    return this.toCelebrationEventResponse(event);
+    return this.toCelebrationEventResponse(event, userId);
   }
 
   async updateEvent(
@@ -165,13 +200,10 @@ export class EventsService {
     const event = await this.prismaService.celebrationEvent.update({
       where: { id: eventId },
       data,
-      include: {
-        person: true,
-        organizer: true,
-      },
+      include: this.eventInclude(),
     });
 
-    return this.toCelebrationEventResponse(event);
+    return this.toCelebrationEventResponse(event, userId);
   }
 
   async updateEventStatus(
@@ -188,13 +220,193 @@ export class EventsService {
       data: {
         status: updateEventStatusDto.status,
       },
-      include: {
-        person: true,
-        organizer: true,
+      include: this.eventInclude(),
+    });
+
+    return this.toCelebrationEventResponse(event, userId);
+  }
+
+  async getGiftIdeas(
+    teamId: string,
+    userId: string,
+    eventId: string,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    const event = await this.findTeamEventOrThrow(teamId, eventId);
+
+    return (event.giftIdeas ?? []).map((idea) =>
+      this.toGiftIdeaResponse(idea, userId, event.selectedGiftIdeaId),
+    );
+  }
+
+  async createGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+    createGiftIdeaDto: CreateGiftIdeaDto,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+    const title = this.trimRequiredText(createGiftIdeaDto.title);
+
+    await this.prismaService.giftIdea.create({
+      data: {
+        eventId,
+        title,
+        description: this.trimOptionalText(createGiftIdeaDto.description),
+        price: createGiftIdeaDto.price,
+        link: this.trimOptionalText(createGiftIdeaDto.link),
+        proposedById: userId,
       },
     });
 
-    return this.toCelebrationEventResponse(event);
+    return this.getGiftIdeas(teamId, userId, eventId);
+  }
+
+  async updateGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+    ideaId: string,
+    updateGiftIdeaDto: UpdateGiftIdeaDto,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+    await this.findEventGiftIdeaOrThrow(eventId, ideaId);
+
+    const data: Prisma.GiftIdeaUpdateInput = {};
+
+    if (updateGiftIdeaDto.title !== undefined) {
+      data.title = this.trimRequiredText(updateGiftIdeaDto.title);
+    }
+
+    if (updateGiftIdeaDto.description !== undefined) {
+      data.description = this.trimOptionalText(updateGiftIdeaDto.description);
+    }
+
+    if (updateGiftIdeaDto.price !== undefined) {
+      data.price = updateGiftIdeaDto.price;
+    }
+
+    if (updateGiftIdeaDto.link !== undefined) {
+      data.link = this.trimOptionalText(updateGiftIdeaDto.link);
+    }
+
+    await this.prismaService.giftIdea.update({
+      where: { id: ideaId },
+      data,
+    });
+
+    return this.getGiftIdeas(teamId, userId, eventId);
+  }
+
+  async deleteGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+    ideaId: string,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    const event = await this.findTeamEventOrThrow(teamId, eventId);
+    await this.findEventGiftIdeaOrThrow(eventId, ideaId);
+
+    if (event.selectedGiftIdeaId === ideaId) {
+      throw new ConflictException('Нельзя удалить итоговый подарок');
+    }
+
+    await this.prismaService.giftIdea.delete({
+      where: { id: ideaId },
+    });
+
+    return this.getGiftIdeas(teamId, userId, eventId);
+  }
+
+  async voteForGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+    ideaId: string,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+    await this.findEventGiftIdeaOrThrow(eventId, ideaId);
+
+    await this.prismaService.vote.upsert({
+      where: {
+        eventId_userId: {
+          eventId,
+          userId,
+        },
+      },
+      create: {
+        eventId,
+        ideaId,
+        userId,
+      },
+      update: {
+        ideaId,
+      },
+    });
+
+    return this.getGiftIdeas(teamId, userId, eventId);
+  }
+
+  async removeVote(
+    teamId: string,
+    userId: string,
+    eventId: string,
+  ): Promise<GiftIdeaResponse[]> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+
+    await this.prismaService.vote.deleteMany({
+      where: {
+        eventId,
+        userId,
+      },
+    });
+
+    return this.getGiftIdeas(teamId, userId, eventId);
+  }
+
+  async selectGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+    selectGiftIdeaDto: SelectGiftIdeaDto,
+  ): Promise<CelebrationEventResponse> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+    await this.findEventGiftIdeaOrThrow(eventId, selectGiftIdeaDto.giftIdeaId);
+
+    const event = await this.prismaService.celebrationEvent.update({
+      where: { id: eventId },
+      data: {
+        selectedGiftIdeaId: selectGiftIdeaDto.giftIdeaId,
+      },
+      include: this.eventInclude(),
+    });
+
+    return this.toCelebrationEventResponse(event, userId);
+  }
+
+  async clearSelectedGiftIdea(
+    teamId: string,
+    userId: string,
+    eventId: string,
+  ): Promise<CelebrationEventResponse> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+    await this.findTeamEventOrThrow(teamId, eventId);
+
+    const event = await this.prismaService.celebrationEvent.update({
+      where: { id: eventId },
+      data: {
+        selectedGiftIdeaId: null,
+      },
+      include: this.eventInclude(),
+    });
+
+    return this.toCelebrationEventResponse(event, userId);
   }
 
   private async findTeamPersonOrThrow(
@@ -224,10 +436,7 @@ export class EventsService {
         id: eventId,
         teamId,
       },
-      include: {
-        person: true,
-        organizer: true,
-      },
+      include: this.eventInclude(),
     });
 
     if (!event) {
@@ -235,6 +444,24 @@ export class EventsService {
     }
 
     return event;
+  }
+
+  private async findEventGiftIdeaOrThrow(
+    eventId: string,
+    ideaId: string,
+  ): Promise<GiftIdea> {
+    const giftIdea = await this.prismaService.giftIdea.findFirst({
+      where: {
+        id: ideaId,
+        eventId,
+      },
+    });
+
+    if (!giftIdea) {
+      throw new NotFoundException('Идея подарка не найдена');
+    }
+
+    return giftIdea;
   }
 
   private parseDateOnly(value: string): Date {
@@ -254,8 +481,28 @@ export class EventsService {
     return date;
   }
 
+  private eventInclude(): Prisma.CelebrationEventInclude {
+    return {
+      person: true,
+      organizer: true,
+      selectedGiftIdea: {
+        include: {
+          proposedBy: true,
+        },
+      },
+      giftIdeas: {
+        include: {
+          proposedBy: true,
+          votes: true,
+        },
+        orderBy: [{ createdAt: 'asc' }, { title: 'asc' }],
+      },
+    };
+  }
+
   private toCelebrationEventResponse(
     event: CelebrationEventWithRelations,
+    userId: string,
   ): CelebrationEventResponse {
     return {
       id: event.id,
@@ -264,6 +511,7 @@ export class EventsService {
       date: this.formatDateOnly(event.date),
       status: event.status,
       budget: event.budget === null ? null : Number(event.budget),
+      selectedGiftIdeaId: event.selectedGiftIdeaId,
       createdAt: event.createdAt,
       person: {
         id: event.person.id,
@@ -279,7 +527,64 @@ export class EventsService {
             email: event.organizer.email,
           }
         : null,
+      selectedGiftIdea: event.selectedGiftIdea
+        ? this.toSelectedGiftIdeaResponse(event.selectedGiftIdea)
+        : null,
+      giftIdeas: (event.giftIdeas ?? []).map((idea) =>
+        this.toGiftIdeaResponse(idea, userId, event.selectedGiftIdeaId),
+      ),
     };
+  }
+
+  private toGiftIdeaResponse(
+    idea: GiftIdeaWithVotes,
+    userId: string,
+    selectedGiftIdeaId: string | null,
+  ): GiftIdeaResponse {
+    const votes = idea.votes ?? [];
+
+    return {
+      id: idea.id,
+      title: idea.title,
+      description: idea.description,
+      price: idea.price === null ? null : Number(idea.price),
+      link: idea.link,
+      proposedById: idea.proposedById,
+      proposedByName: idea.proposedBy?.name ?? null,
+      voteCount: votes.length,
+      votedByCurrentUser: votes.some((vote) => vote.userId === userId),
+      isSelected: idea.id === selectedGiftIdeaId,
+      createdAt: idea.createdAt,
+    };
+  }
+
+  private toSelectedGiftIdeaResponse(
+    idea: GiftIdeaWithProposer,
+  ): SelectedGiftIdeaResponse {
+    return {
+      id: idea.id,
+      title: idea.title,
+      description: idea.description,
+      price: idea.price === null ? null : Number(idea.price),
+      link: idea.link,
+      proposedById: idea.proposedById,
+      proposedByName: idea.proposedBy?.name ?? null,
+    };
+  }
+
+  private trimOptionalText(value: string | undefined): string | null {
+    const trimmedValue = value?.trim();
+    return trimmedValue ? trimmedValue : null;
+  }
+
+  private trimRequiredText(value: string): string {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      throw new BadRequestException('Название идеи подарка обязательно');
+    }
+
+    return trimmedValue;
   }
 
   private formatDateOnly(date: Date): string {

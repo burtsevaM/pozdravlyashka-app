@@ -164,6 +164,9 @@
                   </div>
                   <p>Бюджет: {{ formatMoney(event.budget) }}</p>
                   <p>Организатор: {{ event.organizer?.name || 'Не указан' }}</p>
+                  @if (event.selectedGiftIdea) {
+                    <p>Итоговый подарок: {{ event.selectedGiftIdea.title }}</p>
+                  }
                 </article>
               }
             </div>

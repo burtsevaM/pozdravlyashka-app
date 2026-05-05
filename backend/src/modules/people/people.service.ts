@@ -6,6 +6,7 @@ import {
 import {
   CelebrationEvent,
   EventStatus,
+  GiftIdea,
   GiftHistory,
   Person,
   PersonStatus,
@@ -36,6 +37,14 @@ export type PersonEventResponse = {
   date: string;
   status: EventStatus;
   budget: number | null;
+  selectedGiftIdeaId: string | null;
+  selectedGiftIdea: {
+    id: string;
+    title: string;
+    description: string | null;
+    price: number | null;
+    link: string | null;
+  } | null;
   createdAt: Date;
   organizer: {
     id: string;
@@ -82,6 +91,7 @@ type PersonWithGiftHistory = Person & {
 
 type PersonEvent = CelebrationEvent & {
   organizer?: User | null;
+  selectedGiftIdea?: GiftIdea | null;
 };
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -419,6 +429,7 @@ export class PeopleService {
         events: {
           include: {
             organizer: true,
+            selectedGiftIdea: true,
           },
           orderBy: [{ date: 'asc' }, { createdAt: 'desc' }],
         },
@@ -524,6 +535,19 @@ export class PeopleService {
       date: this.formatDateOnly(event.date),
       status: event.status,
       budget: event.budget === null ? null : Number(event.budget),
+      selectedGiftIdeaId: event.selectedGiftIdeaId,
+      selectedGiftIdea: event.selectedGiftIdea
+        ? {
+            id: event.selectedGiftIdea.id,
+            title: event.selectedGiftIdea.title,
+            description: event.selectedGiftIdea.description,
+            price:
+              event.selectedGiftIdea.price === null
+                ? null
+                : Number(event.selectedGiftIdea.price),
+            link: event.selectedGiftIdea.link,
+          }
+        : null,
       createdAt: event.createdAt,
       organizer: event.organizer
         ? {

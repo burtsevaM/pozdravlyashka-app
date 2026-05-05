@@ -1,3 +1,5 @@
+import { GiftIdea, SelectedGiftIdea } from './gift-idea.models';
+
 export type EventStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type EventPerson = {
@@ -21,6 +23,9 @@ export type CelebrationEvent = {
   date: string;
   status: EventStatus;
   budget: number | null;
+  selectedGiftIdeaId: string | null;
+  selectedGiftIdea: SelectedGiftIdea | null;
+  giftIdeas: GiftIdea[];
   createdAt: string;
   person: EventPerson;
   organizer: EventOrganizer | null;
@@ -33,6 +38,8 @@ export type PersonCelebrationEvent = {
   date: string;
   status: EventStatus;
   budget: number | null;
+  selectedGiftIdeaId: string | null;
+  selectedGiftIdea: SelectedGiftIdea | null;
   createdAt: string;
   organizer: EventOrganizer | null;
 };

@@ -1,8 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +18,10 @@ import {
   EventStatus,
   UpdateEventRequest,
 } from '../../core/models/event.models';
+import {
+  CreateGiftIdeaRequest,
+  GiftIdea,
+} from '../../core/models/gift-idea.models';
 import { Person } from '../../core/models/person.models';
 import { EventsService } from '../../core/services/events.service';
 import { PeopleService } from '../../core/services/people.service';
@@ -36,12 +42,14 @@ type EventStatusOption = {
   imports: [
     MatButtonModule,
     MatCardModule,
+    MatChipsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './events-page.html',
   styleUrl: './events-page.scss',
@@ -50,6 +58,7 @@ export class EventsPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
   private readonly eventsService = inject(EventsService);
+  private readonly formBuilder = inject(FormBuilder);
   private readonly peopleService = inject(PeopleService);
   protected readonly teamContext = inject(TeamContextService);
 
@@ -57,8 +66,17 @@ export class EventsPage implements OnInit {
   protected readonly people = signal<Person[]>([]);
   protected readonly selectedEvent = signal<CelebrationEvent | null>(null);
   protected readonly isLoading = signal(false);
+  protected readonly isGiftIdeaSaving = signal(false);
+  protected readonly editingGiftIdeaId = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly successMessage = signal<string | null>(null);
+
+  protected readonly giftIdeaForm = this.formBuilder.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(160)]],
+    description: ['', [Validators.maxLength(1000)]],
+    price: [null as number | null, [Validators.min(0)]],
+    link: ['', [Validators.maxLength(500)]],
+  });
 
   protected readonly statusOptions: EventStatusOption[] = [
     { value: 'PLANNED', label: 'Запланирована' },
@@ -177,9 +195,170 @@ export class EventsPage implements OnInit {
       .getEvent(activeTeamId, event.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (loadedEvent) => this.selectedEvent.set(loadedEvent),
+        next: (loadedEvent) => {
+          this.selectedEvent.set(loadedEvent);
+          this.replaceEvent(loadedEvent);
+          this.cancelGiftIdeaEditing();
+        },
         error: (error: unknown) => {
           this.errorMessage.set(this.getActionErrorMessage(error, 'открыть инициативу'));
+        },
+      });
+  }
+
+  protected submitGiftIdea(): void {
+    const event = this.selectedEvent();
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!event || !activeTeamId) {
+      return;
+    }
+
+    if (this.giftIdeaForm.invalid) {
+      this.giftIdeaForm.markAllAsTouched();
+      return;
+    }
+
+    const data = this.getGiftIdeaFormData();
+    const editingGiftIdeaId = this.editingGiftIdeaId();
+    const request$ = editingGiftIdeaId
+      ? this.eventsService.updateGiftIdea(activeTeamId, event.id, editingGiftIdeaId, data)
+      : this.eventsService.createGiftIdea(activeTeamId, event.id, data);
+
+    this.isGiftIdeaSaving.set(true);
+    this.errorMessage.set(null);
+
+    request$
+      .pipe(
+        finalize(() => this.isGiftIdeaSaving.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (giftIdeas) => {
+          this.successMessage.set(
+            editingGiftIdeaId ? 'Идея подарка сохранена' : 'Идея подарка добавлена',
+          );
+          this.applyGiftIdeas(event.id, giftIdeas);
+          this.cancelGiftIdeaEditing();
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(
+            this.getActionErrorMessage(
+              error,
+              editingGiftIdeaId ? 'сохранить идею подарка' : 'добавить идею',
+            ),
+          );
+        },
+      });
+  }
+
+  protected editGiftIdea(idea: GiftIdea): void {
+    this.editingGiftIdeaId.set(idea.id);
+    this.giftIdeaForm.setValue({
+      title: idea.title,
+      description: idea.description ?? '',
+      price: idea.price,
+      link: idea.link ?? '',
+    });
+  }
+
+  protected cancelGiftIdeaEditing(): void {
+    this.editingGiftIdeaId.set(null);
+    this.giftIdeaForm.reset({
+      title: '',
+      description: '',
+      price: null,
+      link: '',
+    });
+  }
+
+  protected deleteGiftIdea(idea: GiftIdea): void {
+    const event = this.selectedEvent();
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!event || !activeTeamId) {
+      return;
+    }
+
+    this.eventsService
+      .deleteGiftIdea(activeTeamId, event.id, idea.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (giftIdeas) => {
+          this.successMessage.set('Идея подарка удалена');
+          this.applyGiftIdeas(event.id, giftIdeas);
+          if (this.editingGiftIdeaId() === idea.id) {
+            this.cancelGiftIdeaEditing();
+          }
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getActionErrorMessage(error, 'удалить идею подарка'));
+        },
+      });
+  }
+
+  protected voteForGiftIdea(idea: GiftIdea): void {
+    const event = this.selectedEvent();
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!event || !activeTeamId) {
+      return;
+    }
+
+    this.eventsService
+      .voteForGiftIdea(activeTeamId, event.id, idea.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (giftIdeas) => {
+          this.successMessage.set('Голос учтен');
+          this.applyGiftIdeas(event.id, giftIdeas);
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getActionErrorMessage(error, 'проголосовать'));
+        },
+      });
+  }
+
+  protected removeVote(): void {
+    const event = this.selectedEvent();
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!event || !activeTeamId) {
+      return;
+    }
+
+    this.eventsService
+      .removeVote(activeTeamId, event.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (giftIdeas) => {
+          this.successMessage.set('Голос снят');
+          this.applyGiftIdeas(event.id, giftIdeas);
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getActionErrorMessage(error, 'снять голос'));
+        },
+      });
+  }
+
+  protected selectFinalGift(idea: GiftIdea): void {
+    const event = this.selectedEvent();
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!event || !activeTeamId) {
+      return;
+    }
+
+    this.eventsService
+      .selectFinalGift(activeTeamId, event.id, idea.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedEvent) => {
+          this.successMessage.set('Итоговый подарок выбран');
+          this.replaceEvent(updatedEvent);
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getActionErrorMessage(error, 'выбрать итоговый подарок'));
         },
       });
   }
@@ -221,6 +400,10 @@ export class EventsPage implements OnInit {
           currency: 'RUB',
           maximumFractionDigits: 0,
         }).format(value);
+  }
+
+  protected formatOptionalMoney(value: number | null): string {
+    return value === null ? 'Цена не указана' : this.formatMoney(value);
   }
 
   protected getStatusLabel(status: EventStatus): string {
@@ -298,6 +481,45 @@ export class EventsPage implements OnInit {
     }
   }
 
+  private applyGiftIdeas(eventId: string, giftIdeas: GiftIdea[]): void {
+    const selectedGiftIdea = giftIdeas.find((idea) => idea.isSelected) ?? null;
+    const selectedGiftIdeaPatch = {
+      selectedGiftIdeaId: selectedGiftIdea?.id ?? null,
+      selectedGiftIdea: selectedGiftIdea
+        ? {
+            id: selectedGiftIdea.id,
+            title: selectedGiftIdea.title,
+            description: selectedGiftIdea.description,
+            price: selectedGiftIdea.price,
+            link: selectedGiftIdea.link,
+            proposedById: selectedGiftIdea.proposedById,
+            proposedByName: selectedGiftIdea.proposedByName,
+          }
+        : null,
+    };
+
+    this.events.update((events) =>
+      events.map((event) =>
+        event.id === eventId ? { ...event, giftIdeas, ...selectedGiftIdeaPatch } : event,
+      ),
+    );
+
+    this.selectedEvent.update((event) =>
+      event?.id === eventId ? { ...event, giftIdeas, ...selectedGiftIdeaPatch } : event,
+    );
+  }
+
+  private getGiftIdeaFormData(): CreateGiftIdeaRequest {
+    const value = this.giftIdeaForm.getRawValue();
+
+    return {
+      title: value.title.trim(),
+      description: value.description.trim() || null,
+      price: value.price,
+      link: value.link.trim() || null,
+    };
+  }
+
   private sortEvents(left: CelebrationEvent, right: CelebrationEvent): number {
     return left.date.localeCompare(right.date) || left.person.fullName.localeCompare(right.person.fullName);
   }
@@ -351,6 +573,10 @@ export class EventsPage implements OnInit {
     }
 
     if (error.status === 409) {
+      if (action.includes('удалить идею')) {
+        return 'Нельзя удалить итоговый подарок.';
+      }
+
       return `Не удалось ${action}: активная инициатива на эту дату уже существует.`;
     }
 

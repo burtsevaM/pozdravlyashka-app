@@ -1,8 +1,11 @@
 import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { CelebrationEvent } from '../../core/models/event.models';
 import { UpcomingBirthday } from '../../core/models/person.models';
 import { TeamWithRole } from '../../core/models/team.models';
+import { EventsService } from '../../core/services/events.service';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamContextService } from '../../core/services/team-context.service';
 import { DashboardPage } from './dashboard-page';
@@ -40,6 +43,10 @@ class PeopleServiceStub {
   readonly getUpcomingBirthdays = vi.fn(() => of([] as UpcomingBirthday[]));
 }
 
+class EventsServiceStub {
+  readonly getEvents = vi.fn(() => of([] as CelebrationEvent[]));
+}
+
 describe('DashboardPage', () => {
   let fixture: ComponentFixture<DashboardPage>;
   let teamContext: TeamContextServiceStub;
@@ -50,7 +57,9 @@ describe('DashboardPage', () => {
     await TestBed.configureTestingModule({
       imports: [DashboardPage],
       providers: [
+        provideRouter([]),
         { provide: TeamContextService, useValue: teamContext },
+        { provide: EventsService, useClass: EventsServiceStub },
         { provide: PeopleService, useClass: PeopleServiceStub },
       ],
     }).compileComponents();

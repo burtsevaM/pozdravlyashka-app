@@ -9,8 +9,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { CelebrationEvent } from '../../core/models/event.models';
 import { UpcomingBirthday } from '../../core/models/person.models';
+import { EventsService } from '../../core/services/events.service';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamContextService } from '../../core/services/team-context.service';
 
@@ -24,6 +27,7 @@ type DashboardCard = {
 @Component({
   selector: 'app-dashboard-page',
   imports: [
+    RouterLink,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
@@ -38,6 +42,7 @@ type DashboardCard = {
 })
 export class DashboardPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly eventsService = inject(EventsService);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly peopleService = inject(PeopleService);
   protected readonly teamContext = inject(TeamContextService);
@@ -48,6 +53,7 @@ export class DashboardPage implements OnInit {
 
   protected readonly teamNameControl = this.teamForm.controls.name;
   protected readonly upcomingBirthdays = signal<UpcomingBirthday[]>([]);
+  protected readonly events = signal<CelebrationEvent[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly isCreatingTeam = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -149,6 +155,10 @@ export class DashboardPage implements OnInit {
     return `через ${daysUntil} дней`;
   }
 
+  protected getPendingGiftSelectionCount(): number {
+    return this.events().filter((event) => !event.selectedGiftIdeaId).length;
+  }
+
   private loadTeamsAndBirthdays(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -170,6 +180,7 @@ export class DashboardPage implements OnInit {
 
     if (!activeTeamId) {
       this.upcomingBirthdays.set([]);
+      this.events.set([]);
       return;
     }
 
@@ -179,6 +190,14 @@ export class DashboardPage implements OnInit {
       .subscribe({
         next: (birthdays) => this.upcomingBirthdays.set(birthdays),
         error: () => this.errorMessage.set('Не удалось загрузить ближайшие дни рождения'),
+      });
+
+    this.eventsService
+      .getEvents(activeTeamId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (events) => this.events.set(events),
+        error: () => this.errorMessage.set('Не удалось загрузить инициативы'),
       });
   }
 
