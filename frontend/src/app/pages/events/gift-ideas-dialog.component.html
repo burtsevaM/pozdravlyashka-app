@@ -1,0 +1,198 @@
+<h2 mat-dialog-title>Идеи подарков для {{ event().person.fullName }}</h2>
+
+<mat-dialog-content class="gift-dialog-content">
+  <section class="dialog-summary">
+    <div>
+      <p class="eyebrow">Инициатива</p>
+      <h3>{{ formatDate(event().date) }}</h3>
+      <p>Бюджет: {{ formatMoney(event().budget) }}</p>
+    </div>
+    <mat-chip-set aria-label="Статусы инициативы и подарка">
+      <mat-chip>{{ getStatusLabel(event().status) }}</mat-chip>
+      @if (event().selectedGiftIdea) {
+        <mat-chip highlighted>Итоговый подарок</mat-chip>
+      }
+    </mat-chip-set>
+  </section>
+
+  @if (errorMessage(); as message) {
+    <p class="error-message">{{ message }}</p>
+  }
+
+  @if (successMessage(); as message) {
+    <p class="success-message">{{ message }}</p>
+  }
+
+  @if (event().selectedGiftIdea; as selectedGiftIdea) {
+    <section class="selection-panel selected-panel">
+      <div>
+        <p class="eyebrow">Итоговый подарок</p>
+        <h3>{{ selectedGiftIdea.title }}</h3>
+        <p>{{ formatOptionalMoney(selectedGiftIdea.price) }}</p>
+      </div>
+    </section>
+  } @else {
+    <section class="selection-panel">
+      <div>
+        <p class="eyebrow">Активный выбор подарка</p>
+        @if (leadingGiftIdea; as leader) {
+          @if (leader.voteCount > 0) {
+            <h3>Лидер голосования</h3>
+            <p>
+              {{ leader.title }} - {{ leader.voteCount }}
+              {{ getVotesWord(leader.voteCount) }}
+            </p>
+          } @else {
+            <h3>Голосование открыто</h3>
+            <p>Пока нет голосов.</p>
+          }
+        } @else if (giftIdeas.length > 0) {
+          <h3>Голосование открыто</h3>
+          <p>Пока нет голосов.</p>
+        } @else {
+          <h3>Идей подарков пока нет</h3>
+          <p>Добавьте первый вариант для голосования.</p>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="actions-row" aria-label="Действия с идеями подарков">
+    <button mat-flat-button color="primary" type="button" (click)="openCreateForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      <span>Добавить идею</span>
+    </button>
+    <p>Идей: {{ giftIdeas.length }}, голосов: {{ totalVotesCount }}</p>
+  </section>
+
+  @if (isFormOpen()) {
+    <form class="gift-idea-form" [formGroup]="form" (ngSubmit)="submitGiftIdea()">
+      <mat-form-field appearance="outline">
+        <mat-label>Название подарка</mat-label>
+        <input matInput type="text" formControlName="title" maxlength="160" />
+        @if (controls.title.touched && controls.title.hasError('required')) {
+          <mat-error>Укажите название подарка</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Описание</mat-label>
+        <textarea matInput rows="3" formControlName="description" maxlength="1000"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Примерная цена</mat-label>
+        <input matInput type="number" min="0" formControlName="price" />
+        @if (controls.price.touched && controls.price.hasError('min')) {
+          <mat-error>Цена не может быть отрицательной</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ссылка</mat-label>
+        <input matInput type="url" formControlName="link" maxlength="500" />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+          <mat-icon aria-hidden="true">{{ editingGiftIdeaId() ? 'save' : 'add' }}</mat-icon>
+          <span>{{ editingGiftIdeaId() ? 'Сохранить' : 'Добавить идею' }}</span>
+        </button>
+        <button mat-button type="button" (click)="closeForm()">
+          <mat-icon aria-hidden="true">close</mat-icon>
+          <span>Отмена</span>
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (giftIdeas.length > 0) {
+    <section class="gift-ideas-list" aria-label="Список идей подарков">
+      @for (idea of giftIdeas; track idea.id) {
+        <mat-card
+          appearance="outlined"
+          class="gift-idea-card"
+          [class.selected-gift]="idea.isSelected"
+        >
+          <mat-card-content>
+            <div class="gift-idea-heading">
+              <div>
+                <h3>{{ idea.title }}</h3>
+                <p>{{ formatOptionalMoney(idea.price) }}</p>
+              </div>
+              <mat-chip-set aria-label="Статусы идеи подарка">
+                @if (idea.isSelected) {
+                  <mat-chip highlighted>Итоговый подарок</mat-chip>
+                }
+                @if (idea.votedByCurrentUser) {
+                  <mat-chip>Ваш голос</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+
+            @if (idea.description) {
+              <p class="gift-description">{{ idea.description }}</p>
+            }
+
+            @if (idea.link) {
+              <a class="gift-link" [href]="idea.link" target="_blank" rel="noopener noreferrer">
+                Открыть ссылку
+              </a>
+            }
+
+            <dl class="gift-meta">
+              <div>
+                <dt>Автор</dt>
+                <dd>{{ idea.proposedByName || 'Не указан' }}</dd>
+              </div>
+              <div>
+                <dt>Голоса</dt>
+                <dd>{{ idea.voteCount }}</dd>
+              </div>
+            </dl>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            @if (idea.votedByCurrentUser) {
+              <button mat-button type="button" (click)="removeVote()">
+                <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+                <span>Снять голос</span>
+              </button>
+            } @else {
+              <button mat-button type="button" (click)="voteForGiftIdea(idea)">
+                <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+                <span>Голосовать</span>
+              </button>
+            }
+
+            @if (!idea.isSelected) {
+              <button mat-button type="button" (click)="selectFinalGift(idea)">
+                <mat-icon aria-hidden="true">check_circle</mat-icon>
+                <span>Выбрать итоговым</span>
+              </button>
+            }
+
+            <button mat-button type="button" (click)="openEditForm(idea)">
+              <mat-icon aria-hidden="true">edit</mat-icon>
+              <span>Редактировать</span>
+            </button>
+            <button mat-button type="button" class="delete-button" (click)="deleteGiftIdea(idea)">
+              <mat-icon aria-hidden="true">delete</mat-icon>
+              <span>Удалить</span>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </section>
+  } @else {
+    <section class="empty-panel">
+      <mat-icon aria-hidden="true">redeem</mat-icon>
+      <h3>Идей подарков пока нет</h3>
+      <p>Добавьте первый вариант для голосования.</p>
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" type="button" (click)="close()">Закрыть</button>
+</mat-dialog-actions>
