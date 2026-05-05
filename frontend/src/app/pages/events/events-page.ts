@@ -22,9 +22,9 @@ import { EventsService } from '../../core/services/events.service';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamContextService } from '../../core/services/team-context.service';
 import {
-  EventDetailsDialogComponent,
-  EventDetailsDialogData,
-} from './event-details-dialog.component';
+  PersonCardDialogComponent,
+  PersonCardDialogData,
+} from '../people/person-card-dialog.component';
 import { EventDialogComponent, EventDialogData, EventDialogResult } from './event-dialog.component';
 import {
   GiftIdeasDialogComponent,
@@ -174,28 +174,27 @@ export class EventsPage implements OnInit {
 
     this.errorMessage.set(null);
 
-    forkJoin({
-      event: this.eventsService.getEvent(activeTeamId, event.id),
-      person: this.peopleService.getPersonDetails(activeTeamId, event.personId),
-    })
+    this.eventsService
+      .getEvent(activeTeamId, event.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ event: loadedEvent, person }) => {
+        next: (loadedEvent) => {
           this.replaceEvent(loadedEvent);
-          this.dialog.open<EventDetailsDialogComponent, EventDetailsDialogData>(
-            EventDetailsDialogComponent,
+          this.dialog.open<PersonCardDialogComponent, PersonCardDialogData>(
+            PersonCardDialogComponent,
             {
-              width: 'min(960px, calc(100vw - 24px))',
+              width: 'min(980px, calc(100vw - 24px))',
               maxWidth: '100vw',
               data: {
-                event: loadedEvent,
-                person,
+                teamId: activeTeamId,
+                personId: loadedEvent.personId,
+                currentEvent: loadedEvent,
               },
             },
           );
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.getActionErrorMessage(error, 'открыть инициативу'));
+          this.errorMessage.set(this.getActionErrorMessage(error, 'открыть карточку участника'));
         },
       });
   }
