@@ -48,14 +48,14 @@
     <section class="people-list" aria-label="Список участников">
       @for (person of people(); track person.id) {
         <mat-card appearance="outlined" class="person-card">
-          <mat-card-header>
+          <mat-card-header class="person-card-header">
             <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
             <mat-card-title>{{ person.fullName }}</mat-card-title>
             <mat-card-subtitle>
               {{ person.department || 'Группа или отдел не указаны' }}
             </mat-card-subtitle>
           </mat-card-header>
-          <mat-card-content>
+          <mat-card-content class="person-card-content">
             <dl>
               <div>
                 <dt>Дата рождения</dt>
@@ -78,7 +78,7 @@
               <h3>История подарков</h3>
               @if (getGiftHistory(person).length > 0) {
                 <ul>
-                  @for (gift of getGiftHistory(person); track gift.id) {
+                  @for (gift of getVisibleGiftHistory(person); track gift.id) {
                     <li>
                       <p class="gift-title">
                         <span>{{ formatGiftYear(gift.year) }}</span>
@@ -91,12 +91,17 @@
                     </li>
                   }
                 </ul>
+                @if (getHiddenGiftHistoryCount(person) > 0) {
+                  <p class="gift-history-more">
+                    Еще {{ getHiddenGiftHistoryCount(person) }} в карточке участника
+                  </p>
+                }
               } @else {
                 <p class="gift-history-empty">История подарков пока не добавлена.</p>
               }
             </section>
           </mat-card-content>
-          <mat-card-actions align="end">
+          <mat-card-actions class="person-actions">
             <a mat-button [routerLink]="['/people', person.id]">
               <mat-icon aria-hidden="true">open_in_new</mat-icon>
               <span>Открыть карточку</span>

@@ -55,7 +55,7 @@ dt {
 }
 
 .toolbar mat-icon,
-mat-card-actions mat-icon {
+.person-actions mat-icon {
   margin-right: 6px;
 }
 
@@ -80,11 +80,33 @@ mat-card-actions mat-icon {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+  align-items: stretch;
 }
 
 .person-card {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  min-height: 520px;
+  flex-direction: column;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.person-card-header {
+  min-width: 0;
+}
+
+.person-card-header mat-card-title,
+.person-card-header mat-card-subtitle {
+  overflow-wrap: anywhere;
+}
+
+.person-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
 
 mat-icon[mat-card-avatar] {
@@ -117,9 +139,12 @@ dd {
 .gift-history {
   display: grid;
   gap: 8px;
+  min-height: 168px;
   margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid #e4e9f0;
+  padding: 12px;
+  background: #f7faf8;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
 }
 
 .gift-history h3 {
@@ -138,25 +163,35 @@ dd {
 }
 
 .gift-history li {
-  padding: 9px 10px;
-  background: #f7f9fb;
+  min-width: 0;
+  padding: 8px 10px;
+  background: #ffffff;
   border: 1px solid #e1e7ee;
   border-radius: 8px;
 }
 
 .gift-title,
 .gift-comment,
-.gift-history-empty {
+.gift-history-empty,
+.gift-history-more {
   margin: 0;
 }
 
 .gift-title {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
   gap: 5px;
   align-items: baseline;
   color: #1d2430;
   line-height: 1.35;
+}
+
+.gift-title strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .gift-title span:first-child {
@@ -165,15 +200,43 @@ dd {
 }
 
 .gift-comment,
-.gift-history-empty {
+.gift-history-empty,
+.gift-history-more {
   margin-top: 4px;
   color: #657084;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
+.gift-comment {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 .gift-history-empty {
   margin-top: 0;
+}
+
+.gift-history-more {
+  align-self: end;
+}
+
+.person-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.person-actions a,
+.person-actions button {
+  flex: 0 0 auto;
 }
 
 .archive-button {
@@ -187,5 +250,13 @@ dd {
 
   .people-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .person-actions a,
+  .person-actions button {
+    flex: 1 1 170px;
+    max-width: 240px;
   }
 }
