@@ -112,6 +112,8 @@ Rules:
 - `Email`, `Группа/отдел`, `Прошлый подарок`, `Год подарка`, `Комментарий` are optional;
 - if email is filled, it must be valid;
 - if gift year is filled, it must be a number;
+- `GiftHistory` is created only when `Прошлый подарок` is filled;
+- imported gift history is shown in each person's card on `/people`;
 - empty rows are ignored;
 - duplicate people by full name and birth date are skipped.
 
@@ -123,7 +125,7 @@ Manual import check:
 4. Open `/import`, choose a valid `.xlsx` file and click `Проверить файл`.
 5. Confirm valid and invalid rows are shown in preview.
 6. Click `Сохранить валидные строки`.
-7. Open `/people` and confirm imported people are listed.
+7. Open `/people` and confirm imported people and their gift history are listed.
 8. Open dashboard and confirm upcoming birthdays appear when dates are within 30 days.
 9. Check `GiftHistory` in the database for rows with previous gifts.
 

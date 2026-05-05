@@ -3,11 +3,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Person, PersonStatus, Prisma } from '@prisma/client';
+import { GiftHistory, Person, PersonStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { TeamsService } from '../teams/teams.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
+
+export type GiftHistoryResponse = {
+  id: string;
+  year: number | null;
+  occasion: string;
+  giftName: string;
+  amount: number | null;
+  organizerName: string | null;
+  comment: string | null;
+};
 
 export type PersonResponse = {
   id: string;
@@ -20,6 +30,7 @@ export type PersonResponse = {
   preferences: string | null;
   notes: string | null;
   createdAt: Date;
+  giftHistory: GiftHistoryResponse[];
 };
 
 export type UpcomingBirthdayResponse = {
@@ -36,6 +47,10 @@ type PersonWithBirthdayDistance = {
   person: Person;
   nextBirthday: Date;
   daysUntil: number;
+};
+
+type PersonWithGiftHistory = Person & {
+  giftHistory?: GiftHistory[];
 };
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -82,6 +97,19 @@ export class PeopleService {
         teamId,
         ...(includeArchived ? {} : { status: PersonStatus.ACTIVE }),
       },
+      include: {
+        giftHistory: {
+          orderBy: [
+            {
+              year: {
+                sort: 'desc',
+                nulls: 'last',
+              },
+            },
+            { giftName: 'asc' },
+          ],
+        },
+      },
       orderBy: [{ fullName: 'asc' }, { createdAt: 'asc' }],
     });
 
@@ -94,7 +122,10 @@ export class PeopleService {
     personId: string,
   ): Promise<PersonResponse> {
     await this.teamsService.ensureTeamMember(teamId, userId);
-    const person = await this.findTeamPersonOrThrow(teamId, personId);
+    const person = await this.findTeamPersonWithGiftHistoryOrThrow(
+      teamId,
+      personId,
+    );
 
     return this.toPersonResponse(person);
   }
@@ -241,6 +272,37 @@ export class PeopleService {
     return person;
   }
 
+  private async findTeamPersonWithGiftHistoryOrThrow(
+    teamId: string,
+    personId: string,
+  ): Promise<PersonWithGiftHistory> {
+    const person = await this.prismaService.person.findFirst({
+      where: {
+        id: personId,
+        teamId,
+      },
+      include: {
+        giftHistory: {
+          orderBy: [
+            {
+              year: {
+                sort: 'desc',
+                nulls: 'last',
+              },
+            },
+            { giftName: 'asc' },
+          ],
+        },
+      },
+    });
+
+    if (!person) {
+      throw new NotFoundException('Участник не найден');
+    }
+
+    return person;
+  }
+
   private parseUpcomingDays(rawDays: string | undefined): number {
     if (rawDays === undefined) {
       return 30;
@@ -274,7 +336,7 @@ export class PeopleService {
     return date;
   }
 
-  private toPersonResponse(person: Person): PersonResponse {
+  private toPersonResponse(person: PersonWithGiftHistory): PersonResponse {
     return {
       id: person.id,
       teamId: person.teamId,
@@ -286,6 +348,21 @@ export class PeopleService {
       preferences: person.preferences,
       notes: person.notes,
       createdAt: person.createdAt,
+      giftHistory: (person.giftHistory ?? []).map((giftHistory) =>
+        this.toGiftHistoryResponse(giftHistory),
+      ),
+    };
+  }
+
+  private toGiftHistoryResponse(giftHistory: GiftHistory): GiftHistoryResponse {
+    return {
+      id: giftHistory.id,
+      year: giftHistory.year,
+      occasion: giftHistory.occasion,
+      giftName: giftHistory.giftName,
+      amount: giftHistory.amount === null ? null : Number(giftHistory.amount),
+      organizerName: giftHistory.organizerName,
+      comment: giftHistory.comment,
     };
   }
 

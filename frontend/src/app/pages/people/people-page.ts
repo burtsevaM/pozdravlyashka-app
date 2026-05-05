@@ -8,7 +8,12 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
-import { CreatePersonRequest, Person, UpdatePersonRequest } from '../../core/models/person.models';
+import {
+  CreatePersonRequest,
+  GiftHistory,
+  Person,
+  UpdatePersonRequest,
+} from '../../core/models/person.models';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamContextService } from '../../core/services/team-context.service';
 import { PersonDialogComponent } from './person-dialog.component';
@@ -126,6 +131,14 @@ export class PeoplePage implements OnInit {
       month: 'long',
       year: 'numeric',
     }).format(new Date(`${value}T00:00:00`));
+  }
+
+  protected getGiftHistory(person: Person): GiftHistory[] {
+    return person.giftHistory ?? [];
+  }
+
+  protected formatGiftYear(year: number | null): string {
+    return year === null ? 'Год не указан' : String(year);
   }
 
   protected loadPeople(): void {
