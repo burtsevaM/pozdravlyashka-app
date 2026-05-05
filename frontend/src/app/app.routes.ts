@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { DashboardPage } from './pages/dashboard/dashboard-page';
+import { EventsPage } from './pages/events/events-page';
 import { ImportPage } from './pages/import/import-page';
+import { PersonDetailPage } from './pages/people/person-detail-page';
 import { PeoplePage } from './pages/people/people-page';
 import { SimplePage } from './pages/simple-page/simple-page';
 
@@ -24,13 +26,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'events',
-    component: SimplePage,
+    path: 'people/:personId',
+    component: PersonDetailPage,
     canActivate: [authGuard],
-    data: {
-      title: 'Поздравления',
-      description: 'Планирование событий, бюджета, организаторов и статусов подготовки.',
-    },
+  },
+  {
+    path: 'events',
+    component: EventsPage,
+    canActivate: [authGuard],
   },
   {
     path: 'import',

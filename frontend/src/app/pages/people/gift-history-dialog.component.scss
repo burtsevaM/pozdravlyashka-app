@@ -1,0 +1,22 @@
+.gift-history-form {
+  display: grid;
+  min-width: min(100%, 520px);
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+@media (min-width: 620px) {
+  .form-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

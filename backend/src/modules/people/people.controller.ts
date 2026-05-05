@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -13,7 +15,9 @@ import {
 import { Request } from 'express';
 import { AuthUser } from '../auth/types/auth-user.type';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateGiftHistoryDto } from './dto/create-gift-history.dto';
 import { CreatePersonDto } from './dto/create-person.dto';
+import { UpdateGiftHistoryDto } from './dto/update-gift-history.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import {
   PeopleService,
@@ -76,6 +80,63 @@ export class PeopleController {
     @Param('personId', ParseUUIDPipe) personId: string,
   ): Promise<PersonResponse> {
     return this.peopleService.getPerson(teamId, request.user.id, personId);
+  }
+
+  @Get(':personId/gift-history')
+  getGiftHistory(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('personId', ParseUUIDPipe) personId: string,
+  ) {
+    return this.peopleService.getGiftHistory(teamId, request.user.id, personId);
+  }
+
+  @Post(':personId/gift-history')
+  createGiftHistory(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('personId', ParseUUIDPipe) personId: string,
+    @Body() createGiftHistoryDto: CreateGiftHistoryDto,
+  ) {
+    return this.peopleService.createGiftHistory(
+      teamId,
+      request.user.id,
+      personId,
+      createGiftHistoryDto,
+    );
+  }
+
+  @Patch(':personId/gift-history/:giftHistoryId')
+  updateGiftHistory(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('personId', ParseUUIDPipe) personId: string,
+    @Param('giftHistoryId', ParseUUIDPipe) giftHistoryId: string,
+    @Body() updateGiftHistoryDto: UpdateGiftHistoryDto,
+  ) {
+    return this.peopleService.updateGiftHistory(
+      teamId,
+      request.user.id,
+      personId,
+      giftHistoryId,
+      updateGiftHistoryDto,
+    );
+  }
+
+  @Delete(':personId/gift-history/:giftHistoryId')
+  @HttpCode(204)
+  deleteGiftHistory(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('personId', ParseUUIDPipe) personId: string,
+    @Param('giftHistoryId', ParseUUIDPipe) giftHistoryId: string,
+  ): Promise<void> {
+    return this.peopleService.deleteGiftHistory(
+      teamId,
+      request.user.id,
+      personId,
+      giftHistoryId,
+    );
   }
 
   @Patch(':personId')

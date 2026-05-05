@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -10,10 +11,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import {
   CreatePersonRequest,
-  GiftHistory,
   Person,
   UpdatePersonRequest,
 } from '../../core/models/person.models';
+import { GiftHistory } from '../../core/models/gift-history.models';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamContextService } from '../../core/services/team-context.service';
 import { PersonDialogComponent } from './person-dialog.component';
@@ -26,6 +27,7 @@ import { PersonDialogComponent } from './person-dialog.component';
     MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    RouterLink,
   ],
   templateUrl: './people-page.html',
   styleUrl: './people-page.scss',
