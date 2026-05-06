@@ -11,6 +11,13 @@ export type TeamWithUserRole = {
   role: TeamRole;
 };
 
+export type TeamMemberResponse = {
+  userId: string;
+  name: string;
+  email: string;
+  role: TeamRole;
+};
+
 type TeamMembership = TeamMember & {
   team: Team;
 };
@@ -64,6 +71,37 @@ export class TeamsService {
   async getTeam(teamId: string, userId: string): Promise<TeamWithUserRole> {
     const membership = await this.ensureTeamMember(teamId, userId);
     return this.toTeamWithUserRole(membership.team, membership.role);
+  }
+
+  async getTeamMembers(
+    teamId: string,
+    userId: string,
+  ): Promise<TeamMemberResponse[]> {
+    await this.ensureTeamMember(teamId, userId);
+
+    const members = await this.prismaService.teamMember.findMany({
+      where: { teamId },
+      include: { user: true },
+      orderBy: [
+        {
+          user: {
+            name: 'asc',
+          },
+        },
+        {
+          user: {
+            email: 'asc',
+          },
+        },
+      ],
+    });
+
+    return members.map((member) => ({
+      userId: member.userId,
+      name: member.user.name,
+      email: member.user.email,
+      role: member.role,
+    }));
   }
 
   async ensureTeamMember(

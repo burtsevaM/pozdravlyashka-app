@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { CreateTeamRequest, TeamWithRole } from '../models/team.models';
+import { CreateTeamRequest, TeamMember, TeamWithRole } from '../models/team.models';
 
 @Injectable({
   providedIn: 'root',
@@ -20,5 +20,9 @@ export class TeamsService {
 
   getTeam(teamId: string) {
     return this.httpClient.get<TeamWithRole>(`${environment.apiUrl}/teams/${teamId}`);
+  }
+
+  getTeamMembers(teamId: string) {
+    return this.httpClient.get<TeamMember[]>(`${environment.apiUrl}/teams/${teamId}/members`);
   }
 }

@@ -66,11 +66,7 @@
                 </div>
               </div>
 
-              <mat-form-field
-                appearance="outline"
-                class="status-field"
-                subscriptSizing="dynamic"
-              >
+              <mat-form-field appearance="outline" class="status-field" subscriptSizing="dynamic">
                 <mat-select
                   aria-label="Статус инициативы"
                   [value]="event.status"
@@ -102,6 +98,16 @@
               <div class="event-meta-item">
                 <dt>Организатор</dt>
                 <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+              </div>
+              @if (event.deputy) {
+                <div class="event-meta-item">
+                  <dt>Заместитель</dt>
+                  <dd>{{ event.deputy.name }}</dd>
+                </div>
+              }
+              <div class="event-meta-item">
+                <dt>Сбор</dt>
+                <dd>{{ getCollectedSummary(event) }}</dd>
               </div>
             </dl>
 
