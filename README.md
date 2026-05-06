@@ -23,7 +23,7 @@ docker-compose.yml PostgreSQL and Mailpit
 ## Quick Start
 
 ```bash
-docker compose up -d postgres
+docker compose up -d postgres mailpit
 ```
 
 ```bash
@@ -44,6 +44,7 @@ npm start
 
 API health check: `GET http://localhost:3000/api/health`.
 Database health check: `GET http://localhost:3000/api/health/db`.
+Mailpit UI for dev email: `http://localhost:8025`.
 
 Auth endpoints:
 
@@ -104,7 +105,20 @@ Import endpoints:
 - `POST /api/teams/:teamId/imports/people/preview`
 - `POST /api/teams/:teamId/imports/people/commit`
 
+Notifications endpoints:
+
+- `GET /api/notifications`
+- `GET /api/notifications/unread-count`
+- `PATCH /api/notifications/:notificationId/read`
+- `PATCH /api/notifications/read-all`
+- `DELETE /api/notifications/:notificationId`
+- `POST /api/reminders/run`
+
 Backend `.env` must contain `DATABASE_URL`, `JWT_SECRET` and `JWT_EXPIRES_IN`.
+Email reminders use Nodemailer. In dev mode Mailpit receives messages on SMTP
+port `1025` and exposes UI on `http://localhost:8025`. Real sending is enabled
+with `EMAIL_MODE=smtp` and SMTP variables in `backend/.env`; Mail.ru and Yandex
+must use app passwords.
 Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
 `npm run prisma:generate`, `npm run prisma:studio`.
 
@@ -230,6 +244,37 @@ Manual check:
 8. Confirm the organizer changed and delegation history appeared.
 9. Refresh the page and confirm contributions, deputy and delegation history remain.
 10. Try invalid cases: zero or negative amount, duplicate contribution, non-member deputy, non-member new organizer and end date before start date.
+
+## Notifications And Email Reminders MVP
+
+Implemented in this stage:
+
+- in-app notifications are stored in PostgreSQL as `Notification` records;
+- `/reminders` shows persisted notifications after page refresh;
+- notifications can be marked as read, marked all read and deleted;
+- the header shows unread notifications count;
+- event reminders are generated for 14/7/3/1/0 days before an active initiative;
+- organizer and deputy receive reminders, with deputy priority when the organizer is the birthday person;
+- email reminders are sent through Nodemailer and tracked as `EMAIL` notifications;
+- repeated runs skip duplicates by event, user, channel, type and reminder offset;
+- assigning a deputy and transferring organizer rights create in-app notifications.
+
+Manual check:
+
+1. Run `docker compose up -d postgres mailpit`.
+2. Start backend and frontend.
+3. Register or log in.
+4. Create or select a team.
+5. Create a person.
+6. Create a celebration initiative with date in 1, 3, 7 or 14 days.
+7. Open `/reminders`.
+8. Click `Проверить напоминания`.
+9. Confirm an in-app notification appeared and unread count increased.
+10. Open Mailpit at `http://localhost:8025` and confirm the email arrived.
+11. Mark the notification as read and confirm unread count decreased.
+12. Mark all as read and confirm the count is 0.
+13. Delete a notification and confirm it disappeared.
+14. Run reminders again and confirm duplicate notifications are skipped.
 
 ## Docs
 

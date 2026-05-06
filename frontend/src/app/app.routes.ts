@@ -5,6 +5,7 @@ import { EventsPage } from './pages/events/events-page';
 import { ImportPage } from './pages/import/import-page';
 import { PersonDetailPage } from './pages/people/person-detail-page';
 import { PeoplePage } from './pages/people/people-page';
+import { RemindersPage } from './pages/reminders/reminders-page';
 import { SimplePage } from './pages/simple-page/simple-page';
 
 export const routes: Routes = [
@@ -42,12 +43,8 @@ export const routes: Routes = [
   },
   {
     path: 'reminders',
-    component: SimplePage,
+    component: RemindersPage,
     canActivate: [authGuard],
-    data: {
-      title: 'Напоминания',
-      description: 'Контроль ближайших дат и уведомлений внутри приложения и по email.',
-    },
   },
   {
     path: 'settings',

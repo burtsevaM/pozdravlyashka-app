@@ -31,7 +31,7 @@ PWA нужна, чтобы приложение было удобно откры
 ## Local Run
 
 ```bash
-docker compose up -d postgres
+docker compose up -d postgres mailpit
 ```
 
 ```bash
@@ -67,6 +67,10 @@ Database health check:
 
 - `GET http://localhost:3000/api/health`
 - `GET http://localhost:3000/api/health/db`
+
+Mailpit UI:
+
+- `http://localhost:8025`
 
 ## Authorization
 
@@ -159,6 +163,45 @@ Regular team members can view initiatives, gift ideas and contribution summary.
 When the birthday person's email matches organizer email, event responses
 include `organizerIsBirthdayPerson` so the frontend can recommend assigning a
 deputy without changing organizer automatically.
+
+## Notifications And Email Reminders
+
+Notifications are stored in PostgreSQL in `Notification`. The MVP uses the
+existing channels `APP` and `EMAIL`, plus `readAt` for read state,
+`reminderOffsetDays` for reminder thresholds and `errorMessage` for failed SMTP
+delivery. A unique database index prevents duplicates for one
+`eventId/userId/channel/type/reminderOffsetDays` combination.
+
+Protected notification endpoints:
+
+- `GET /api/notifications` - current user's notifications, with optional `unreadOnly`, `limit` and `channel`.
+- `GET /api/notifications/unread-count` - current unread count.
+- `PATCH /api/notifications/:notificationId/read` - mark one own notification read.
+- `PATCH /api/notifications/read-all` - mark all own notifications read.
+- `DELETE /api/notifications/:notificationId` - delete one own notification.
+- `POST /api/reminders/run` - manually run reminder generation for teams where the current user is a member.
+
+The daily scheduler runs event reminders at 09:00 server time with
+`@nestjs/schedule`. The manual endpoint is kept for demo and QA. Reminder
+thresholds are 14, 7, 3, 1 and 0 days before an active celebration initiative.
+Recipients are the organizer and deputy; if the organizer is the birthday
+person and a deputy exists, the deputy is notified first. If no deputy exists,
+the organizer receives a message asking to appoint one.
+
+Email is sent by Nodemailer. `EMAIL_MODE=dev` sends to Mailpit on localhost
+SMTP port `1025`; `EMAIL_MODE=smtp` uses `EMAIL_HOST`, `EMAIL_PORT`,
+`EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASSWORD` and `EMAIL_FROM`. Mail.ru uses
+`smtp.mail.ru:465`, Yandex uses `smtp.yandex.ru:465`, both with app passwords.
+
+Manual check:
+
+1. Run `docker compose up -d postgres mailpit`.
+2. Start backend and frontend.
+3. Log in.
+4. Create a team, person and celebration initiative dated in 1/3/7/14 days.
+5. Open `/reminders` and click `Проверить напоминания`.
+6. Confirm the in-app notification, unread count and Mailpit email.
+7. Mark notifications read, delete one and rerun reminders to confirm duplicates are skipped.
 
 Manual check:
 

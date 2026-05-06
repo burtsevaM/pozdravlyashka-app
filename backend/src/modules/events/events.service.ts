@@ -19,6 +19,7 @@ import {
   Vote,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { TeamsService } from '../teams/teams.service';
 import { AssignDeputyDto } from './dto/assign-deputy.dto';
 import { CreateContributionDto } from './dto/create-contribution.dto';
@@ -169,11 +170,15 @@ const ACTIVE_EVENT_STATUSES: EventStatus[] = [
   EventStatus.IN_PROGRESS,
 ];
 
+const DEPUTY_ASSIGNED_NOTIFICATION_TYPE = 'DEPUTY_ASSIGNED';
+const ORGANIZER_TRANSFERRED_NOTIFICATION_TYPE = 'ORGANIZER_TRANSFERRED';
+
 @Injectable()
 export class EventsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly teamsService: TeamsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getEvents(
@@ -628,6 +633,16 @@ export class EventsService {
       include: this.eventInclude(),
     });
 
+    if (assignDeputyDto.deputyId) {
+      await this.notificationsService.createActionNotificationIfMissing({
+        userId: assignDeputyDto.deputyId,
+        eventId: event.id,
+        type: DEPUTY_ASSIGNED_NOTIFICATION_TYPE,
+        title: 'Вас назначили заместителем',
+        message: `Вас назначили заместителем организатора по поздравлению ${event.person.fullName}.`,
+      });
+    }
+
     return this.toCelebrationEventResponse(event, userId);
   }
 
@@ -720,6 +735,14 @@ export class EventsService {
         fromUser: true,
         toUser: true,
       },
+    });
+
+    await this.notificationsService.createActionNotificationIfMissing({
+      userId: createDelegationDto.toUserId,
+      eventId: result.updatedEvent.id,
+      type: ORGANIZER_TRANSFERRED_NOTIFICATION_TYPE,
+      title: 'Вам передали права организатора',
+      message: `Вам передали права организатора по поздравлению ${result.updatedEvent.person.fullName}.`,
     });
 
     return {
