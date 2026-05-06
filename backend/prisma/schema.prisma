@@ -201,15 +201,22 @@ model Delegation {
 }
 
 model Notification {
-  id        String              @id @default(uuid())
-  userId    String
-  eventId   String?
-  type      String
-  message   String
-  channel   NotificationChannel @default(APP)
-  status    NotificationStatus  @default(PENDING)
-  createdAt DateTime            @default(now())
-  sentAt    DateTime?
-  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event     CelebrationEvent?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  id                 String              @id @default(uuid())
+  userId             String
+  eventId            String?
+  type               String
+  title              String?
+  message            String
+  channel            NotificationChannel @default(APP)
+  status             NotificationStatus  @default(PENDING)
+  reminderOffsetDays Int?
+  readAt             DateTime?
+  sentAt             DateTime?
+  errorMessage       String?
+  createdAt          DateTime            @default(now())
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event              CelebrationEvent?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, userId, channel, type, reminderOffsetDays])
+  @@index([userId, createdAt])
 }
