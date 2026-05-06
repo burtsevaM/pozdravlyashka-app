@@ -1,13 +1,24 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { finalize } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { finalize, forkJoin } from 'rxjs';
+import {
+  Contribution,
+  ContributionStatus,
+  ContributionSummary,
+} from '../../core/models/contribution.models';
+import { Delegation } from '../../core/models/delegation.models';
 import {
   CelebrationEvent,
   EventStatus,
@@ -15,7 +26,12 @@ import {
 } from '../../core/models/event.models';
 import { GiftHistory } from '../../core/models/gift-history.models';
 import { Person, PersonStatus } from '../../core/models/person.models';
+import { TeamMember } from '../../core/models/team.models';
+import { ContributionsService } from '../../core/services/contributions.service';
+import { DelegationsService } from '../../core/services/delegations.service';
+import { EventsService } from '../../core/services/events.service';
 import { PeopleService } from '../../core/services/people.service';
+import { TeamsService } from '../../core/services/teams.service';
 
 export type PersonCardDialogData = {
   teamId: string;
@@ -36,12 +52,17 @@ type PersonStatusOption = {
 @Component({
   selector: 'app-person-card-dialog',
   imports: [
+    ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
     MatDialogModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
+    MatProgressBarModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
   templateUrl: './person-card-dialog.component.html',
   styleUrl: './person-card-dialog.component.scss',
@@ -49,12 +70,54 @@ type PersonStatusOption = {
 export class PersonCardDialogComponent implements OnInit {
   private readonly data = inject<PersonCardDialogData>(MAT_DIALOG_DATA);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly contributionsService = inject(ContributionsService);
+  private readonly delegationsService = inject(DelegationsService);
+  private readonly eventsService = inject(EventsService);
   private readonly peopleService = inject(PeopleService);
+  private readonly teamsService = inject(TeamsService);
 
   protected readonly person = signal<Person | null>(null);
+  protected readonly currentEvent = signal<CelebrationEvent | null>(this.data.currentEvent ?? null);
+  protected readonly teamMembers = signal<TeamMember[]>([]);
+  protected readonly contributionSummary = signal<ContributionSummary | null>(null);
+  protected readonly delegations = signal<Delegation[]>([]);
   protected readonly isLoading = signal(false);
-  protected readonly errorMessage = signal<string | null>(null);
-  protected readonly currentEvent = this.data.currentEvent ?? null;
+  protected readonly isManagementLoading = signal(false);
+  protected readonly loadErrorMessage = signal<string | null>(null);
+  protected readonly actionErrorMessage = signal<string | null>(null);
+  protected readonly successMessage = signal<string | null>(null);
+  protected readonly editingContributionId = signal<string | null>(null);
+
+  protected readonly contributionForm = this.formBuilder.group({
+    userId: ['', [Validators.required]],
+    amount: ['', [Validators.required, Validators.min(0.01)]],
+    status: ['PENDING' as ContributionStatus, [Validators.required]],
+    comment: [''],
+  });
+
+  protected readonly contributionEditForm = this.formBuilder.group({
+    amount: ['', [Validators.required, Validators.min(0.01)]],
+    status: ['PENDING' as ContributionStatus, [Validators.required]],
+    comment: [''],
+  });
+
+  protected readonly deputyForm = this.formBuilder.group({
+    deputyId: [''],
+  });
+
+  protected readonly delegationForm = this.formBuilder.group({
+    toUserId: ['', [Validators.required]],
+    startDate: ['', [Validators.required]],
+    endDate: [''],
+    reason: [''],
+  });
+
+  protected readonly contributionStatusOptions: { value: ContributionStatus; label: string }[] = [
+    { value: 'PENDING', label: 'Не сдал' },
+    { value: 'PAID', label: 'Сдал' },
+    { value: 'CANCELLED', label: 'Отменен' },
+  ];
 
   private readonly eventStatusOptions: EventStatusOption[] = [
     { value: 'PLANNED', label: 'Запланирована' },
@@ -71,6 +134,7 @@ export class PersonCardDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPerson();
+    this.loadManagementData();
   }
 
   protected get giftHistory(): GiftHistory[] {
@@ -79,6 +143,12 @@ export class PersonCardDialogComponent implements OnInit {
 
   protected get celebrationEvents(): PersonCelebrationEvent[] {
     return this.person()?.celebrationEvents ?? [];
+  }
+
+  protected get availableContributionMembers(): TeamMember[] {
+    const usedUserIds = new Set(this.contributionSummary()?.items.map((item) => item.userId) ?? []);
+
+    return this.teamMembers().filter((member) => !usedUserIds.has(member.userId));
   }
 
   protected formatDate(value: string): string {
@@ -138,9 +208,241 @@ export class PersonCardDialogComponent implements OnInit {
     return event.giftIdeas.reduce((total, idea) => total + idea.voteCount, 0);
   }
 
+  protected getContributionStatusLabel(status: ContributionStatus): string {
+    return (
+      this.contributionStatusOptions.find((option) => option.value === status)?.label ?? status
+    );
+  }
+
+  protected getRemainingAmount(summary: ContributionSummary): number | null {
+    if (summary.budget === null) {
+      return null;
+    }
+
+    return Math.max(summary.budget - summary.paidAmount, 0);
+  }
+
+  protected addContribution(): void {
+    const event = this.currentEvent();
+
+    if (!event || this.contributionForm.invalid) {
+      this.contributionForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.contributionForm.getRawValue();
+    this.actionErrorMessage.set(null);
+
+    this.contributionsService
+      .createContribution(this.data.teamId, event.id, {
+        userId: value.userId,
+        amount: Number(value.amount),
+        status: value.status,
+        comment: value.comment.trim() || undefined,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.contributionSummary.set(summary);
+          this.successMessage.set('Взнос добавлен');
+          this.contributionForm.reset({
+            userId: '',
+            amount: '',
+            status: 'PENDING',
+            comment: '',
+          });
+          this.refreshCurrentEvent(event.id);
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'добавить взнос'));
+        },
+      });
+  }
+
+  protected startContributionEdit(contribution: Contribution): void {
+    this.editingContributionId.set(contribution.id);
+    this.contributionEditForm.setValue({
+      amount: String(contribution.amount),
+      status: contribution.status,
+      comment: contribution.comment ?? '',
+    });
+  }
+
+  protected cancelContributionEdit(): void {
+    this.editingContributionId.set(null);
+  }
+
+  protected saveContribution(contributionId: string): void {
+    const event = this.currentEvent();
+
+    if (!event || this.contributionEditForm.invalid) {
+      this.contributionEditForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.contributionEditForm.getRawValue();
+    this.actionErrorMessage.set(null);
+
+    this.contributionsService
+      .updateContribution(this.data.teamId, event.id, contributionId, {
+        amount: Number(value.amount),
+        status: value.status,
+        comment: value.comment.trim(),
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.contributionSummary.set(summary);
+          this.editingContributionId.set(null);
+          this.successMessage.set('Взнос сохранен');
+          this.refreshCurrentEvent(event.id);
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'сохранить взнос'));
+        },
+      });
+  }
+
+  protected updateContributionStatus(contribution: Contribution, status: ContributionStatus): void {
+    const event = this.currentEvent();
+
+    if (!event || contribution.status === status) {
+      return;
+    }
+
+    this.actionErrorMessage.set(null);
+
+    this.contributionsService
+      .updateContributionStatus(this.data.teamId, event.id, contribution.id, { status })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.contributionSummary.set(summary);
+          this.successMessage.set('Статус взноса обновлен');
+          this.refreshCurrentEvent(event.id);
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'изменить статус взноса'));
+        },
+      });
+  }
+
+  protected deleteContribution(contributionId: string): void {
+    const event = this.currentEvent();
+
+    if (!event) {
+      return;
+    }
+
+    this.actionErrorMessage.set(null);
+
+    this.contributionsService
+      .deleteContribution(this.data.teamId, event.id, contributionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.contributionSummary.set(summary);
+          this.successMessage.set('Взнос удален');
+          this.refreshCurrentEvent(event.id);
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'удалить взнос'));
+        },
+      });
+  }
+
+  protected saveDeputy(): void {
+    const event = this.currentEvent();
+
+    if (!event) {
+      return;
+    }
+
+    const deputyId = this.deputyForm.controls.deputyId.value || null;
+    this.actionErrorMessage.set(null);
+
+    this.delegationsService
+      .assignDeputy(this.data.teamId, event.id, deputyId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedEvent) => {
+          this.currentEvent.set(updatedEvent);
+          this.deputyForm.controls.deputyId.setValue(updatedEvent.deputyId ?? '');
+          this.successMessage.set('Заместитель сохранен');
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'назначить заместителя'));
+        },
+      });
+  }
+
+  protected removeDeputy(): void {
+    const event = this.currentEvent();
+
+    if (!event) {
+      return;
+    }
+
+    this.actionErrorMessage.set(null);
+
+    this.delegationsService
+      .removeDeputy(this.data.teamId, event.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedEvent) => {
+          this.currentEvent.set(updatedEvent);
+          this.deputyForm.controls.deputyId.setValue('');
+          this.successMessage.set('Заместитель снят');
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'снять заместителя'));
+        },
+      });
+  }
+
+  protected transferOrganizer(): void {
+    const event = this.currentEvent();
+
+    if (!event || this.delegationForm.invalid) {
+      this.delegationForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.delegationForm.getRawValue();
+    this.actionErrorMessage.set(null);
+
+    this.delegationsService
+      .transferOrganizer(this.data.teamId, event.id, {
+        toUserId: value.toUserId,
+        startDate: value.startDate,
+        endDate: value.endDate || undefined,
+        reason: value.reason.trim() || undefined,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ event: updatedEvent }) => {
+          this.currentEvent.set(updatedEvent);
+          this.deputyForm.controls.deputyId.setValue(updatedEvent.deputyId ?? '');
+          this.delegationForm.reset({
+            toUserId: '',
+            startDate: '',
+            endDate: '',
+            reason: '',
+          });
+          this.successMessage.set('Права организатора переданы');
+          this.loadDelegations(updatedEvent.id);
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(
+            this.getActionErrorMessage(error, 'передать права организатора'),
+          );
+        },
+      });
+  }
+
   private loadPerson(): void {
     this.isLoading.set(true);
-    this.errorMessage.set(null);
+    this.loadErrorMessage.set(null);
 
     this.peopleService
       .getPersonDetails(this.data.teamId, this.data.personId)
@@ -151,8 +453,66 @@ export class PersonCardDialogComponent implements OnInit {
       .subscribe({
         next: (person) => this.person.set(person),
         error: (error: unknown) => {
-          this.errorMessage.set(this.getActionErrorMessage(error, 'загрузить карточку участника'));
+          this.loadErrorMessage.set(
+            this.getActionErrorMessage(error, 'загрузить карточку участника'),
+          );
         },
+      });
+  }
+
+  private loadManagementData(): void {
+    const event = this.currentEvent();
+
+    if (!event) {
+      return;
+    }
+
+    this.isManagementLoading.set(true);
+    this.actionErrorMessage.set(null);
+
+    forkJoin({
+      members: this.teamsService.getTeamMembers(this.data.teamId),
+      contributions: this.contributionsService.getContributions(this.data.teamId, event.id),
+      delegations: this.delegationsService.getDelegations(this.data.teamId, event.id),
+    })
+      .pipe(
+        finalize(() => this.isManagementLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: ({ members, contributions, delegations }) => {
+          this.teamMembers.set(members);
+          this.contributionSummary.set(contributions);
+          this.delegations.set(delegations);
+          this.deputyForm.controls.deputyId.setValue(event.deputyId ?? '');
+        },
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(this.getActionErrorMessage(error, 'загрузить управление'));
+        },
+      });
+  }
+
+  private loadDelegations(eventId: string): void {
+    this.delegationsService
+      .getDelegations(this.data.teamId, eventId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (delegations) => this.delegations.set(delegations),
+        error: (error: unknown) => {
+          this.actionErrorMessage.set(
+            this.getActionErrorMessage(error, 'загрузить историю передачи прав'),
+          );
+        },
+      });
+  }
+
+  private refreshCurrentEvent(eventId: string): void {
+    this.eventsService
+      .getEvent(this.data.teamId, eventId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event) => this.currentEvent.set(event),
+        error: () => undefined,
       });
   }
 

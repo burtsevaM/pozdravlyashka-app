@@ -180,9 +180,8 @@ export class EventsPage implements OnInit {
       .subscribe({
         next: (loadedEvent) => {
           this.replaceEvent(loadedEvent);
-          this.dialog.open<PersonCardDialogComponent, PersonCardDialogData>(
-            PersonCardDialogComponent,
-            {
+          this.dialog
+            .open<PersonCardDialogComponent, PersonCardDialogData>(PersonCardDialogComponent, {
               width: 'min(980px, calc(100vw - 24px))',
               maxWidth: '100vw',
               data: {
@@ -190,8 +189,10 @@ export class EventsPage implements OnInit {
                 personId: loadedEvent.personId,
                 currentEvent: loadedEvent,
               },
-            },
-          );
+            })
+            .afterClosed()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.loadPageData());
         },
         error: (error: unknown) => {
           this.errorMessage.set(this.getActionErrorMessage(error, 'открыть карточку участника'));
@@ -358,6 +359,21 @@ export class EventsPage implements OnInit {
     return `${ideasCount} ${this.getIdeasWord(ideasCount)}, ${votesCount} ${this.getVotesWord(
       votesCount,
     )}`;
+  }
+
+  protected getCollectedSummary(event: CelebrationEvent): string {
+    const summary = event.contributionSummary;
+    const budget = summary.budget ?? event.budget;
+
+    if (!budget && summary.paidAmount === 0) {
+      return 'Сбор не начат';
+    }
+
+    if (!budget) {
+      return `Собрано: ${this.formatMoney(summary.paidAmount)}`;
+    }
+
+    return `Собрано: ${this.formatMoney(summary.paidAmount)} из ${this.formatMoney(budget)}`;
   }
 
   private createEvent(data: CreateEventRequest): void {

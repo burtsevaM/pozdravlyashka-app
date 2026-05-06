@@ -12,7 +12,11 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../auth/types/auth-user.type';
 import { CreateTeamDto } from './dto/create-team.dto';
-import { TeamsService, TeamWithUserRole } from './teams.service';
+import {
+  TeamMemberResponse,
+  TeamsService,
+  TeamWithUserRole,
+} from './teams.service';
 
 type AuthenticatedRequest = Request & {
   user: AuthUser;
@@ -44,5 +48,13 @@ export class TeamsController {
     @Param('teamId', ParseUUIDPipe) teamId: string,
   ): Promise<TeamWithUserRole> {
     return this.teamsService.getTeam(teamId, request.user.id);
+  }
+
+  @Get(':teamId/members')
+  getTeamMembers(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+  ): Promise<TeamMemberResponse[]> {
+    return this.teamsService.getTeamMembers(teamId, request.user.id);
   }
 }

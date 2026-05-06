@@ -94,6 +94,7 @@ Protected team endpoints:
 - `POST /api/teams` - create team and current user's `TeamMember`.
 - `GET /api/teams` - list teams where current user is a member.
 - `GET /api/teams/:teamId` - get one accessible team with current user's role.
+- `GET /api/teams/:teamId/members` - list team users for contribution and role assignment forms.
 
 Protected people endpoints:
 
@@ -126,6 +127,15 @@ Protected celebration event endpoints:
 - `DELETE /api/teams/:teamId/events/:eventId/vote` - remove current user's vote in the initiative.
 - `PATCH /api/teams/:teamId/events/:eventId/selected-gift` - store the final gift idea on the initiative.
 - `DELETE /api/teams/:teamId/events/:eventId/selected-gift` - clear the final gift selection.
+- `GET /api/teams/:teamId/events/:eventId/contributions` - list contributions and calculated collection summary.
+- `POST /api/teams/:teamId/events/:eventId/contributions` - add one team member to the collection.
+- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId` - update amount, status or comment.
+- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId/status` - update only contribution status.
+- `DELETE /api/teams/:teamId/events/:eventId/contributions/:contributionId` - delete a contribution record.
+- `PATCH /api/teams/:teamId/events/:eventId/deputy` - assign or clear initiative deputy.
+- `DELETE /api/teams/:teamId/events/:eventId/deputy` - clear initiative deputy.
+- `POST /api/teams/:teamId/events/:eventId/delegations` - transfer initiative organizer rights and create history.
+- `GET /api/teams/:teamId/events/:eventId/delegations` - list organizer transfer history.
 
 Gift ideas and votes are persisted with Prisma. `Vote.eventId` plus a unique
 `eventId/userId` index enforces one active vote per user in one initiative.
@@ -139,6 +149,16 @@ gift. Initiative details open in a centered Material dialog with the person
 card, gift history and related initiatives. Gift ideas, voting, editing and
 final gift selection are handled in a separate Material dialog; when it closes,
 the initiative card is refreshed from the updated backend response.
+
+Money collection, deputy assignment and organizer transfer are managed inside
+the initiative details dialog. Contributions are unique per `eventId/userId`
+and use `ContributionStatus`. The backend checks that the selected user belongs
+to the team, that the event belongs to the URL team and that only the organizer,
+deputy or team OWNER/ADMIN can change collection, deputy or delegation data.
+Regular team members can view initiatives, gift ideas and contribution summary.
+When the birthday person's email matches organizer email, event responses
+include `organizerIsBirthdayPerson` so the frontend can recommend assigning a
+deputy without changing organizer automatically.
 
 Manual check:
 
@@ -159,6 +179,9 @@ Manual check:
 15. Refresh the page and confirm the saved data remains.
 16. Try to delete the final gift and confirm the conflict message is shown.
 17. Confirm archived people are hidden and dashboard shows upcoming birthdays.
+18. Add a contribution, mark it paid, edit amount and delete it.
+19. Assign a deputy, refresh and confirm the deputy remains.
+20. Transfer organizer rights, confirm history is shown and refresh again.
 
 ## Excel Import Format
 

@@ -5,9 +5,17 @@
     <div class="dialog-loading">
       <mat-spinner diameter="36" />
     </div>
-  } @else if (errorMessage(); as message) {
+  } @else if (loadErrorMessage(); as message) {
     <p class="error-message">{{ message }}</p>
   } @else if (person(); as person) {
+    @if (actionErrorMessage(); as message) {
+      <p class="error-message">{{ message }}</p>
+    }
+
+    @if (successMessage(); as message) {
+      <p class="success-message">{{ message }}</p>
+    }
+
     <section class="dialog-header">
       <div>
         <p class="eyebrow">Участник поздравления</p>
@@ -61,7 +69,7 @@
         </mat-card-content>
       </mat-card>
 
-      @if (currentEvent; as event) {
+      @if (currentEvent(); as event) {
         <mat-card appearance="outlined" class="detail-card">
           <mat-card-header>
             <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
@@ -86,6 +94,10 @@
                 <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
               </div>
               <div>
+                <dt>Заместитель</dt>
+                <dd>{{ event.deputy?.name || 'Заместитель не назначен' }}</dd>
+              </div>
+              <div>
                 <dt>Подарок</dt>
                 <dd>{{ getCurrentEventTitle(event) }}</dd>
               </div>
@@ -96,6 +108,309 @@
                 </dd>
               </div>
             </dl>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (currentEvent(); as event) {
+        <mat-card appearance="outlined" class="detail-card wide-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar aria-hidden="true">payments</mat-icon>
+            <mat-card-title>Сбор денег</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (isManagementLoading()) {
+              <div class="inline-loading">
+                <mat-spinner diameter="28" />
+              </div>
+            } @else if (contributionSummary(); as summary) {
+              <div class="money-summary">
+                <div>
+                  <span>Бюджет</span>
+                  <strong>{{ formatMoney(summary.budget) }}</strong>
+                </div>
+                <div>
+                  <span>Собрано</span>
+                  <strong>{{ formatMoney(summary.paidAmount) }}</strong>
+                </div>
+                <div>
+                  <span>Осталось</span>
+                  <strong>{{ formatMoney(getRemainingAmount(summary)) }}</strong>
+                </div>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="summary.progressPercent" />
+              <p class="summary-caption">
+                {{ summary.progressPercent }}%, сдали {{ summary.paidCount }}, не сдали
+                {{ summary.pendingCount }}
+              </p>
+
+              <form
+                class="management-form"
+                [formGroup]="contributionForm"
+                (ngSubmit)="addContribution()"
+              >
+                <mat-form-field appearance="outline">
+                  <mat-label>Участник сбора</mat-label>
+                  <mat-select formControlName="userId">
+                    @for (member of availableContributionMembers; track member.userId) {
+                      <mat-option [value]="member.userId"
+                        >{{ member.name }} · {{ member.email }}</mat-option
+                      >
+                    }
+                  </mat-select>
+                  @if (
+                    contributionForm.controls.userId.touched &&
+                    contributionForm.controls.userId.hasError('required')
+                  ) {
+                    <mat-error>Выберите участника</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Сумма</mat-label>
+                  <input matInput type="number" min="0.01" step="0.01" formControlName="amount" />
+                  @if (
+                    contributionForm.controls.amount.touched &&
+                    contributionForm.controls.amount.invalid
+                  ) {
+                    <mat-error>Укажите сумму больше 0</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Статус</mat-label>
+                  <mat-select formControlName="status">
+                    @for (option of contributionStatusOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-wide">
+                  <mat-label>Комментарий</mat-label>
+                  <textarea matInput rows="2" formControlName="comment"></textarea>
+                </mat-form-field>
+
+                <button mat-flat-button color="primary" type="submit">
+                  <mat-icon aria-hidden="true">add</mat-icon>
+                  Добавить взнос
+                </button>
+              </form>
+
+              @if (summary.items.length > 0) {
+                <div class="contribution-list">
+                  @for (contribution of summary.items; track contribution.id) {
+                    <article class="contribution-item">
+                      @if (editingContributionId() === contribution.id) {
+                        <form
+                          class="contribution-edit-form"
+                          [formGroup]="contributionEditForm"
+                          (ngSubmit)="saveContribution(contribution.id)"
+                        >
+                          <strong>{{ contribution.userName }}</strong>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Сумма</mat-label>
+                            <input
+                              matInput
+                              type="number"
+                              min="0.01"
+                              step="0.01"
+                              formControlName="amount"
+                            />
+                            @if (
+                              contributionEditForm.controls.amount.touched &&
+                              contributionEditForm.controls.amount.invalid
+                            ) {
+                              <mat-error>Сумма должна быть больше 0</mat-error>
+                            }
+                          </mat-form-field>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Статус</mat-label>
+                            <mat-select formControlName="status">
+                              @for (option of contributionStatusOptions; track option.value) {
+                                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="form-wide">
+                            <mat-label>Комментарий</mat-label>
+                            <textarea matInput rows="2" formControlName="comment"></textarea>
+                          </mat-form-field>
+                          <div class="item-actions">
+                            <button mat-flat-button color="primary" type="submit">Сохранить</button>
+                            <button mat-button type="button" (click)="cancelContributionEdit()">
+                              Отмена
+                            </button>
+                          </div>
+                        </form>
+                      } @else {
+                        <div class="contribution-main">
+                          <div>
+                            <h4>{{ contribution.userName }}</h4>
+                            <p>{{ contribution.userEmail }}</p>
+                            @if (contribution.comment) {
+                              <p>{{ contribution.comment }}</p>
+                            }
+                          </div>
+                          <div class="contribution-amount">
+                            <strong>{{ formatMoney(contribution.amount) }}</strong>
+                            <mat-chip highlighted>{{
+                              getContributionStatusLabel(contribution.status)
+                            }}</mat-chip>
+                          </div>
+                        </div>
+                        <div class="item-actions">
+                          <button
+                            mat-button
+                            type="button"
+                            (click)="updateContributionStatus(contribution, 'PAID')"
+                          >
+                            <mat-icon aria-hidden="true">done</mat-icon>
+                            Сдал
+                          </button>
+                          <button
+                            mat-button
+                            type="button"
+                            (click)="updateContributionStatus(contribution, 'PENDING')"
+                          >
+                            <mat-icon aria-hidden="true">schedule</mat-icon>
+                            Не сдал
+                          </button>
+                          <button
+                            mat-button
+                            type="button"
+                            (click)="startContributionEdit(contribution)"
+                          >
+                            <mat-icon aria-hidden="true">edit</mat-icon>
+                            Изменить
+                          </button>
+                          <button
+                            mat-button
+                            color="warn"
+                            type="button"
+                            (click)="deleteContribution(contribution.id)"
+                          >
+                            <mat-icon aria-hidden="true">delete</mat-icon>
+                            Удалить
+                          </button>
+                        </div>
+                      }
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="empty-text">Участники сбора пока не добавлены.</p>
+              }
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="detail-card wide-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar aria-hidden="true">admin_panel_settings</mat-icon>
+            <mat-card-title>Организация</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <dl>
+              <div>
+                <dt>Организатор</dt>
+                <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
+              </div>
+              <div>
+                <dt>Заместитель</dt>
+                <dd>{{ event.deputy?.name || 'Заместитель не назначен' }}</dd>
+              </div>
+            </dl>
+
+            @if (event.organizerIsBirthdayPerson && !event.deputy) {
+              <p class="warning-message">
+                У организатора день рождения. Назначьте заместителя для подготовки поздравления.
+              </p>
+            }
+
+            <form class="management-form" [formGroup]="deputyForm" (ngSubmit)="saveDeputy()">
+              <mat-form-field appearance="outline">
+                <mat-label>Заместитель</mat-label>
+                <mat-select formControlName="deputyId">
+                  <mat-option value="">Не назначен</mat-option>
+                  @for (member of teamMembers(); track member.userId) {
+                    <mat-option [value]="member.userId"
+                      >{{ member.name }} · {{ member.email }}</mat-option
+                    >
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button mat-flat-button color="primary" type="submit">Сохранить</button>
+              @if (event.deputyId) {
+                <button mat-button type="button" (click)="removeDeputy()">Снять заместителя</button>
+              }
+            </form>
+
+            <h4 class="section-subtitle">Передать права организатора</h4>
+            <form
+              class="management-form"
+              [formGroup]="delegationForm"
+              (ngSubmit)="transferOrganizer()"
+            >
+              <mat-form-field appearance="outline">
+                <mat-label>Новый организатор</mat-label>
+                <mat-select formControlName="toUserId">
+                  @for (member of teamMembers(); track member.userId) {
+                    <mat-option [value]="member.userId"
+                      >{{ member.name }} · {{ member.email }}</mat-option
+                    >
+                  }
+                </mat-select>
+                @if (
+                  delegationForm.controls.toUserId.touched &&
+                  delegationForm.controls.toUserId.hasError('required')
+                ) {
+                  <mat-error>Выберите организатора</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Дата начала</mat-label>
+                <input matInput type="date" formControlName="startDate" />
+                @if (
+                  delegationForm.controls.startDate.touched &&
+                  delegationForm.controls.startDate.hasError('required')
+                ) {
+                  <mat-error>Укажите дату начала</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Дата окончания</mat-label>
+                <input matInput type="date" formControlName="endDate" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="form-wide">
+                <mat-label>Причина</mat-label>
+                <textarea matInput rows="2" formControlName="reason"></textarea>
+              </mat-form-field>
+              <button mat-flat-button color="primary" type="submit">Передать права</button>
+            </form>
+
+            <h4 class="section-subtitle">История передачи прав</h4>
+            @if (delegations().length > 0) {
+              <div class="item-list">
+                @for (delegation of delegations(); track delegation.id) {
+                  <article class="detail-item">
+                    <h4>От {{ delegation.fromUserName }} к {{ delegation.toUserName }}</h4>
+                    <p>
+                      {{ formatDate(delegation.startDate) }}
+                      @if (delegation.endDate) {
+                        - {{ formatDate(delegation.endDate) }}
+                      }
+                    </p>
+                    <p>{{ delegation.active ? 'Активна' : 'Неактивна' }}</p>
+                    @if (delegation.reason) {
+                      <p>{{ delegation.reason }}</p>
+                    }
+                  </article>
+                }
+              </div>
+            } @else {
+              <p class="empty-text">Передачи прав пока не было.</p>
+            }
           </mat-card-content>
         </mat-card>
       }
@@ -142,7 +457,7 @@
           @if (celebrationEvents.length > 0) {
             <div class="item-list">
               @for (event of celebrationEvents; track event.id) {
-                <article class="detail-item" [class.current-item]="event.id === currentEvent?.id">
+                <article class="detail-item" [class.current-item]="event.id === currentEvent()?.id">
                   <h4>{{ formatDate(event.date) }}</h4>
                   <p>{{ getEventStatusLabel(event.status) }}</p>
                   <p>Бюджет: {{ formatMoney(event.budget) }}</p>

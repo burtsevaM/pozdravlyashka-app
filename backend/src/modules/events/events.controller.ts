@@ -15,17 +15,25 @@ import {
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../auth/types/auth-user.type';
+import { AssignDeputyDto } from './dto/assign-deputy.dto';
+import { CreateContributionDto } from './dto/create-contribution.dto';
+import { CreateDelegationDto } from './dto/create-delegation.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { CreateGiftIdeaDto } from './dto/create-gift-idea.dto';
 import { GetEventsQueryDto } from './dto/get-events-query.dto';
 import { SelectGiftIdeaDto } from './dto/select-gift-idea.dto';
+import { UpdateContributionStatusDto } from './dto/update-contribution-status.dto';
+import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateGiftIdeaDto } from './dto/update-gift-idea.dto';
 import {
   CelebrationEventResponse,
+  ContributionSummaryResponse,
+  DelegationResponse,
   EventsService,
   GiftIdeaResponse,
+  TransferOrganizerResponse,
 } from './events.service';
 
 type AuthenticatedRequest = Request & {
@@ -206,5 +214,131 @@ export class EventsController {
       request.user.id,
       eventId,
     );
+  }
+
+  @Get(':eventId/contributions')
+  getContributions(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<ContributionSummaryResponse> {
+    return this.eventsService.getContributions(
+      teamId,
+      request.user.id,
+      eventId,
+    );
+  }
+
+  @Post(':eventId/contributions')
+  createContribution(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() createContributionDto: CreateContributionDto,
+  ): Promise<ContributionSummaryResponse> {
+    return this.eventsService.createContribution(
+      teamId,
+      request.user.id,
+      eventId,
+      createContributionDto,
+    );
+  }
+
+  @Patch(':eventId/contributions/:contributionId')
+  updateContribution(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('contributionId', ParseUUIDPipe) contributionId: string,
+    @Body() updateContributionDto: UpdateContributionDto,
+  ): Promise<ContributionSummaryResponse> {
+    return this.eventsService.updateContribution(
+      teamId,
+      request.user.id,
+      eventId,
+      contributionId,
+      updateContributionDto,
+    );
+  }
+
+  @Patch(':eventId/contributions/:contributionId/status')
+  updateContributionStatus(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('contributionId', ParseUUIDPipe) contributionId: string,
+    @Body() updateContributionStatusDto: UpdateContributionStatusDto,
+  ): Promise<ContributionSummaryResponse> {
+    return this.eventsService.updateContributionStatus(
+      teamId,
+      request.user.id,
+      eventId,
+      contributionId,
+      updateContributionStatusDto,
+    );
+  }
+
+  @Delete(':eventId/contributions/:contributionId')
+  deleteContribution(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('contributionId', ParseUUIDPipe) contributionId: string,
+  ): Promise<ContributionSummaryResponse> {
+    return this.eventsService.deleteContribution(
+      teamId,
+      request.user.id,
+      eventId,
+      contributionId,
+    );
+  }
+
+  @Patch(':eventId/deputy')
+  assignDeputy(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() assignDeputyDto: AssignDeputyDto,
+  ): Promise<CelebrationEventResponse> {
+    return this.eventsService.assignDeputy(
+      teamId,
+      request.user.id,
+      eventId,
+      assignDeputyDto,
+    );
+  }
+
+  @Delete(':eventId/deputy')
+  @HttpCode(200)
+  removeDeputy(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<CelebrationEventResponse> {
+    return this.eventsService.removeDeputy(teamId, request.user.id, eventId);
+  }
+
+  @Post(':eventId/delegations')
+  transferOrganizer(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() createDelegationDto: CreateDelegationDto,
+  ): Promise<TransferOrganizerResponse> {
+    return this.eventsService.transferOrganizer(
+      teamId,
+      request.user.id,
+      eventId,
+      createDelegationDto,
+    );
+  }
+
+  @Get(':eventId/delegations')
+  getDelegations(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<DelegationResponse[]> {
+    return this.eventsService.getDelegations(teamId, request.user.id, eventId);
   }
 }

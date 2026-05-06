@@ -56,6 +56,7 @@ Teams endpoints:
 - `POST /api/teams`
 - `GET /api/teams`
 - `GET /api/teams/:teamId`
+- `GET /api/teams/:teamId/members`
 
 People endpoints:
 
@@ -88,6 +89,15 @@ Celebration event endpoints:
 - `DELETE /api/teams/:teamId/events/:eventId/vote`
 - `PATCH /api/teams/:teamId/events/:eventId/selected-gift`
 - `DELETE /api/teams/:teamId/events/:eventId/selected-gift`
+- `GET /api/teams/:teamId/events/:eventId/contributions`
+- `POST /api/teams/:teamId/events/:eventId/contributions`
+- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId`
+- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId/status`
+- `DELETE /api/teams/:teamId/events/:eventId/contributions/:contributionId`
+- `PATCH /api/teams/:teamId/events/:eventId/deputy`
+- `DELETE /api/teams/:teamId/events/:eventId/deputy`
+- `POST /api/teams/:teamId/events/:eventId/delegations`
+- `GET /api/teams/:teamId/events/:eventId/delegations`
 
 Import endpoints:
 
@@ -197,6 +207,29 @@ Manual check:
 9. Select the final gift.
 10. Refresh the page and confirm votes and final gift remain.
 11. Try to delete the final gift and confirm the app shows an error.
+
+## Contributions, Deputy And Delegation MVP
+
+Implemented in this stage:
+
+- money collection is stored in PostgreSQL as `Contribution` records for a concrete celebration initiative;
+- contribution status and summary are calculated from real database data;
+- an initiative can have a saved deputy organizer;
+- organizer rights can be transferred to another team member and saved in `Delegation` history;
+- management actions are allowed only for the organizer, deputy, OWNER or ADMIN.
+
+Manual check:
+
+1. Log in to the application.
+2. Create or select a team.
+3. Create a celebration initiative.
+4. Open initiative details from `/events`.
+5. Add a contribution, mark it as «Сдал», edit the amount and delete it.
+6. Assign a deputy and refresh the page.
+7. Transfer organizer rights to another team member.
+8. Confirm the organizer changed and delegation history appeared.
+9. Refresh the page and confirm contributions, deputy and delegation history remain.
+10. Try invalid cases: zero or negative amount, duplicate contribution, non-member deputy, non-member new organizer and end date before start date.
 
 ## Docs
 

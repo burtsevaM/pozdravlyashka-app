@@ -133,6 +133,7 @@ model CelebrationEvent {
   giftIdeas          GiftIdea[]
   votes              Vote[]
   contributions      Contribution[]
+  delegations        Delegation[]
   notifications      Notification[]
 }
 
@@ -173,6 +174,7 @@ model Contribution {
   status    ContributionStatus @default(PENDING)
   comment   String?
   createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
   event     CelebrationEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -180,17 +182,22 @@ model Contribution {
 }
 
 model Delegation {
-  id         String   @id @default(uuid())
+  id         String            @id @default(uuid())
   teamId     String
+  eventId    String?
   fromUserId String
   toUserId   String
   startDate  DateTime
-  endDate    DateTime
+  endDate    DateTime?
   reason     String?
-  active     Boolean  @default(true)
-  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  fromUser   User     @relation("DelegationFrom", fields: [fromUserId], references: [id])
-  toUser     User     @relation("DelegationTo", fields: [toUserId], references: [id])
+  active     Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+  team       Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  event      CelebrationEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  fromUser   User              @relation("DelegationFrom", fields: [fromUserId], references: [id])
+  toUser     User              @relation("DelegationTo", fields: [toUserId], references: [id])
+
+  @@index([teamId, eventId])
 }
 
 model Notification {
