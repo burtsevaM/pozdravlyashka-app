@@ -9,6 +9,7 @@ import {
   CelebrationEvent,
   Contribution,
   ContributionStatus,
+  EventOccasion,
   Delegation,
   EventStatus,
   GiftIdea,
@@ -107,6 +108,7 @@ export type CelebrationEventResponse = {
   personId: string;
   date: string;
   status: EventStatus;
+  occasion: EventOccasion;
   budget: number | null;
   organizerId: string | null;
   organizerName: string | null;
@@ -239,6 +241,7 @@ export class EventsService {
         teamId,
         personId: createEventDto.personId,
         date: eventDate,
+        occasion: createEventDto.occasion ?? EventOccasion.BIRTHDAY,
         budget: createEventDto.budget,
         organizerId: userId,
         status: EventStatus.PLANNED,
@@ -277,6 +280,10 @@ export class EventsService {
 
     if (updateEventDto.budget !== undefined) {
       data.budget = updateEventDto.budget;
+    }
+
+    if (updateEventDto.occasion !== undefined) {
+      data.occasion = updateEventDto.occasion;
     }
 
     const event = await this.prismaService.celebrationEvent.update({
@@ -961,6 +968,7 @@ export class EventsService {
       personId: event.personId,
       date: this.formatDateOnly(event.date),
       status: event.status,
+      occasion: event.occasion,
       budget: event.budget === null ? null : Number(event.budget),
       organizerId: event.organizerId,
       organizerName: event.organizer?.name ?? null,

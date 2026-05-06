@@ -26,6 +26,16 @@ enum EventStatus {
   CANCELLED
 }
 
+enum EventOccasion {
+  BIRTHDAY
+  CORPORATE
+  PROFESSIONAL_HOLIDAY
+  ANNIVERSARY
+  FAREWELL
+  SUPPORT
+  OTHER
+}
+
 enum ContributionStatus {
   PENDING
   PAID
@@ -121,6 +131,7 @@ model CelebrationEvent {
   personId           String
   date               DateTime
   status             EventStatus    @default(PLANNED)
+  occasion           EventOccasion   @default(BIRTHDAY)
   organizerId        String?
   deputyId           String?
   budget             Decimal?       @db.Decimal(10, 2)

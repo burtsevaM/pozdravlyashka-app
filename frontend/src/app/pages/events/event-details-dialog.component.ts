@@ -4,7 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { CelebrationEvent, EventStatus } from '../../core/models/event.models';
+import {
+  CelebrationEvent,
+  EVENT_OCCASION_LABELS,
+  EventOccasion,
+  EventStatus,
+} from '../../core/models/event.models';
 import { GiftIdea } from '../../core/models/gift-idea.models';
 import { GiftHistory } from '../../core/models/gift-history.models';
 import { Person } from '../../core/models/person.models';
@@ -71,6 +76,10 @@ export class EventDetailsDialogComponent {
 
   protected getStatusLabel(status: EventStatus): string {
     return this.statusOptions.find((option) => option.value === status)?.label ?? status;
+  }
+
+  protected getOccasionLabel(occasion: EventOccasion): string {
+    return EVENT_OCCASION_LABELS[occasion];
   }
 
   protected getTotalVotesCount(event: CelebrationEvent): number {

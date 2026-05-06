@@ -3,6 +3,37 @@ import { ContributionSummary } from './contribution.models';
 
 export type EventStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
+export type EventOccasion =
+  | 'BIRTHDAY'
+  | 'CORPORATE'
+  | 'PROFESSIONAL_HOLIDAY'
+  | 'ANNIVERSARY'
+  | 'FAREWELL'
+  | 'SUPPORT'
+  | 'OTHER';
+
+export const DEFAULT_EVENT_OCCASION: EventOccasion = 'BIRTHDAY';
+
+export const EVENT_OCCASION_LABELS: Record<EventOccasion, string> = {
+  BIRTHDAY: 'День рождения',
+  CORPORATE: 'Корпоратив',
+  PROFESSIONAL_HOLIDAY: 'Профессиональный праздник',
+  ANNIVERSARY: 'Юбилей',
+  FAREWELL: 'Проводы',
+  SUPPORT: 'Поддержка',
+  OTHER: 'Другое',
+};
+
+export const EVENT_OCCASION_OPTIONS: { value: EventOccasion; label: string }[] = [
+  { value: 'BIRTHDAY', label: EVENT_OCCASION_LABELS.BIRTHDAY },
+  { value: 'CORPORATE', label: EVENT_OCCASION_LABELS.CORPORATE },
+  { value: 'PROFESSIONAL_HOLIDAY', label: EVENT_OCCASION_LABELS.PROFESSIONAL_HOLIDAY },
+  { value: 'ANNIVERSARY', label: EVENT_OCCASION_LABELS.ANNIVERSARY },
+  { value: 'FAREWELL', label: EVENT_OCCASION_LABELS.FAREWELL },
+  { value: 'SUPPORT', label: EVENT_OCCASION_LABELS.SUPPORT },
+  { value: 'OTHER', label: EVENT_OCCASION_LABELS.OTHER },
+];
+
 export type EventPerson = {
   id: string;
   fullName: string;
@@ -23,6 +54,7 @@ export type CelebrationEvent = {
   personId: string;
   date: string;
   status: EventStatus;
+  occasion: EventOccasion;
   budget: number | null;
   organizerId: string | null;
   organizerName: string | null;
@@ -47,6 +79,7 @@ export type PersonCelebrationEvent = {
   personId: string;
   date: string;
   status: EventStatus;
+  occasion: EventOccasion;
   budget: number | null;
   organizerId?: string | null;
   organizerName?: string | null;
@@ -65,11 +98,13 @@ export type PersonCelebrationEvent = {
 export type CreateEventRequest = {
   personId: string;
   date: string;
+  occasion?: EventOccasion;
   budget?: number;
 };
 
 export type UpdateEventRequest = {
   date?: string;
+  occasion?: EventOccasion;
   budget?: number;
 };
 

@@ -156,6 +156,14 @@ card, gift history and related initiatives. Gift ideas, voting, editing and
 final gift selection are handled in a separate Material dialog; when it closes,
 the initiative card is refreshed from the updated backend response.
 
+Each `CelebrationEvent` has an `EventOccasion`. The default is `BIRTHDAY`, so
+the birthday workflow remains the primary scenario. The supported occasions are
+`BIRTHDAY`, `CORPORATE`, `PROFESSIONAL_HOLIDAY`, `ANNIVERSARY`, `FAREWELL`,
+`SUPPORT` and `OTHER`, shown in the UI as «День рождения», «Корпоратив»,
+«Профессиональный праздник», «Юбилей», «Проводы», «Поддержка» and «Другое».
+This expands initiatives to real team events without turning the product into a
+general event calendar.
+
 Money collection, deputy assignment and organizer transfer are managed inside
 the initiative details dialog. Contributions are unique per `eventId/userId`
 and use `ContributionStatus`. The backend checks that the selected user belongs

@@ -21,6 +21,8 @@ import {
 import { Delegation } from '../../core/models/delegation.models';
 import {
   CelebrationEvent,
+  EVENT_OCCASION_LABELS,
+  EventOccasion,
   EventStatus,
   PersonCelebrationEvent,
 } from '../../core/models/event.models';
@@ -175,6 +177,10 @@ export class PersonCardDialogComponent implements OnInit {
 
   protected getEventStatusLabel(status: EventStatus): string {
     return this.eventStatusOptions.find((option) => option.value === status)?.label ?? status;
+  }
+
+  protected getOccasionLabel(occasion: EventOccasion): string {
+    return EVENT_OCCASION_LABELS[occasion];
   }
 
   protected getPersonStatusLabel(status: PersonStatus): string {

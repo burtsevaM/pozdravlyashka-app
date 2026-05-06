@@ -8,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import {
   CelebrationEvent,
   CreateEventRequest,
+  DEFAULT_EVENT_OCCASION,
+  EVENT_OCCASION_OPTIONS,
   UpdateEventRequest,
 } from '../../core/models/event.models';
 import { Person } from '../../core/models/person.models';
@@ -45,6 +47,7 @@ export class EventDialogComponent {
     : 'Создать инициативу поздравления';
 
   protected readonly isEditMode = Boolean(this.data.event);
+  protected readonly occasionOptions = EVENT_OCCASION_OPTIONS;
 
   protected readonly form = this.formBuilder.group({
     personId: [
@@ -52,6 +55,7 @@ export class EventDialogComponent {
       this.isEditMode ? [] : [Validators.required],
     ],
     date: [this.data.event?.date ?? this.data.defaultDate ?? '', [Validators.required]],
+    occasion: [this.data.event?.occasion ?? DEFAULT_EVENT_OCCASION, [Validators.required]],
     budget: [
       this.data.event?.budget === null || this.data.event?.budget === undefined
         ? ''
@@ -69,11 +73,13 @@ export class EventDialogComponent {
     }
 
     const date = this.controls.date.value;
+    const occasion = this.controls.occasion.value;
     const budget = String(this.controls.budget.value).trim();
 
     if (this.isEditMode) {
       this.dialogRef.close({
         date,
+        occasion,
         ...(budget ? { budget: Number(budget) } : {}),
       });
       return;
@@ -90,6 +96,7 @@ export class EventDialogComponent {
     this.dialogRef.close({
       personId,
       date,
+      occasion,
       ...(budget ? { budget: Number(budget) } : {}),
     });
   }

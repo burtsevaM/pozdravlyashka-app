@@ -145,6 +145,15 @@ inside a concrete celebration initiative.
 Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
 `npm run prisma:generate`, `npm run prisma:studio`.
 
+## Celebration Event Occasions
+
+Инициативы поздравлений теперь хранят повод события. По умолчанию используется
+«День рождения», поэтому основной сценарий дней рождения остается главным и не
+ломается. Дополнительно поддерживаются: «Корпоратив», «Профессиональный
+праздник», «Юбилей», «Проводы», «Поддержка» и «Другое». Это позволяет вести
+разные коллективные события без превращения приложения в универсальный
+календарь.
+
 ## MVP Teams And People
 
 Implemented in this stage:

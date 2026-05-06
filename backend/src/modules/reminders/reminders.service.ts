@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   CelebrationEvent,
+  EventOccasion,
   EventStatus,
   GiftIdea,
   NotificationChannel,
@@ -152,7 +153,7 @@ export class RemindersService {
         userId: recipient.user.id,
         eventId: event.id,
         type: this.getReminderType(daysUntil),
-        title: this.getReminderTitle(daysUntil),
+        title: this.getReminderTitle(event),
         message,
         channel: NotificationChannel.APP,
         status: NotificationStatus.PENDING,
@@ -259,7 +260,7 @@ export class RemindersService {
     recipient: ReminderRecipient,
   ): string {
     const parts = [
-      `Скоро событие: день рождения ${event.person.fullName}.`,
+      `${this.getOccasionReminderTitle(event.occasion)}: ${event.person.fullName}.`,
       `Дата: ${this.formatDate(event.date)}.`,
       `До события осталось: ${this.formatDaysUntil(daysUntil)}.`,
       `Статус инициативы: ${this.formatEventStatus(event.status)}.`,
@@ -281,7 +282,7 @@ export class RemindersService {
     return [
       'Здравствуйте!',
       '',
-      `Скоро событие: день рождения ${event.person.fullName}.`,
+      `${this.getOccasionReminderTitle(event.occasion)}: ${event.person.fullName}.`,
       `Дата: ${this.formatDate(event.date)}.`,
       `До события осталось: ${this.formatDaysUntil(daysUntil)}.`,
       `Статус инициативы: ${this.formatEventStatus(event.status)}.`,
@@ -303,7 +304,7 @@ export class RemindersService {
       <div style="font-family: Arial, sans-serif; color: #1d2430; line-height: 1.5; max-width: 640px;">
         <h1 style="font-size: 22px; color: #2f5d50;">Поздравляшка</h1>
         <p>Здравствуйте!</p>
-        <p>Скоро событие: день рождения <strong>${this.escapeHtml(event.person.fullName)}</strong>.</p>
+        <p>${this.escapeHtml(this.getOccasionReminderTitle(event.occasion))}: <strong>${this.escapeHtml(event.person.fullName)}</strong>.</p>
         <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
           <tbody>
             ${this.renderEmailRow('Дата', this.formatDate(event.date))}
@@ -327,12 +328,23 @@ export class RemindersService {
     `;
   }
 
-  private getReminderTitle(daysUntil: number): string {
-    if (daysUntil === 0) {
-      return 'День рождения сегодня';
-    }
+  private getReminderTitle(event: ReminderEvent): string {
+    return this.getOccasionReminderTitle(event.occasion);
+  }
 
-    return 'Скоро день рождения';
+  private getOccasionReminderTitle(occasion: EventOccasion): string {
+    const titles: Record<EventOccasion, string> = {
+      [EventOccasion.BIRTHDAY]: 'Скоро день рождения',
+      [EventOccasion.ANNIVERSARY]: 'Скоро юбилей',
+      [EventOccasion.FAREWELL]: 'Скоро проводы',
+      [EventOccasion.PROFESSIONAL_HOLIDAY]:
+        'Скоро профессиональный праздник',
+      [EventOccasion.CORPORATE]: 'Скоро корпоративное событие',
+      [EventOccasion.SUPPORT]: 'Запланирован сбор на поддержку',
+      [EventOccasion.OTHER]: 'Скоро событие',
+    };
+
+    return titles[occasion];
   }
 
   private getReminderEmailSubject(event: ReminderEvent): string {

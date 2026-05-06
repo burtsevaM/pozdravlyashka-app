@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import {
   CelebrationEvent,
+  EventOccasion,
   EventStatus,
   GiftIdea,
   GiftHistory,
@@ -36,6 +37,7 @@ export type PersonEventResponse = {
   personId: string;
   date: string;
   status: EventStatus;
+  occasion: EventOccasion;
   budget: number | null;
   selectedGiftIdeaId: string | null;
   selectedGiftIdea: {
@@ -534,6 +536,7 @@ export class PeopleService {
       personId: event.personId,
       date: this.formatDateOnly(event.date),
       status: event.status,
+      occasion: event.occasion,
       budget: event.budget === null ? null : Number(event.budget),
       selectedGiftIdeaId: event.selectedGiftIdeaId,
       selectedGiftIdea: event.selectedGiftIdea
