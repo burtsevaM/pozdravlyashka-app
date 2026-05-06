@@ -18,7 +18,7 @@ mat-card-actions {
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #2f5d50;
+  color: var(--color-primary-strong);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -38,34 +38,34 @@ h3 {
 .actions-row p,
 .empty-panel p,
 dt {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .success-message,
 .error-message {
   padding: 12px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
 }
 
 .success-message {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+  border: 1px solid rgba(111, 169, 187, 0.28);
 }
 
 .error-message {
-  color: #8a1f1f;
-  background: #fff0f0;
-  border: 1px solid #f1c7c7;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
 }
 
 .selection-panel,
 .empty-panel,
 .gift-idea-form {
   padding: 14px;
-  border: 1px solid #dfe4ec;
-  border-radius: 8px;
-  background: #f8faf9;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-soft-block-bg);
 }
 
 .selection-panel {
@@ -74,8 +74,8 @@ dt {
 }
 
 .selected-panel {
-  border-color: #2f5d50;
-  background: #edf8f1;
+  border-color: var(--color-primary-strong);
+  background: rgba(223, 241, 245, 0.72);
 }
 
 .actions-row {
@@ -102,13 +102,13 @@ mat-card-actions mat-icon {
 }
 
 .gift-idea-card {
-  border-radius: 8px;
-  background: #ffffff;
+  border-radius: var(--radius-panel);
+  background: var(--color-card-bg);
 }
 
 .gift-idea-card.selected-gift {
-  border-color: #2f5d50;
-  box-shadow: inset 4px 0 0 #2f5d50;
+  border-color: var(--color-primary-strong);
+  box-shadow: inset 4px 0 0 var(--color-primary-strong);
 }
 
 .gift-idea-heading {
@@ -117,7 +117,7 @@ mat-card-actions mat-icon {
 
 .gift-idea-heading p,
 .gift-description {
-  color: #394456;
+  color: var(--color-text-main);
 }
 
 .gift-description {
@@ -128,7 +128,7 @@ mat-card-actions mat-icon {
 .gift-link {
   display: inline-flex;
   margin-top: 12px;
-  color: #2f5d50;
+  color: var(--color-primary-strong);
   font-weight: 600;
 }
 
@@ -148,16 +148,16 @@ dt {
 
 dd {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
 .delete-button {
-  color: #8a1f1f;
+  color: var(--color-danger);
 }
 
 .empty-panel mat-icon {
-  color: #2f5d50;
+  color: var(--color-primary-strong);
 }
 
 @media (min-width: 820px) {
