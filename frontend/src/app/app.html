@@ -13,6 +13,13 @@
           <span class="current-user">{{ user.name || user.email }}</span>
         }
 
+        <a mat-icon-button class="notification-button" routerLink="/reminders" aria-label="Открыть уведомления">
+          <mat-icon aria-hidden="true">notifications</mat-icon>
+          @if (unreadCount() > 0) {
+            <span class="notification-count">{{ unreadCount() }}</span>
+          }
+        </a>
+
         <button mat-button type="button" class="logout-button" (click)="logout()">
           <mat-icon aria-hidden="true">logout</mat-icon>
           <span>Выйти</span>

@@ -1,0 +1,134 @@
+<section class="page-header">
+  <p class="eyebrow">Напоминания</p>
+  <h1>Центр уведомлений</h1>
+  <p>Проверяйте подготовку поздравлений, email-отправки и непрочитанные уведомления.</p>
+</section>
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
+
+<section class="actions-panel" aria-label="Действия с напоминаниями">
+  <div class="summary">
+    <mat-icon aria-hidden="true">notifications_active</mat-icon>
+    <div>
+      <span class="summary-label">Непрочитанные</span>
+      <strong>{{ unreadCount() }}</strong>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button mat-flat-button color="primary" type="button" (click)="runReminders()" [disabled]="isRunning()">
+      @if (isRunning()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        <mat-icon aria-hidden="true">task_alt</mat-icon>
+      }
+      <span>Проверить напоминания</span>
+    </button>
+    <button
+      mat-button
+      type="button"
+      (click)="markAllAsRead()"
+      [disabled]="!hasUnreadNotifications()"
+    >
+      <mat-icon aria-hidden="true">done_all</mat-icon>
+      <span>Отметить все прочитанными</span>
+    </button>
+    <button mat-button type="button" (click)="loadNotifications()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      <span>Обновить</span>
+    </button>
+  </div>
+</section>
+
+@if (runResult(); as result) {
+  <section class="run-result" aria-label="Результат проверки напоминаний">
+    <span>Проверено инициатив: <strong>{{ result.checkedEvents }}</strong></span>
+    <span>Создано уведомлений: <strong>{{ result.createdInAppNotifications }}</strong></span>
+    <span>Отправлено email: <strong>{{ result.sentEmails }}</strong></span>
+    <span>Ошибок email: <strong>{{ result.failedEmails }}</strong></span>
+    <span>Пропущено дублей: <strong>{{ result.skippedDuplicates }}</strong></span>
+  </section>
+}
+
+<section class="mailpit-note">
+  <mat-icon aria-hidden="true">mail</mat-icon>
+  <p>Email-напоминания отправляются через SMTP. В dev-режиме письма доступны в Mailpit: <a href="http://localhost:8025" target="_blank" rel="noreferrer">http://localhost:8025</a>.</p>
+</section>
+
+<section class="filters" aria-label="Фильтр уведомлений">
+  @for (option of filterOptions; track option.value) {
+    <button
+      mat-button
+      type="button"
+      [class.active-filter]="activeFilter() === option.value"
+      (click)="setFilter(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  }
+</section>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (notifications().length === 0) {
+  <section class="empty-panel">
+    <mat-icon aria-hidden="true">notifications_none</mat-icon>
+    <h2>Уведомлений пока нет.</h2>
+  </section>
+} @else {
+  <section class="notifications-list" aria-label="Список уведомлений">
+    @for (notification of notifications(); track notification.id) {
+      <mat-card appearance="outlined" class="notification-card" [class.unread]="!notification.readAt">
+        <mat-card-content class="notification-content">
+          <div class="notification-main">
+            <div class="notification-icon" aria-hidden="true">
+              <mat-icon>{{ notification.channel === 'EMAIL' ? 'alternate_email' : 'notifications' }}</mat-icon>
+            </div>
+            <div class="notification-copy">
+              <h2>{{ notification.title || 'Уведомление' }}</h2>
+              <p>{{ notification.message }}</p>
+              @if (notification.eventId) {
+                <span class="event-link">Связано с инициативой: {{ notification.eventId }}</span>
+              }
+              @if (notification.errorMessage) {
+                <span class="delivery-error">{{ notification.errorMessage }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="notification-meta">
+            <mat-chip-set aria-label="Параметры уведомления">
+              <mat-chip>{{ getChannelLabel(notification.channel) }}</mat-chip>
+              <mat-chip>{{ getStatusLabel(notification) }}</mat-chip>
+            </mat-chip-set>
+            <time [attr.datetime]="notification.createdAt">{{ getCreatedDate(notification.createdAt) }}</time>
+          </div>
+
+          <div class="notification-actions">
+            <button
+              mat-button
+              type="button"
+              (click)="markAsRead(notification)"
+              [disabled]="!!notification.readAt"
+            >
+              <mat-icon aria-hidden="true">check</mat-icon>
+              <span>Прочитать</span>
+            </button>
+            <button mat-button type="button" (click)="deleteNotification(notification)">
+              <mat-icon aria-hidden="true">delete</mat-icon>
+              <span>Удалить</span>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </section>
+}

@@ -53,6 +53,30 @@
   color: #ffffff;
 }
 
+.notification-button {
+  position: relative;
+  color: #ffffff;
+}
+
+.notification-count {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  color: #ffffff;
+  background: #b63a3a;
+  border: 2px solid #2f5d50;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .logout-button mat-icon {
   margin-right: 6px;
 }
