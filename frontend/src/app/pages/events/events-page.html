@@ -86,20 +86,20 @@
               </mat-form-field>
             </div>
 
-            <dl class="event-meta">
-              <div>
+            <dl class="event-meta-grid">
+              <div class="event-meta-item">
                 <dt>Дата события</dt>
                 <dd>{{ formatDate(event.date) }}</dd>
               </div>
-              <div>
+              <div class="event-meta-item">
                 <dt>До события</dt>
                 <dd>{{ getDaysUntilLabel(event.date) }}</dd>
               </div>
-              <div>
+              <div class="event-meta-item">
                 <dt>Бюджет</dt>
                 <dd>{{ formatMoney(event.budget) }}</dd>
               </div>
-              <div>
+              <div class="event-meta-item">
                 <dt>Организатор</dt>
                 <dd>{{ event.organizer?.name || 'Не указан' }}</dd>
               </div>
