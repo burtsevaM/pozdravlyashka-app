@@ -13,6 +13,10 @@ export type CurrentUserResponse = {
   user: AuthUser;
 };
 
+export type UpdateProfileRequest = {
+  name: string;
+};
+
 export type LoginRequest = {
   email: string;
   password: string;

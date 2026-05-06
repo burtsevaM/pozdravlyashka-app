@@ -162,6 +162,7 @@
                     <h3>{{ formatDate(event.date) }}</h3>
                     <span class="status-chip">{{ getStatusLabel(event.status) }}</span>
                   </div>
+                  <p>Повод: {{ getOccasionLabel(event.occasion) }}</p>
                   <p>Бюджет: {{ formatMoney(event.budget) }}</p>
                   <p>Организатор: {{ event.organizer?.name || 'Не указан' }}</p>
                   @if (event.selectedGiftIdea) {

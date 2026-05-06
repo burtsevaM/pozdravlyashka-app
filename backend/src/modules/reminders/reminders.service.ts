@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   CelebrationEvent,
+  EventOccasion,
   EventStatus,
   GiftIdea,
   NotificationChannel,
@@ -14,6 +15,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SettingsService } from '../settings/settings.service';
 
 export type RemindersRunResponse = {
   checkedEvents: number;
@@ -36,6 +38,8 @@ type ReminderRecipient = {
   messageSuffix?: string;
 };
 
+type ReminderOffset = 14 | 7 | 3 | 1 | 0;
+
 const REMINDER_OFFSETS = [14, 7, 3, 1, 0] as const;
 
 @Injectable()
@@ -44,6 +48,7 @@ export class RemindersService {
     private readonly prismaService: PrismaService,
     private readonly mailService: MailService,
     private readonly notificationsService: NotificationsService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
@@ -114,8 +119,22 @@ export class RemindersService {
       const recipients = this.getReminderRecipients(event);
 
       for (const recipient of recipients) {
-        await this.createInAppReminder(event, recipient, daysUntil, stats);
-        await this.createEmailReminder(event, recipient, daysUntil, stats);
+        const settings =
+          await this.settingsService.getOrCreateNotificationSettings(
+            recipient.user.id,
+          );
+
+        if (!this.isReminderEnabled(daysUntil, settings)) {
+          continue;
+        }
+
+        if (settings.inAppEnabled) {
+          await this.createInAppReminder(event, recipient, daysUntil, stats);
+        }
+
+        if (settings.emailEnabled) {
+          await this.createEmailReminder(event, recipient, daysUntil, stats);
+        }
       }
     }
 
@@ -134,7 +153,7 @@ export class RemindersService {
         userId: recipient.user.id,
         eventId: event.id,
         type: this.getReminderType(daysUntil),
-        title: this.getReminderTitle(daysUntil),
+        title: this.getReminderTitle(event),
         message,
         channel: NotificationChannel.APP,
         status: NotificationStatus.PENDING,
@@ -241,7 +260,7 @@ export class RemindersService {
     recipient: ReminderRecipient,
   ): string {
     const parts = [
-      `Скоро событие: день рождения ${event.person.fullName}.`,
+      `${this.getOccasionReminderTitle(event.occasion)}: ${event.person.fullName}.`,
       `Дата: ${this.formatDate(event.date)}.`,
       `До события осталось: ${this.formatDaysUntil(daysUntil)}.`,
       `Статус инициативы: ${this.formatEventStatus(event.status)}.`,
@@ -263,7 +282,7 @@ export class RemindersService {
     return [
       'Здравствуйте!',
       '',
-      `Скоро событие: день рождения ${event.person.fullName}.`,
+      `${this.getOccasionReminderTitle(event.occasion)}: ${event.person.fullName}.`,
       `Дата: ${this.formatDate(event.date)}.`,
       `До события осталось: ${this.formatDaysUntil(daysUntil)}.`,
       `Статус инициативы: ${this.formatEventStatus(event.status)}.`,
@@ -285,7 +304,7 @@ export class RemindersService {
       <div style="font-family: Arial, sans-serif; color: #1d2430; line-height: 1.5; max-width: 640px;">
         <h1 style="font-size: 22px; color: #2f5d50;">Поздравляшка</h1>
         <p>Здравствуйте!</p>
-        <p>Скоро событие: день рождения <strong>${this.escapeHtml(event.person.fullName)}</strong>.</p>
+        <p>${this.escapeHtml(this.getOccasionReminderTitle(event.occasion))}: <strong>${this.escapeHtml(event.person.fullName)}</strong>.</p>
         <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
           <tbody>
             ${this.renderEmailRow('Дата', this.formatDate(event.date))}
@@ -309,12 +328,23 @@ export class RemindersService {
     `;
   }
 
-  private getReminderTitle(daysUntil: number): string {
-    if (daysUntil === 0) {
-      return 'День рождения сегодня';
-    }
+  private getReminderTitle(event: ReminderEvent): string {
+    return this.getOccasionReminderTitle(event.occasion);
+  }
 
-    return 'Скоро день рождения';
+  private getOccasionReminderTitle(occasion: EventOccasion): string {
+    const titles: Record<EventOccasion, string> = {
+      [EventOccasion.BIRTHDAY]: 'Скоро день рождения',
+      [EventOccasion.ANNIVERSARY]: 'Скоро юбилей',
+      [EventOccasion.FAREWELL]: 'Скоро проводы',
+      [EventOccasion.PROFESSIONAL_HOLIDAY]:
+        'Скоро профессиональный праздник',
+      [EventOccasion.CORPORATE]: 'Скоро корпоративное событие',
+      [EventOccasion.SUPPORT]: 'Запланирован сбор на поддержку',
+      [EventOccasion.OTHER]: 'Скоро событие',
+    };
+
+    return titles[occasion];
   }
 
   private getReminderEmailSubject(event: ReminderEvent): string {
@@ -333,6 +363,27 @@ export class RemindersService {
     return REMINDER_OFFSETS.includes(
       daysUntil as (typeof REMINDER_OFFSETS)[number],
     );
+  }
+
+  private isReminderEnabled(
+    daysUntil: ReminderOffset,
+    settings: {
+      remind14Days: boolean;
+      remind7Days: boolean;
+      remind3Days: boolean;
+      remind1Day: boolean;
+      remindOnDay: boolean;
+    },
+  ): boolean {
+    const enabledByOffset: Record<ReminderOffset, boolean> = {
+      14: settings.remind14Days,
+      7: settings.remind7Days,
+      3: settings.remind3Days,
+      1: settings.remind1Day,
+      0: settings.remindOnDay,
+    };
+
+    return enabledByOffset[daysUntil];
   }
 
   private isOrganizerBirthdayPerson(event: ReminderEvent): boolean {

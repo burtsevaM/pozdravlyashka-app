@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import {
   CreateEventRequest,
+  EVENT_OCCASION_LABELS,
+  EventOccasion,
   EventStatus,
 } from '../../core/models/event.models';
 import {
@@ -296,6 +298,10 @@ export class PersonDetailPage implements OnInit {
     };
 
     return labels[status];
+  }
+
+  protected getOccasionLabel(occasion: EventOccasion): string {
+    return EVENT_OCCASION_LABELS[occasion];
   }
 
   protected getPersonStatusLabel(status: PersonStatus): string {

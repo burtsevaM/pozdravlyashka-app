@@ -51,12 +51,14 @@ Auth endpoints:
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
+- `PATCH /api/auth/profile`
 
 Teams endpoints:
 
 - `POST /api/teams`
 - `GET /api/teams`
 - `GET /api/teams/:teamId`
+- `PATCH /api/teams/:teamId`
 - `GET /api/teams/:teamId/members`
 
 People endpoints:
@@ -104,6 +106,13 @@ Import endpoints:
 
 - `POST /api/teams/:teamId/imports/people/preview`
 - `POST /api/teams/:teamId/imports/people/commit`
+- `GET /api/teams/:teamId/imports/people/template`
+
+Settings endpoints:
+
+- `GET /api/settings/notifications`
+- `PATCH /api/settings/notifications`
+- `GET /api/settings/email-status`
 
 Notifications endpoints:
 
@@ -119,8 +128,31 @@ Email reminders use Nodemailer. In dev mode Mailpit receives messages on SMTP
 port `1025` and exposes UI on `http://localhost:8025`. Real sending is enabled
 with `EMAIL_MODE=smtp` and SMTP variables in `backend/.env`; Mail.ru and Yandex
 must use app passwords.
+
+## Settings MVP
+
+The `/settings` page contains real MVP settings instead of a placeholder:
+
+- profile name can be edited through `PATCH /api/auth/profile`;
+- the active team name can be edited by OWNER/ADMIN through `PATCH /api/teams/:teamId`;
+- notification channels and reminder days are saved in `UserNotificationSettings`;
+- reminder generation respects disabled in-app/email channels and disabled day offsets;
+- email status shows `mode`, `host`, `port`, `secure`, `from` and Mailpit URL without returning SMTP password or other secrets;
+- Excel import template is downloaded as `people-import-template.xlsx` from the protected team import endpoint.
+
+Default organizer and deputy are informational in settings: they are assigned
+inside a concrete celebration initiative.
 Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
 `npm run prisma:generate`, `npm run prisma:studio`.
+
+## Celebration Event Occasions
+
+Инициативы поздравлений теперь хранят повод события. По умолчанию используется
+«День рождения», поэтому основной сценарий дней рождения остается главным и не
+ломается. Дополнительно поддерживаются: «Корпоратив», «Профессиональный
+праздник», «Юбилей», «Проводы», «Поддержка» и «Другое». Это позволяет вести
+разные коллективные события без превращения приложения в универсальный
+календарь.
 
 ## MVP Teams And People
 

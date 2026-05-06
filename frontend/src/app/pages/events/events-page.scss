@@ -131,12 +131,13 @@ mat-icon[mat-card-avatar] {
 }
 
 .event-title-group {
+  display: grid;
+  gap: 4px;
   min-width: 0;
 }
 
 .event-title-group h2 {
   display: -webkit-box;
-  margin-bottom: 4px;
   overflow: hidden;
   color: #1d2430;
   font-size: 1.18rem;
@@ -144,6 +145,22 @@ mat-icon[mat-card-avatar] {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.occasion-chip {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  padding: 4px 8px;
+  color: #394456;
+  background: #f6f0e7;
+  border: 1px solid #e5d8c4;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 

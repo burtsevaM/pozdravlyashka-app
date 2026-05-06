@@ -13,6 +13,8 @@ import { finalize, forkJoin } from 'rxjs';
 import {
   CelebrationEvent,
   CreateEventRequest,
+  EVENT_OCCASION_LABELS,
+  EventOccasion,
   EventStatus,
   UpdateEventRequest,
 } from '../../core/models/event.models';
@@ -288,6 +290,10 @@ export class EventsPage implements OnInit {
 
   protected getStatusLabel(status: EventStatus): string {
     return this.statusOptions.find((option) => option.value === status)?.label ?? status;
+  }
+
+  protected getOccasionLabel(occasion: EventOccasion): string {
+    return EVENT_OCCASION_LABELS[occasion];
   }
 
   protected getDaysUntilLabel(value: string): string {

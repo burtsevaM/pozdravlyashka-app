@@ -62,6 +62,7 @@
                 </span>
                 <div class="event-title-group">
                   <h2>{{ event.person.fullName }}</h2>
+                  <span class="occasion-chip">{{ getOccasionLabel(event.occasion) }}</span>
                   <p>{{ event.person.department || 'Группа или отдел не указаны' }}</p>
                 </div>
               </div>
@@ -83,6 +84,10 @@
             </div>
 
             <dl class="event-meta-grid">
+              <div class="event-meta-item">
+                <dt>Повод</dt>
+                <dd>{{ getOccasionLabel(event.occasion) }}</dd>
+              </div>
               <div class="event-meta-item">
                 <dt>Дата события</dt>
                 <dd>{{ formatDate(event.date) }}</dd>

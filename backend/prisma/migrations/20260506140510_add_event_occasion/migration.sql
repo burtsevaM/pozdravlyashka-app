@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "EventOccasion" AS ENUM ('BIRTHDAY', 'CORPORATE', 'PROFESSIONAL_HOLIDAY', 'ANNIVERSARY', 'FAREWELL', 'SUPPORT', 'OTHER');
+
+-- AlterTable
+ALTER TABLE "CelebrationEvent" ADD COLUMN     "occasion" "EventOccasion" NOT NULL DEFAULT 'BIRTHDAY';

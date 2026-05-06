@@ -54,6 +54,10 @@
       <mat-card-content>
         <dl>
           <div>
+            <dt>Повод</dt>
+            <dd>{{ getOccasionLabel(data.event.occasion) }}</dd>
+          </div>
+          <div>
             <dt>Дата события</dt>
             <dd>{{ formatDate(data.event.date) }}</dd>
           </div>
@@ -125,6 +129,7 @@
               <article class="detail-item" [class.current-item]="event.id === data.event.id">
                 <h4>{{ formatDate(event.date) }}</h4>
                 <p>{{ getStatusLabel(event.status) }}</p>
+                <p>Повод: {{ getOccasionLabel(event.occasion) }}</p>
                 <p>Бюджет: {{ formatMoney(event.budget) }}</p>
                 @if (event.selectedGiftIdea) {
                   <p>Итоговый подарок: {{ event.selectedGiftIdea.title }}</p>

@@ -41,6 +41,12 @@ export class ImportsService {
     );
   }
 
+  downloadPeopleImportTemplate(teamId: string) {
+    return this.httpClient.get(`${this.getImportsUrl(teamId)}/template`, {
+      responseType: 'blob',
+    });
+  }
+
   private getImportsUrl(teamId: string): string {
     return `${environment.apiUrl}/teams/${teamId}/imports/people`;
   }

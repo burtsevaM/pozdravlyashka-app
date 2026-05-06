@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Post,
   Req,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -57,5 +60,26 @@ export class ImportsController {
       request.user.id,
       commitPeopleImportDto,
     );
+  }
+
+  @Get('template')
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @Header(
+    'Content-Disposition',
+    'attachment; filename="people-import-template.xlsx"',
+  )
+  async downloadPeopleTemplate(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+  ): Promise<StreamableFile> {
+    const buffer = await this.importsService.createPeopleImportTemplate(
+      teamId,
+      request.user.id,
+    );
+
+    return new StreamableFile(buffer);
   }
 }
