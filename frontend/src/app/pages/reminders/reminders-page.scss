@@ -4,7 +4,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2f5d50;
+  color: var(--color-primary);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -26,7 +26,7 @@ h1 {
 .mailpit-note,
 .event-link,
 time {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .success-message,
@@ -37,19 +37,19 @@ time {
 }
 
 .success-message {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-primary-soft);
 }
 
 .error-message,
 .delivery-error {
-  color: #8a1f1f;
+  color: var(--color-danger);
 }
 
 .error-message {
-  background: #fff0f0;
-  border: 1px solid #f1c7c7;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
 }
 
 .actions-panel,
@@ -66,8 +66,8 @@ time {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -78,12 +78,12 @@ time {
 }
 
 .summary mat-icon {
-  color: #2f5d50;
+  color: var(--color-primary);
 }
 
 .summary-label {
   display: block;
-  color: #657084;
+  color: var(--color-text-muted);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -115,8 +115,8 @@ time {
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px 14px;
-  background: #f7faf8;
-  border: 1px solid #dfe4ec;
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -127,18 +127,18 @@ time {
 }
 
 .mailpit-note mat-icon {
-  color: #2f5d50;
+  color: var(--color-primary);
 }
 
 .mailpit-note a {
-  color: #2f5d50;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .filters {
   padding: 4px;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -147,15 +147,15 @@ time {
 }
 
 .active-filter {
-  color: #23533f;
-  background: #edf8f1;
+  color: var(--color-success);
+  background: var(--color-soft-block-bg);
 }
 
 .loading-state,
 .empty-panel {
   padding: 24px;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -165,7 +165,7 @@ time {
 }
 
 .empty-panel mat-icon {
-  color: #2f5d50;
+  color: var(--color-primary);
 }
 
 .notifications-list {
@@ -175,11 +175,11 @@ time {
 
 .notification-card {
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-card-bg);
 }
 
 .notification-card.unread {
-  border-color: #91c6ad;
+  border-color: var(--color-primary-soft);
 }
 
 .notification-content {
@@ -201,8 +201,8 @@ time {
   justify-content: center;
   width: 40px;
   height: 40px;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary);
+  background: var(--color-soft-block-bg);
   border-radius: 50%;
 }
 
@@ -213,7 +213,7 @@ time {
 }
 
 .notification-copy h2 {
-  color: #1d2430;
+  color: var(--color-text-main);
   font-size: 1.1rem;
   line-height: 1.25;
   overflow-wrap: anywhere;

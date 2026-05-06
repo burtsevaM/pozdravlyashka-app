@@ -4,7 +4,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2f5d50;
+  color: var(--color-primary);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -28,15 +28,15 @@ h1 {
 mat-card-content p,
 .birthday-item p,
 .empty-state {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .team-section,
 .birthdays-section {
   margin-bottom: 20px;
   padding: 20px;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -67,15 +67,15 @@ mat-card-content p,
 }
 
 .success-message {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-primary-soft);
 }
 
 .error-message {
-  color: #8a1f1f;
-  background: #fff0f0;
-  border: 1px solid #f1c7c7;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
 }
 
 .section-heading {
@@ -91,8 +91,8 @@ mat-card-content p,
   justify-content: center;
   width: 44px;
   height: 44px;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary);
+  background: var(--color-soft-block-bg);
   border-radius: 8px;
 }
 
@@ -110,18 +110,18 @@ mat-card-content p,
   display: grid;
   gap: 10px;
   padding: 14px;
-  border: 1px solid #e6ebf2;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
 .birthday-date {
   display: grid;
   gap: 3px;
-  color: #2f5d50;
+  color: var(--color-primary);
 }
 
 .birthday-date span {
-  color: #657084;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -133,15 +133,15 @@ mat-card-content p,
 
 mat-card {
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-card-bg);
 }
 
 mat-icon[mat-card-avatar] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary);
+  background: var(--color-soft-block-bg);
 }
 
 mat-card-content p {

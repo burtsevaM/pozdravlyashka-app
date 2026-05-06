@@ -1,5 +1,26 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 
+:root {
+  --color-primary: #0096A5;
+  --color-primary-hover: #007F8C;
+  --color-primary-light: #4EBDD5;
+  --color-primary-soft: #B6DBE5;
+  --color-accent: #FFD46B;
+  --color-accent-soft: #F3E0A7;
+  --color-page-bg: #F7FAFC;
+  --color-card-bg: #FFFFFF;
+  --color-soft-block-bg: #EAF7F8;
+  --color-text-main: #1F2937;
+  --color-text-muted: #64748B;
+  --color-border: #DDE7EC;
+  --color-success: #3A9B7A;
+  --color-warning: #FFD46B;
+  --color-danger: #C24141;
+  --color-danger-soft: #FFF1F1;
+  --color-danger-border: #F2C7C7;
+  --color-info: #4EBDD5;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,9 +33,63 @@ body {
 
 body {
   font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: #f6f7fb;
+  color: var(--color-text-main);
+  background: var(--color-page-bg);
 }
 
 a {
+  color: var(--color-primary);
   text-decoration: none;
+}
+
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  --mdc-filled-button-container-color: var(--color-primary);
+  --mdc-filled-button-label-text-color: #ffffff;
+  --mdc-protected-button-container-color: var(--color-primary);
+  --mdc-protected-button-label-text-color: #ffffff;
+  --mdc-fab-container-color: var(--color-primary);
+  --mat-fab-foreground-color: #ffffff;
+}
+
+.mat-mdc-unelevated-button.mat-primary:hover,
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-mdc-fab.mat-primary:hover,
+.mat-mdc-mini-fab.mat-primary:hover {
+  --mdc-filled-button-container-color: var(--color-primary-hover);
+  --mdc-protected-button-container-color: var(--color-primary-hover);
+  --mdc-fab-container-color: var(--color-primary-hover);
+}
+
+.mat-mdc-outlined-button.mat-primary,
+.mat-mdc-button.mat-primary {
+  --mdc-outlined-button-label-text-color: var(--color-primary);
+  --mdc-text-button-label-text-color: var(--color-primary);
+}
+
+.mat-mdc-outlined-button.mat-primary:hover,
+.mat-mdc-button.mat-primary:hover {
+  background: var(--color-soft-block-bg);
+}
+
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: var(--color-primary);
+  --mdc-linear-progress-track-color: var(--color-primary-soft);
+}
+
+.mat-mdc-chip {
+  --mdc-chip-elevated-container-color: var(--color-soft-block-bg);
+  --mdc-chip-label-text-color: var(--color-primary);
+  --mdc-chip-with-icon-icon-color: var(--color-primary);
+}
+
+.mat-mdc-card {
+  border-color: var(--color-border);
+  background: var(--color-card-bg);
+}
+
+.mat-mdc-form-field-focus-overlay {
+  background: var(--color-soft-block-bg);
 }

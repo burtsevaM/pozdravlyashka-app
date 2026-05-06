@@ -16,7 +16,7 @@
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #2f5d50;
+  color: var(--color-primary);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -36,13 +36,13 @@ h3 {
 .dialog-header p:last-child,
 .empty-text,
 dt {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .dialog-status-chip {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-primary-soft);
 }
 
 .item-list,
@@ -61,7 +61,7 @@ dl {
   flex-direction: column;
   min-width: 0;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-card-bg);
 }
 
 .detail-card mat-card-content {
@@ -72,8 +72,8 @@ mat-icon[mat-card-avatar] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary);
+  background: var(--color-soft-block-bg);
 }
 
 dl {
@@ -89,7 +89,7 @@ dt {
 
 dd {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
@@ -97,23 +97,23 @@ dd {
   display: grid;
   gap: 6px;
   padding: 12px;
-  background: #f7f9fb;
-  border: 1px solid #e1e7ee;
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
 .detail-item.current-item {
-  border-color: #2f5d50;
-  box-shadow: inset 4px 0 0 #2f5d50;
+  border-color: var(--color-primary);
+  box-shadow: inset 4px 0 0 var(--color-primary);
 }
 
 .detail-item h4 {
-  color: #1d2430;
+  color: var(--color-text-main);
   font-size: 1rem;
 }
 
 .detail-item p {
-  color: #394456;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 

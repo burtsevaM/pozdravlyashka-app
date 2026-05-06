@@ -1,26 +1,26 @@
 :host {
   display: block;
   min-height: 100dvh;
-  color: #1d2430;
+  color: var(--color-text-main);
 }
 
 .app-shell {
   min-height: 100dvh;
-  background: #f6f7fb;
+  background: var(--color-page-bg);
 }
 
 .app-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #ffffff;
-  border-bottom: 1px solid #dfe4ec;
+  background: var(--color-card-bg);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .top-bar {
   min-height: 64px;
-  color: #ffffff;
-  background: #2f5d50;
+  color: var(--color-card-bg);
+  background: var(--color-primary);
 }
 
 .brand {
@@ -50,12 +50,16 @@
 }
 
 .logout-button {
-  color: #ffffff;
+  color: var(--color-card-bg);
+}
+
+.top-bar button:hover {
+  background: rgb(255 255 255 / 14%);
 }
 
 .notification-button {
   position: relative;
-  color: #ffffff;
+  color: var(--color-card-bg);
 }
 
 .notification-count {
@@ -68,9 +72,9 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  color: #ffffff;
-  background: #b63a3a;
-  border: 2px solid #2f5d50;
+  color: var(--color-card-bg);
+  background: var(--color-danger);
+  border: 2px solid var(--color-primary);
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 700;
@@ -92,7 +96,11 @@
 .mobile-nav a {
   flex: 0 0 auto;
   min-height: 40px;
-  color: #384252;
+  color: var(--color-text-main);
+}
+
+.mobile-nav a:hover {
+  background: var(--color-soft-block-bg);
 }
 
 .mobile-nav mat-icon {
@@ -116,8 +124,8 @@
 }
 
 .active-link {
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary);
+  background: var(--color-soft-block-bg);
 }
 
 @media (min-width: 840px) {
@@ -140,12 +148,16 @@
     width: 256px;
     height: calc(100dvh - 64px);
     padding: 16px 12px;
-    background: #ffffff;
-    border-right: 1px solid #dfe4ec;
+    background: var(--color-card-bg);
+    border-right: 1px solid var(--color-border);
   }
 
   .desktop-nav a {
     border-radius: 8px;
+  }
+
+  .desktop-nav a:hover {
+    background: var(--color-soft-block-bg);
   }
 
   .content {
