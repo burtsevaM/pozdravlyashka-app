@@ -60,6 +60,7 @@ model User {
   delegationsFrom Delegation[]       @relation("DelegationFrom")
   delegationsTo   Delegation[]       @relation("DelegationTo")
   notifications   Notification[]
+  notificationSettings UserNotificationSettings?
 }
 
 model Team {
@@ -219,4 +220,19 @@ model Notification {
 
   @@unique([eventId, userId, channel, type, reminderOffsetDays])
   @@index([userId, createdAt])
+}
+
+model UserNotificationSettings {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  inAppEnabled  Boolean  @default(true)
+  emailEnabled  Boolean  @default(true)
+  remind14Days  Boolean  @default(true)
+  remind7Days   Boolean  @default(true)
+  remind3Days   Boolean  @default(true)
+  remind1Day    Boolean  @default(true)
+  remindOnDay   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

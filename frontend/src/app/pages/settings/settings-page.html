@@ -1,0 +1,247 @@
+<section class="page-header">
+  <p class="eyebrow">Раздел</p>
+  <h1>Настройки</h1>
+  <p>Параметры профиля, коллектива, уведомлений и импорта.</p>
+</section>
+
+@if (isLoading()) {
+  <section class="loading-panel" aria-live="polite">
+    <mat-spinner diameter="32" />
+    <span>Загрузка настроек...</span>
+  </section>
+}
+
+@if (successMessage(); as message) {
+  <p class="success-message">{{ message }}</p>
+}
+
+@if (errorMessage(); as message) {
+  <p class="error-message">{{ message }}</p>
+}
+
+<section class="settings-grid" aria-label="Настройки приложения">
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">account_circle</mat-icon>
+      <mat-card-title>Профиль</mat-card-title>
+      <mat-card-subtitle>Данные текущего пользователя</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="settings-form" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline">
+          <mat-label>Имя</mat-label>
+          <input matInput type="text" formControlName="name" maxlength="120" autocomplete="name" />
+          @if (profileNameControl.touched && profileNameControl.hasError('required')) {
+            <mat-error>Введите имя</mat-error>
+          }
+          @if (profileNameControl.touched && profileNameControl.hasError('maxlength')) {
+            <mat-error>Максимум 120 символов</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+        </mat-form-field>
+
+        <div class="card-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="isSavingProfile()">
+            <mat-icon aria-hidden="true">save</mat-icon>
+            <span>Сохранить профиль</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">groups</mat-icon>
+      <mat-card-title>Активный коллектив</mat-card-title>
+      <mat-card-subtitle>
+        @if (teamContext.activeTeam(); as activeTeam) {
+          {{ activeTeam.name }}
+        } @else {
+          Коллектив не выбран
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (teamContext.teams().length > 0) {
+        <form class="settings-form" [formGroup]="teamForm" (ngSubmit)="saveTeam()">
+          <mat-form-field appearance="outline">
+            <mat-label>Выбрать коллектив</mat-label>
+            <mat-select
+              [value]="teamContext.activeTeamId()"
+              (selectionChange)="selectTeam($event.value)"
+            >
+              @for (team of teamContext.teams(); track team.id) {
+                <mat-option [value]="team.id">{{ team.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Название коллектива</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="name"
+              maxlength="120"
+              autocomplete="off"
+              [readonly]="!canEditActiveTeam()"
+            />
+            @if (teamNameControl.touched && teamNameControl.hasError('required')) {
+              <mat-error>Введите название</mat-error>
+            }
+            @if (teamNameControl.touched && teamNameControl.hasError('maxlength')) {
+              <mat-error>Максимум 120 символов</mat-error>
+            }
+          </mat-form-field>
+
+          @if (!canEditActiveTeam()) {
+            <p class="info-note">Редактировать название может владелец или администратор коллектива.</p>
+          }
+
+          <div class="info-box">
+            <mat-icon aria-hidden="true">info</mat-icon>
+            <p>Организатор и заместитель назначаются в карточке инициативы поздравления.</p>
+          </div>
+
+          <div class="card-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="isSavingTeam() || !canEditActiveTeam()"
+            >
+              <mat-icon aria-hidden="true">save</mat-icon>
+              <span>Сохранить настройки коллектива</span>
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="empty-state">
+          <mat-icon aria-hidden="true">group_add</mat-icon>
+          <p>Сначала создайте коллектив на главной панели.</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">notifications_active</mat-icon>
+      <mat-card-title>Уведомления</mat-card-title>
+      <mat-card-subtitle>Каналы и сроки напоминаний</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="settings-form" [formGroup]="notificationForm" (ngSubmit)="saveNotifications()">
+        <div class="toggle-list">
+          <mat-slide-toggle formControlName="inAppEnabled">Уведомления внутри приложения</mat-slide-toggle>
+          <mat-slide-toggle formControlName="emailEnabled">Email-напоминания</mat-slide-toggle>
+        </div>
+
+        <mat-divider />
+
+        <div class="checkbox-group" aria-label="Дни напоминаний">
+          <p class="group-label">Напоминать</p>
+          <mat-checkbox formControlName="remind14Days">за 14 дней</mat-checkbox>
+          <mat-checkbox formControlName="remind7Days">за 7 дней</mat-checkbox>
+          <mat-checkbox formControlName="remind3Days">за 3 дня</mat-checkbox>
+          <mat-checkbox formControlName="remind1Day">за 1 день</mat-checkbox>
+          <mat-checkbox formControlName="remindOnDay">в день события</mat-checkbox>
+        </div>
+
+        <div class="card-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="isSavingNotifications()">
+            <mat-icon aria-hidden="true">save</mat-icon>
+            <span>Сохранить уведомления</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">alternate_email</mat-icon>
+      <mat-card-title>Email-напоминания</mat-card-title>
+      <mat-card-subtitle>Статус backend SMTP без секретов</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (emailStatus(); as status) {
+        <div class="email-status">
+          <mat-chip>{{ status.mode === 'dev' ? 'Dev-режим' : 'SMTP-режим' }}</mat-chip>
+          <dl>
+            <div>
+              <dt>Host</dt>
+              <dd>{{ status.host }}</dd>
+            </div>
+            <div>
+              <dt>Port</dt>
+              <dd>{{ status.port }}</dd>
+            </div>
+            <div>
+              <dt>Secure</dt>
+              <dd>{{ status.secure }}</dd>
+            </div>
+            <div>
+              <dt>From</dt>
+              <dd>{{ status.from }}</dd>
+            </div>
+          </dl>
+
+          <p class="info-note">
+            Для реальной отправки используются SMTP-настройки backend/.env. Поддерживаются Mail.ru и Яндекс Почта через пароль приложения.
+          </p>
+
+          <div class="card-actions">
+            @if (status.mode === 'dev' && status.mailpitUrl) {
+              <button mat-stroked-button type="button" (click)="openMailpit()">
+                <mat-icon aria-hidden="true">open_in_new</mat-icon>
+                <span>Открыть Mailpit</span>
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <p class="empty-state-text">Статус email-напоминаний пока не загружен.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card wide-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar aria-hidden="true">table_view</mat-icon>
+      <mat-card-title>Импорт Excel</mat-card-title>
+      <mat-card-subtitle>Формат файла для загрузки участников</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="import-layout">
+        <div>
+          <p class="group-label">Ожидаемые колонки</p>
+          <p class="columns-line">
+            ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий
+          </p>
+          <p class="info-note">
+            Даты можно указывать в формате DD.MM.YYYY. Шаблон содержит только вымышленные строки и подходит для проверки структуры файла.
+          </p>
+        </div>
+
+        <div class="card-actions import-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="isDownloadingTemplate() || !teamContext.activeTeamId()"
+            (click)="downloadTemplate()"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            <span>Скачать шаблон Excel</span>
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</section>

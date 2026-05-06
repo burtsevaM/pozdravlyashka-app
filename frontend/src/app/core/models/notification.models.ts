@@ -34,3 +34,27 @@ export type RunRemindersResponse = {
   failedEmails: number;
   skippedDuplicates: number;
 };
+
+export type NotificationSettings = {
+  id: string;
+  userId: string;
+  inAppEnabled: boolean;
+  emailEnabled: boolean;
+  remind14Days: boolean;
+  remind7Days: boolean;
+  remind3Days: boolean;
+  remind1Day: boolean;
+  remindOnDay: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateNotificationSettingsRequest = {
+  inAppEnabled: boolean;
+  emailEnabled: boolean;
+  remind14Days: boolean;
+  remind7Days: boolean;
+  remind3Days: boolean;
+  remind1Day: boolean;
+  remindOnDay: boolean;
+};

@@ -48,6 +48,16 @@ export class TeamContextService {
     );
   }
 
+  updateActiveTeamName(teamId: string, name: string) {
+    return this.teamsService.updateTeam(teamId, { name }).pipe(
+      tap((updatedTeam) => {
+        this.teams.update((teams) =>
+          teams.map((team) => (team.id === updatedTeam.id ? updatedTeam : team)),
+        );
+      }),
+    );
+  }
+
   setActiveTeam(teamId: string | null): void {
     this.activeTeamId.set(teamId);
 

@@ -5,8 +5,10 @@ import { environment } from '../../../environments/environment';
 import {
   Notification,
   NotificationFilters,
+  NotificationSettings,
   RunRemindersResponse,
   UnreadCountResponse,
+  UpdateNotificationSettingsRequest,
 } from '../models/notification.models';
 
 @Injectable({
@@ -46,6 +48,19 @@ export class NotificationsService {
 
   clearUnreadCount(): void {
     this.unreadCount.set(0);
+  }
+
+  getNotificationSettings() {
+    return this.httpClient.get<NotificationSettings>(
+      `${environment.apiUrl}/settings/notifications`,
+    );
+  }
+
+  updateNotificationSettings(request: UpdateNotificationSettingsRequest) {
+    return this.httpClient.patch<NotificationSettings>(
+      `${environment.apiUrl}/settings/notifications`,
+      request,
+    );
   }
 
   markAsRead(notificationId: string) {

@@ -66,6 +66,8 @@ export type PeopleImportCommitResponse = {
   errors: PeopleImportCommitError[];
 };
 
+export type PeopleImportTemplateBuffer = Buffer;
+
 export const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 const EXPECTED_HEADERS: Record<ImportColumnKey, string> = {
@@ -154,6 +156,72 @@ export class ImportsService {
     }
 
     return result;
+  }
+
+  async createPeopleImportTemplate(
+    teamId: string,
+    userId: string,
+  ): Promise<PeopleImportTemplateBuffer> {
+    await this.teamsService.ensureTeamMember(teamId, userId);
+
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('People import');
+    const headers = Object.values(EXPECTED_HEADERS);
+
+    worksheet.addRow(headers);
+    worksheet.addRow([
+      'Иванова Анна Сергеевна',
+      '15.05.1992',
+      'anna.ivanova@example.com',
+      'Маркетинг',
+      'Сертификат в книжный магазин',
+      2025,
+      'Любит бумажные книги',
+    ]);
+    worksheet.addRow([
+      'Петров Алексей Игоревич',
+      '03.11.1988',
+      'alexey.petrov@example.com',
+      'Разработка',
+      'Термокружка',
+      2024,
+      'Не указывать реальные данные в шаблоне',
+    ]);
+
+    worksheet.columns = [
+      { width: 28 },
+      { width: 18 },
+      { width: 28 },
+      { width: 22 },
+      { width: 30 },
+      { width: 14 },
+      { width: 36 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF2F5D50' },
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFDDE4EC' } },
+          left: { style: 'thin', color: { argb: 'FFDDE4EC' } },
+          bottom: { style: 'thin', color: { argb: 'FFDDE4EC' } },
+          right: { style: 'thin', color: { argb: 'FFDDE4EC' } },
+        };
+      });
+    });
+
+    worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(buffer);
   }
 
   private async readPeopleRows(fileBuffer: Buffer): Promise<ParsedImportRow[]> {

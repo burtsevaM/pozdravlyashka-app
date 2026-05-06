@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthResponse, AuthUser } from './types/auth-user.type';
 
 @Injectable()
@@ -79,6 +80,22 @@ export class AuthService {
     });
 
     return user ? this.toAuthUser(user) : null;
+  }
+
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<{ user: AuthUser }> {
+    const user = await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        name: updateProfileDto.name,
+      },
+    });
+
+    return {
+      user: this.toAuthUser(user),
+    };
   }
 
   private async buildAuthResponse(user: User): Promise<AuthResponse> {

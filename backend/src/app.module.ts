@@ -11,6 +11,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PeopleModule } from './modules/people/people.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { TeamsModule } from './modules/teams/teams.module';
 
 @Module({
@@ -26,6 +27,7 @@ import { TeamsModule } from './modules/teams/teams.module';
     GiftsModule,
     NotificationsModule,
     RemindersModule,
+    SettingsModule,
     ImportsModule,
     MailModule,
   ],

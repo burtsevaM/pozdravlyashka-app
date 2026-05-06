@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -12,6 +13,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../auth/types/auth-user.type';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { UpdateTeamDto } from './dto/update-team.dto';
 import {
   TeamMemberResponse,
   TeamsService,
@@ -56,5 +58,14 @@ export class TeamsController {
     @Param('teamId', ParseUUIDPipe) teamId: string,
   ): Promise<TeamMemberResponse[]> {
     return this.teamsService.getTeamMembers(teamId, request.user.id);
+  }
+
+  @Patch(':teamId')
+  updateTeam(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Body() updateTeamDto: UpdateTeamDto,
+  ): Promise<TeamWithUserRole> {
+    return this.teamsService.updateTeam(teamId, request.user.id, updateTeamDto);
   }
 }

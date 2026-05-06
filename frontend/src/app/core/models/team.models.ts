@@ -21,3 +21,7 @@ export type TeamMember = {
 export type CreateTeamRequest = {
   name: string;
 };
+
+export type UpdateTeamRequest = {
+  name: string;
+};

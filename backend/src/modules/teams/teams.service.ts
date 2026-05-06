@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Team, TeamMember, TeamRole } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { UpdateTeamDto } from './dto/update-team.dto';
 
 export type TeamWithUserRole = {
   id: string;
@@ -102,6 +103,32 @@ export class TeamsService {
       email: member.user.email,
       role: member.role,
     }));
+  }
+
+  async updateTeam(
+    teamId: string,
+    userId: string,
+    updateTeamDto: UpdateTeamDto,
+  ): Promise<TeamWithUserRole> {
+    const membership = await this.ensureTeamMember(teamId, userId);
+
+    if (
+      membership.role !== TeamRole.OWNER &&
+      membership.role !== TeamRole.ADMIN
+    ) {
+      throw new ForbiddenException(
+        'Редактировать коллектив может только владелец или администратор',
+      );
+    }
+
+    const team = await this.prismaService.team.update({
+      where: { id: teamId },
+      data: {
+        name: updateTeamDto.name,
+      },
+    });
+
+    return this.toTeamWithUserRole(team, membership.role);
   }
 
   async ensureTeamMember(

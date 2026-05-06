@@ -86,6 +86,7 @@ Available endpoints:
 - `POST /api/auth/register` - creates a user and returns `accessToken`.
 - `POST /api/auth/login` - checks email and password and returns `accessToken`.
 - `GET /api/auth/me` - returns current user by bearer token.
+- `PATCH /api/auth/profile` - updates only the current user's profile name.
 
 ## Teams And People MVP
 
@@ -98,6 +99,7 @@ Protected team endpoints:
 - `POST /api/teams` - create team and current user's `TeamMember`.
 - `GET /api/teams` - list teams where current user is a member.
 - `GET /api/teams/:teamId` - get one accessible team with current user's role.
+- `PATCH /api/teams/:teamId` - update team name for OWNER/ADMIN members.
 - `GET /api/teams/:teamId/members` - list team users for contribution and role assignment forms.
 
 Protected people endpoints:
@@ -242,6 +244,7 @@ Protected import endpoints:
 
 - `POST /api/teams/:teamId/imports/people/preview` - upload `.xlsx`, validate rows and return preview without database writes.
 - `POST /api/teams/:teamId/imports/people/commit` - save valid preview rows as `Person` and optional `GiftHistory`.
+- `GET /api/teams/:teamId/imports/people/template` - download `people-import-template.xlsx` with fixed headers and fictional examples.
 
 Import rules:
 
@@ -255,6 +258,25 @@ Import rules:
 - Gift year is optional, but must be numeric when present.
 - Previous gift creates `GiftHistory`; empty gift name does not.
 - Duplicate people by full name and birth date are skipped.
+
+## Settings MVP
+
+The `/settings` frontend page is a protected Angular page with five cards:
+profile, active team, notifications, email reminders and Excel import. Profile
+and active team forms save through backend endpoints and update frontend
+signals so the header and dashboard reflect the latest values after refresh.
+
+Notification settings are stored in the new Prisma model
+`UserNotificationSettings`. `GET /api/settings/notifications` creates default
+settings when missing, and `PATCH /api/settings/notifications` updates only the
+current user's row. `RemindersService` checks the saved channel switches and
+14/7/3/1/0 day flags before creating in-app or email reminder notifications.
+
+`GET /api/settings/email-status` returns only non-secret SMTP status:
+`mode`, `host`, `port`, `secure`, `from` and the Mailpit UI URL in dev mode.
+`EMAIL_PASSWORD` and SMTP credentials are never returned to frontend. Default
+organizer and deputy remain informational because the existing business model
+assigns them on each celebration initiative.
 
 Manual check:
 

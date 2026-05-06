@@ -6,7 +6,6 @@ import { ImportPage } from './pages/import/import-page';
 import { PersonDetailPage } from './pages/people/person-detail-page';
 import { PeoplePage } from './pages/people/people-page';
 import { RemindersPage } from './pages/reminders/reminders-page';
-import { SimplePage } from './pages/simple-page/simple-page';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -48,12 +47,9 @@ export const routes: Routes = [
   },
   {
     path: 'settings',
-    component: SimplePage,
+    loadComponent: () =>
+      import('./pages/settings/settings-page').then((module) => module.SettingsPage),
     canActivate: [authGuard],
-    data: {
-      title: 'Настройки',
-      description: 'Параметры команды, доступа, SMTP и базовых правил поздравлений.',
-    },
   },
   { path: '**', redirectTo: 'dashboard' },
 ];

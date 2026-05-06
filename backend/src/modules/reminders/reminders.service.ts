@@ -14,6 +14,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SettingsService } from '../settings/settings.service';
 
 export type RemindersRunResponse = {
   checkedEvents: number;
@@ -36,6 +37,8 @@ type ReminderRecipient = {
   messageSuffix?: string;
 };
 
+type ReminderOffset = 14 | 7 | 3 | 1 | 0;
+
 const REMINDER_OFFSETS = [14, 7, 3, 1, 0] as const;
 
 @Injectable()
@@ -44,6 +47,7 @@ export class RemindersService {
     private readonly prismaService: PrismaService,
     private readonly mailService: MailService,
     private readonly notificationsService: NotificationsService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
@@ -114,8 +118,22 @@ export class RemindersService {
       const recipients = this.getReminderRecipients(event);
 
       for (const recipient of recipients) {
-        await this.createInAppReminder(event, recipient, daysUntil, stats);
-        await this.createEmailReminder(event, recipient, daysUntil, stats);
+        const settings =
+          await this.settingsService.getOrCreateNotificationSettings(
+            recipient.user.id,
+          );
+
+        if (!this.isReminderEnabled(daysUntil, settings)) {
+          continue;
+        }
+
+        if (settings.inAppEnabled) {
+          await this.createInAppReminder(event, recipient, daysUntil, stats);
+        }
+
+        if (settings.emailEnabled) {
+          await this.createEmailReminder(event, recipient, daysUntil, stats);
+        }
       }
     }
 
@@ -333,6 +351,27 @@ export class RemindersService {
     return REMINDER_OFFSETS.includes(
       daysUntil as (typeof REMINDER_OFFSETS)[number],
     );
+  }
+
+  private isReminderEnabled(
+    daysUntil: ReminderOffset,
+    settings: {
+      remind14Days: boolean;
+      remind7Days: boolean;
+      remind3Days: boolean;
+      remind1Day: boolean;
+      remindOnDay: boolean;
+    },
+  ): boolean {
+    const enabledByOffset: Record<ReminderOffset, boolean> = {
+      14: settings.remind14Days,
+      7: settings.remind7Days,
+      3: settings.remind3Days,
+      1: settings.remind1Day,
+      0: settings.remindOnDay,
+    };
+
+    return enabledByOffset[daysUntil];
   }
 
   private isOrganizerBirthdayPerson(event: ReminderEvent): boolean {

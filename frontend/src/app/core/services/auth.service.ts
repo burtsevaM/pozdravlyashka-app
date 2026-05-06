@@ -10,6 +10,7 @@ import {
   CurrentUserResponse,
   LoginRequest,
   RegisterRequest,
+  UpdateProfileRequest,
 } from '../models/auth.models';
 
 const ACCESS_TOKEN_KEY = 'pozdravlyashka_access_token';
@@ -46,6 +47,17 @@ export class AuthService {
         this.storage?.setItem(AUTH_USER_KEY, JSON.stringify(user));
       }),
     );
+  }
+
+  updateProfile(updateProfileRequest: UpdateProfileRequest) {
+    return this.httpClient
+      .patch<CurrentUserResponse>(`${environment.apiUrl}/auth/profile`, updateProfileRequest)
+      .pipe(
+        tap(({ user }) => {
+          this.currentUser.set(user);
+          this.storage?.setItem(AUTH_USER_KEY, JSON.stringify(user));
+        }),
+      );
   }
 
   getAccessToken(): string | null {
