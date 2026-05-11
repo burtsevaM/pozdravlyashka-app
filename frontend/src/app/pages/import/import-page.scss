@@ -112,6 +112,10 @@ mat-icon[mat-card-avatar] {
   align-items: center;
 }
 
+.file-actions {
+  justify-content: center;
+}
+
 .file-actions mat-icon,
 .commit-actions mat-icon {
   margin-right: 6px;

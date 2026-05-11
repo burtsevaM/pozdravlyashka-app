@@ -108,6 +108,11 @@ mat-icon[mat-card-avatar] {
   padding-top: 12px;
 }
 
+.settings-form > .card-actions,
+.import-actions {
+  justify-content: center;
+}
+
 .card-actions mat-icon {
   margin-right: 6px;
 }
@@ -257,7 +262,6 @@ mat-chip {
 }
 
 .import-actions {
-  align-self: start;
   padding-top: 0;
   margin-top: 0;
 }
@@ -275,8 +279,4 @@ mat-chip {
     grid-column: 1 / -1;
   }
 
-  .import-layout {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
 }
