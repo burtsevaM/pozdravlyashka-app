@@ -150,9 +150,15 @@
                 <mat-icon aria-hidden="true">edit</mat-icon>
                 <span>Редактировать</span>
               </button>
-              <button mat-button type="button" class="delete-event-button" (click)="deleteEvent(event)">
+              <button
+                mat-icon-button
+                type="button"
+                class="delete-event-button"
+                aria-label="Удалить"
+                title="Удалить"
+                (click)="deleteEvent(event)"
+              >
                 <mat-icon aria-hidden="true">delete</mat-icon>
-                <span>Удалить</span>
               </button>
             </div>
           </mat-card-content>

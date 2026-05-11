@@ -128,8 +128,16 @@
 
 .notification-button {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   color: var(--color-primary-strong);
   background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .notification-button:hover {

@@ -3,6 +3,7 @@
   gap: 16px;
   max-height: min(74vh, 780px);
   padding-bottom: 8px;
+  font-size: 1.03rem;
 }
 
 .dialog-summary,
@@ -19,7 +20,7 @@ mat-card-actions {
 .eyebrow {
   margin: 0 0 6px;
   color: var(--color-primary-strong);
-  font-size: var(--font-size-caption);
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -30,7 +31,7 @@ p {
 }
 
 h3 {
-  font-size: 1.16rem;
+  font-size: 1.24rem;
   line-height: 1.2;
 }
 
@@ -79,7 +80,12 @@ dt {
 }
 
 .actions-row {
+  display: grid;
+  gap: 8px;
   align-items: center;
+  justify-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .actions-row button mat-icon,
@@ -121,6 +127,18 @@ mat-card-actions mat-icon {
   color: var(--color-text-main);
 }
 
+.dialog-summary h3,
+.selection-panel h3,
+.gift-idea-heading h3 {
+  font-size: 1.28rem;
+}
+
+.dialog-summary p:last-child,
+.selection-panel p,
+.gift-idea-heading p {
+  font-size: 1.05rem;
+}
+
 .gift-description {
   margin-top: 12px;
   overflow-wrap: anywhere;
@@ -134,15 +152,17 @@ mat-card-actions mat-icon {
 }
 
 .gift-meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: flex-start;
+  justify-content: flex-start;
   margin: 14px 0 0;
 }
 
 dt {
   margin-bottom: 3px;
-  font-size: var(--font-size-caption);
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -155,6 +175,16 @@ dd {
 
 .delete-button {
   color: var(--color-danger);
+}
+
+mat-card-actions {
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 16px 14px;
+}
+
+mat-card-actions button {
+  flex: 0 0 auto;
 }
 
 .empty-panel mat-icon {
