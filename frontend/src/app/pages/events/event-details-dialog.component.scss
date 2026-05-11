@@ -16,8 +16,8 @@
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #2f5d50;
-  font-size: 0.78rem;
+  color: var(--color-primary-strong);
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -36,13 +36,13 @@ h3 {
 .dialog-header p:last-child,
 .empty-text,
 dt {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .dialog-status-chip {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+  border: 1px solid rgba(111, 169, 187, 0.28);
 }
 
 .item-list,
@@ -60,8 +60,8 @@ dl {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-radius: 8px;
-  background: #ffffff;
+  border-radius: var(--radius-panel);
+  background: var(--color-card-bg);
 }
 
 .detail-card mat-card-content {
@@ -72,8 +72,8 @@ mat-icon[mat-card-avatar] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary-strong);
+  background: var(--color-primary-soft);
 }
 
 dl {
@@ -82,14 +82,14 @@ dl {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.76rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 dd {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
@@ -97,28 +97,29 @@ dd {
   display: grid;
   gap: 6px;
   padding: 12px;
-  background: #f7f9fb;
-  border: 1px solid #e1e7ee;
-  border-radius: 8px;
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
 }
 
 .detail-item.current-item {
-  border-color: #2f5d50;
-  box-shadow: inset 4px 0 0 #2f5d50;
+  border-color: var(--color-primary-strong);
+  box-shadow: inset 4px 0 0 var(--color-primary-strong);
 }
 
 .detail-item h4 {
-  color: #1d2430;
+  color: var(--color-text-main);
   font-size: 1rem;
 }
 
 .detail-item p {
-  color: #394456;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
 mat-dialog-actions {
-  padding-top: 4px;
+  justify-content: center;
+  padding-top: 6px;
 }
 
 @media (min-width: 900px) {

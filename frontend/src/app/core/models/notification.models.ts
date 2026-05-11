@@ -15,6 +15,8 @@ export type Notification = {
   readAt: string | null;
   sentAt: string | null;
   errorMessage: string | null;
+  eventPersonName: string | null;
+  eventOccasion: string | null;
 };
 
 export type NotificationFilters = {

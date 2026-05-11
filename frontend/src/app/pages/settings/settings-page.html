@@ -172,38 +172,47 @@
     <mat-card-content>
       @if (emailStatus(); as status) {
         <div class="email-status">
-          <mat-chip>{{ status.mode === 'dev' ? 'Dev-режим' : 'SMTP-режим' }}</mat-chip>
-          <dl>
+          <div class="email-status-summary">
+            <mat-icon aria-hidden="true">mark_email_read</mat-icon>
             <div>
-              <dt>Host</dt>
-              <dd>{{ status.host }}</dd>
+              <p class="email-status-label">Работают в dev-режиме</p>
+              <p>
+                Письма для проверки доступны в Mailpit. В реальном режиме отправка
+                настраивается через SMTP.
+              </p>
             </div>
-            <div>
-              <dt>Port</dt>
-              <dd>{{ status.port }}</dd>
-            </div>
-            <div>
-              <dt>Secure</dt>
-              <dd>{{ status.secure }}</dd>
-            </div>
-            <div>
-              <dt>From</dt>
-              <dd>{{ status.from }}</dd>
-            </div>
-          </dl>
+          </div>
 
-          <p class="info-note">
-            Для реальной отправки используются SMTP-настройки backend/.env. Поддерживаются Mail.ru и Яндекс Почта через пароль приложения.
-          </p>
-
-          <div class="card-actions">
-            @if (status.mode === 'dev' && status.mailpitUrl) {
+          @if (status.mode === 'dev' && status.mailpitUrl) {
+            <div class="card-actions email-actions">
               <button mat-stroked-button type="button" (click)="openMailpit()">
                 <mat-icon aria-hidden="true">open_in_new</mat-icon>
                 <span>Открыть Mailpit</span>
               </button>
-            }
-          </div>
+            </div>
+          }
+
+          <details class="technical-details">
+            <summary>Техническая информация</summary>
+            <dl>
+              <div>
+                <dt>Host</dt>
+                <dd>{{ status.host }}</dd>
+              </div>
+              <div>
+                <dt>Port</dt>
+                <dd>{{ status.port }}</dd>
+              </div>
+              <div>
+                <dt>Secure</dt>
+                <dd>{{ status.secure }}</dd>
+              </div>
+              <div>
+                <dt>From</dt>
+                <dd>{{ status.from }}</dd>
+              </div>
+            </dl>
+          </details>
         </div>
       } @else {
         <p class="empty-state-text">Статус email-напоминаний пока не загружен.</p>

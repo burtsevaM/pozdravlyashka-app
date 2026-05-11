@@ -4,8 +4,8 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2f5d50;
-  font-size: 0.8rem;
+  color: var(--color-primary-strong);
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -26,14 +26,14 @@ h1 {
 .empty-state-text,
 dt,
 .columns-line {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .loading-panel,
 .success-message,
 .error-message {
   margin-bottom: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
 }
 
 .loading-panel {
@@ -41,9 +41,9 @@ dt,
   gap: 12px;
   align-items: center;
   padding: 14px;
-  color: #2f5d50;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
+  color: var(--color-primary-strong);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
 }
 
 .success-message,
@@ -52,15 +52,15 @@ dt,
 }
 
 .success-message {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+  border: 1px solid rgba(111, 169, 187, 0.28);
 }
 
 .error-message {
-  color: #8a1f1f;
-  background: #fff0f0;
-  border: 1px solid #f1c7c7;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
 }
 
 .settings-grid {
@@ -73,8 +73,8 @@ dt,
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #ffffff;
-  border-radius: 8px;
+  background: var(--color-card-bg);
+  border-radius: var(--radius-panel);
 }
 
 .settings-card mat-card-content {
@@ -87,8 +87,8 @@ mat-icon[mat-card-avatar] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2f5d50;
-  background: #e2efe9;
+  color: var(--color-primary-strong);
+  background: var(--color-primary-soft);
 }
 
 .settings-form {
@@ -121,12 +121,23 @@ mat-icon[mat-card-avatar] {
 }
 
 .checkbox-group {
-  padding-top: 2px;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.checkbox-group mat-checkbox {
+  min-height: 34px;
+}
+
+.checkbox-group ::ng-deep .mdc-label {
+  padding-left: 2px;
+  font-size: var(--font-size-base);
+  line-height: 1.35;
 }
 
 .group-label {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   font-weight: 700;
 }
 
@@ -135,10 +146,10 @@ mat-icon[mat-card-avatar] {
   gap: 10px;
   align-items: flex-start;
   padding: 12px;
-  color: #2f5d50;
-  background: #f1f7f4;
-  border: 1px solid #d5e7de;
-  border-radius: 8px;
+  color: var(--color-primary-strong);
+  background: rgba(223, 241, 245, 0.55);
+  border: 1px solid rgba(111, 169, 187, 0.28);
+  border-radius: var(--radius-panel);
 }
 
 .info-box mat-icon {
@@ -148,11 +159,11 @@ mat-icon[mat-card-avatar] {
 .empty-state {
   justify-items: start;
   margin-top: 16px;
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .empty-state mat-icon {
-  color: #2f5d50;
+  color: var(--color-primary-strong);
 }
 
 dl {
@@ -165,23 +176,69 @@ dl div {
   display: grid;
   gap: 3px;
   padding: 10px 0;
-  border-bottom: 1px solid #e8edf3;
+  border-bottom: 1px solid var(--color-border);
 }
 
 dt {
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 dd {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
 mat-chip {
   width: fit-content;
+}
+
+.email-status-summary {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  color: var(--color-text-main);
+  background: rgba(223, 241, 245, 0.45);
+  border: 1px solid rgba(111, 169, 187, 0.28);
+  border-radius: var(--radius-panel);
+}
+
+.email-status-summary mat-icon {
+  flex: 0 0 auto;
+  color: var(--color-primary-strong);
+}
+
+.email-status-summary p:last-child,
+.technical-details {
+  color: var(--color-text-muted);
+}
+
+.email-status-label {
+  margin-bottom: 4px;
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.email-actions {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.technical-details {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-soft-block-bg);
+  font-size: var(--font-size-small);
+}
+
+.technical-details summary {
+  cursor: pointer;
+  color: var(--color-action);
+  font-weight: 700;
 }
 
 .import-layout {
@@ -200,7 +257,9 @@ mat-chip {
 }
 
 .import-actions {
+  align-self: start;
   padding-top: 0;
+  margin-top: 0;
 }
 
 @media (min-width: 720px) {
@@ -218,6 +277,6 @@ mat-chip {
 
   .import-layout {
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+    align-items: center;
   }
 }

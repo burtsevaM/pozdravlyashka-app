@@ -95,8 +95,8 @@
             <div class="notification-copy">
               <h2>{{ notification.title || 'Уведомление' }}</h2>
               <p>{{ notification.message }}</p>
-              @if (notification.eventId) {
-                <span class="event-link">Связано с инициативой: {{ notification.eventId }}</span>
+              @for (line of getEventRelationLines(notification); track line) {
+                <span class="event-link">{{ line }}</span>
               }
               @if (notification.errorMessage) {
                 <span class="delivery-error">{{ notification.errorMessage }}</span>

@@ -21,7 +21,24 @@ export type NotificationResponse = {
   readAt: Date | null;
   sentAt: Date | null;
   errorMessage: string | null;
+  eventPersonName: string | null;
+  eventOccasion: string | null;
 };
+
+type NotificationWithEvent = Prisma.NotificationGetPayload<{
+  include: {
+    event: {
+      select: {
+        occasion: true;
+        person: {
+          select: {
+            fullName: true;
+          };
+        };
+      };
+    };
+  };
+}>;
 
 export type UnreadCountResponse = {
   count: number;
@@ -66,6 +83,18 @@ export class NotificationsService {
         unreadOnly: query.unreadOnly,
         channel: this.normalizeChannel(query.channel),
       }),
+      include: {
+        event: {
+          select: {
+            occasion: true,
+            person: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: [{ createdAt: 'desc' }],
       take: query.limit ?? 50,
     });
@@ -96,6 +125,18 @@ export class NotificationsService {
       where: { id: notification.id },
       data: {
         readAt: notification.readAt ?? new Date(),
+      },
+      include: {
+        event: {
+          select: {
+            occasion: true,
+            person: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -267,7 +308,7 @@ export class NotificationsService {
   }
 
   private toNotificationResponse(
-    notification: Notification,
+    notification: Notification | NotificationWithEvent,
   ): NotificationResponse {
     return {
       id: notification.id,
@@ -282,6 +323,8 @@ export class NotificationsService {
       readAt: notification.readAt,
       sentAt: notification.sentAt,
       errorMessage: notification.errorMessage,
+      eventPersonName: 'event' in notification ? notification.event?.person.fullName ?? null : null,
+      eventOccasion: 'event' in notification ? notification.event?.occasion ?? null : null,
     };
   }
 }

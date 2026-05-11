@@ -15,7 +15,7 @@ button mat-icon {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2f5d50;
+  color: var(--color-primary-strong);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -37,34 +37,34 @@ h1 {
 .page-header p:last-child,
 .empty-text,
 dt {
-  color: #657084;
+  color: var(--color-text-muted);
 }
 
 .success-message,
 .error-message {
   margin-bottom: 16px;
   padding: 12px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
 }
 
 .success-message {
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+  border: 1px solid rgba(111, 169, 187, 0.28);
 }
 
 .error-message {
-  color: #8a1f1f;
-  background: #fff0f0;
-  border: 1px solid #f1c7c7;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
 }
 
 .loading-state,
 .empty-panel {
   padding: 24px;
-  background: #ffffff;
-  border: 1px solid #dfe4ec;
-  border-radius: 8px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
 }
 
 .empty-panel {
@@ -74,7 +74,7 @@ dt {
 
 .empty-panel mat-icon,
 mat-icon[mat-card-avatar] {
-  color: #2f5d50;
+  color: var(--color-primary-strong);
 }
 
 .detail-layout {
@@ -84,15 +84,15 @@ mat-icon[mat-card-avatar] {
 
 .person-summary,
 mat-card {
-  border-radius: 8px;
-  background: #ffffff;
+  border-radius: var(--radius-panel);
+  background: var(--color-card-bg);
 }
 
 mat-icon[mat-card-avatar] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e2efe9;
+  background: var(--color-primary-soft);
 }
 
 dl {
@@ -110,7 +110,7 @@ dt {
 
 dd {
   margin: 0;
-  color: #1d2430;
+  color: var(--color-text-main);
   overflow-wrap: anywhere;
 }
 
@@ -125,9 +125,9 @@ dd {
   display: grid;
   gap: 10px;
   padding: 12px;
-  background: #f7f9fb;
-  border: 1px solid #e1e7ee;
-  border-radius: 8px;
+  background: var(--color-soft-block-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
 }
 
 .history-item > div:first-child,
@@ -153,16 +153,16 @@ dd {
 
 .status-chip {
   padding: 4px 8px;
-  color: #23533f;
-  background: #edf8f1;
-  border: 1px solid #b9e0c8;
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+  border: 1px solid rgba(111, 169, 187, 0.28);
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 700;
 }
 
 .archive-button {
-  color: #8a1f1f;
+  color: var(--color-danger);
 }
 
 @media (min-width: 900px) {
