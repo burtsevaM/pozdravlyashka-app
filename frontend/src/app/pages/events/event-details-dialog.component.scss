@@ -17,7 +17,7 @@
 .eyebrow {
   margin: 0 0 6px;
   color: var(--color-primary-strong);
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -82,7 +82,7 @@ dl {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.76rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -118,7 +118,8 @@ dd {
 }
 
 mat-dialog-actions {
-  padding-top: 4px;
+  justify-content: center;
+  padding-top: 6px;
 }
 
 @media (min-width: 900px) {

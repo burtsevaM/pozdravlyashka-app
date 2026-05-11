@@ -16,12 +16,30 @@
   --color-danger-soft: #FFF1F1;
   --color-danger-border: #F2C7C7;
   --color-success: #3A9B7A;
+  --color-action: #315F6B;
+  --color-action-hover: rgba(223, 241, 245, 0.72);
+  --color-danger-hover: #FCE7E7;
   --shadow-soft: 0 18px 45px rgba(36, 48, 66, 0.08);
   --shadow-card: 0 10px 30px rgba(36, 48, 66, 0.06);
   --shadow-control: 0 10px 24px rgba(79, 145, 168, 0.22);
   --radius-card: 20px;
   --radius-panel: 16px;
   --radius-control: 14px;
+  --font-size-base: 1rem;
+  --font-size-small: 0.92rem;
+  --font-size-caption: 0.84rem;
+  --font-size-button: 0.96rem;
+  --mat-sys-primary: var(--color-primary-strong);
+  --mat-sys-primary-container: var(--color-primary-soft);
+  --mat-sys-primary-fixed: var(--color-primary-soft);
+  --mat-sys-primary-fixed-dim: var(--color-primary);
+  --mat-sys-inverse-primary: var(--color-primary-soft);
+  --mat-sys-on-primary: #FFFFFF;
+  --mat-sys-on-primary-container: var(--color-text-main);
+  --mat-sys-secondary: var(--color-primary);
+  --mat-sys-secondary-container: var(--color-primary-soft);
+  --mat-sys-tertiary: var(--color-accent);
+  --mat-sys-tertiary-container: var(--color-accent-soft);
 }
 
 * {
@@ -37,6 +55,8 @@ body {
 body {
   color: var(--color-text-main);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
   background:
     radial-gradient(circle at 12% 8%, rgba(255, 243, 196, 0.42), transparent 28%),
     radial-gradient(circle at 88% 0%, rgba(223, 241, 245, 0.7), transparent 30%),
@@ -44,8 +64,12 @@ body {
 }
 
 a {
-  color: var(--color-primary-strong);
+  color: var(--color-action);
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-strong);
 }
 
 .mat-mdc-unelevated-button.mat-primary,
@@ -63,7 +87,7 @@ a {
   border-radius: var(--radius-control);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
   box-shadow: var(--shadow-control);
-  font-size: 0.95rem;
+  font-size: var(--font-size-button);
   font-weight: 600;
   transition:
     transform 160ms ease,
@@ -80,13 +104,16 @@ a {
   box-shadow: 0 14px 30px rgba(79, 145, 168, 0.28);
 }
 
-.mat-mdc-outlined-button.mat-primary,
-.mat-mdc-button.mat-primary,
-.mat-mdc-button:not(.mat-primary) {
+.mat-mdc-outlined-button:not(.mat-warn),
+.mat-mdc-button:not(.mat-warn) {
+  --mdc-text-button-label-text-color: var(--color-action);
+  --mdc-outlined-button-label-text-color: var(--color-action);
+  --mat-text-button-label-text-color: var(--color-action);
+  --mat-outlined-button-label-text-color: var(--color-action);
   min-height: 40px;
   border-radius: var(--radius-control);
-  color: var(--color-primary-strong);
-  font-size: 0.95rem;
+  color: var(--color-action);
+  font-size: var(--font-size-button);
   font-weight: 600;
   transition:
     background 160ms ease,
@@ -94,27 +121,31 @@ a {
     box-shadow 160ms ease;
 }
 
-.mat-mdc-outlined-button.mat-primary {
+.mat-mdc-outlined-button:not(.mat-warn) {
   --mdc-outlined-button-outline-color: var(--color-border);
-  --mdc-outlined-button-label-text-color: var(--color-primary-strong);
+  --mdc-outlined-button-label-text-color: var(--color-action);
+  --mat-outlined-button-label-text-color: var(--color-action);
   background: rgba(255, 255, 255, 0.78);
 }
 
-.mat-mdc-outlined-button.mat-primary:hover,
-.mat-mdc-button.mat-primary:hover,
-.mat-mdc-button:not(.mat-primary):hover {
-  background: var(--color-primary-soft);
+.mat-mdc-outlined-button:not(.mat-warn):hover,
+.mat-mdc-button:not(.mat-warn):hover {
+  background: var(--color-action-hover);
   transform: translateY(-1px);
 }
 
 .mat-mdc-button.mat-warn,
 .mat-mdc-outlined-button.mat-warn {
+  --mdc-text-button-label-text-color: var(--color-danger);
+  --mdc-outlined-button-label-text-color: var(--color-danger);
+  --mat-text-button-label-text-color: var(--color-danger);
+  --mat-outlined-button-label-text-color: var(--color-danger);
   color: var(--color-danger);
 }
 
 .mat-mdc-button.mat-warn:hover,
 .mat-mdc-outlined-button.mat-warn:hover {
-  background: var(--color-danger-soft);
+  background: var(--color-danger-hover);
 }
 
 .mat-mdc-icon-button {
@@ -129,11 +160,87 @@ a {
   transform: translateY(-1px);
 }
 
+.mat-mdc-slide-toggle {
+  --mat-slide-toggle-selected-icon-color: #FFFFFF;
+  --mat-slide-toggle-selected-handle-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-focus-handle-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-hover-handle-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-track-color: var(--color-primary-soft);
+  --mat-slide-toggle-selected-focus-track-color: var(--color-primary-soft);
+  --mat-slide-toggle-selected-hover-track-color: var(--color-primary-soft);
+  --mat-slide-toggle-selected-pressed-track-color: var(--color-primary-soft);
+  --mat-slide-toggle-selected-focus-state-layer-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-hover-state-layer-color: var(--color-primary-strong);
+  --mat-slide-toggle-selected-pressed-state-layer-color: var(--color-primary-strong);
+  --mdc-switch-selected-focus-state-layer-color: var(--color-primary-strong);
+  --mdc-switch-selected-hover-state-layer-color: var(--color-primary-strong);
+  --mdc-switch-selected-pressed-state-layer-color: var(--color-primary-strong);
+  --mdc-switch-selected-focus-handle-color: var(--color-primary-strong);
+  --mdc-switch-selected-hover-handle-color: var(--color-primary-strong);
+  --mdc-switch-selected-pressed-handle-color: var(--color-primary-strong);
+  --mdc-switch-selected-handle-color: var(--color-primary-strong);
+  --mdc-switch-selected-focus-track-color: var(--color-primary-soft);
+  --mdc-switch-selected-hover-track-color: var(--color-primary-soft);
+  --mdc-switch-selected-pressed-track-color: var(--color-primary-soft);
+  --mdc-switch-selected-track-color: var(--color-primary-soft);
+  --mat-switch-label-text-color: var(--color-text-main);
+}
+
+.mat-mdc-checkbox {
+  --mat-checkbox-selected-checkmark-color: #FFFFFF;
+  --mat-checkbox-selected-focus-icon-color: var(--color-primary-strong);
+  --mat-checkbox-selected-hover-icon-color: var(--color-primary-strong);
+  --mat-checkbox-selected-icon-color: var(--color-primary-strong);
+  --mat-checkbox-selected-pressed-icon-color: var(--color-primary-strong);
+  --mat-checkbox-selected-focus-state-layer-color: var(--color-primary-strong);
+  --mat-checkbox-selected-hover-state-layer-color: var(--color-primary-strong);
+  --mat-checkbox-selected-pressed-state-layer-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-checkmark-color: #FFFFFF;
+  --mdc-checkbox-selected-focus-icon-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-hover-icon-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-icon-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-pressed-icon-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-hover-state-layer-color: var(--color-primary-strong);
+  --mdc-checkbox-selected-pressed-state-layer-color: var(--color-primary-strong);
+  --mat-checkbox-label-text-color: var(--color-text-main);
+}
+
+.mat-pseudo-checkbox {
+  --mat-pseudo-checkbox-full-selected-icon-color: var(--color-primary-strong);
+  --mat-pseudo-checkbox-full-selected-checkmark-color: #FFFFFF;
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--color-primary-strong);
+}
+
 .mat-mdc-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   background: var(--color-card-bg);
   box-shadow: var(--shadow-card);
+}
+
+.mat-mdc-card-content,
+.mat-mdc-form-field,
+.mat-mdc-option,
+.mat-mdc-select,
+.mat-mdc-input-element,
+.mat-mdc-dialog-content {
+  font-size: var(--font-size-base);
+}
+
+.mat-mdc-card-subtitle,
+.mat-mdc-hint,
+.mat-mdc-error,
+.mat-mdc-checkbox,
+.mat-mdc-slide-toggle {
+  font-size: var(--font-size-small);
+}
+
+.mat-mdc-dialog-actions {
+  gap: 10px;
+  justify-content: center;
+  padding: 8px 24px 22px;
 }
 
 .mat-mdc-chip {

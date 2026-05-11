@@ -91,6 +91,16 @@ export class EventsController {
     );
   }
 
+  @Delete(':eventId')
+  @HttpCode(204)
+  deleteEvent(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<void> {
+    return this.eventsService.deleteEvent(teamId, request.user.id, eventId);
+  }
+
   @Patch(':eventId/status')
   updateEventStatus(
     @Req() request: AuthenticatedRequest,

@@ -5,7 +5,7 @@
 .eyebrow {
   margin: 0 0 8px;
   color: var(--color-primary-strong);
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -84,7 +84,7 @@ time {
 .summary-label {
   display: block;
   color: var(--color-text-muted);
-  font-size: 0.82rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -228,7 +228,7 @@ time {
 
 .event-link,
 .delivery-error {
-  font-size: 0.9rem;
+  font-size: var(--font-size-small);
 }
 
 .notification-meta {

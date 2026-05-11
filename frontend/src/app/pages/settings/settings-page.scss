@@ -5,7 +5,7 @@
 .eyebrow {
   margin: 0 0 8px;
   color: var(--color-primary-strong);
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -121,7 +121,18 @@ mat-icon[mat-card-avatar] {
 }
 
 .checkbox-group {
-  padding-top: 2px;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.checkbox-group mat-checkbox {
+  min-height: 34px;
+}
+
+.checkbox-group ::ng-deep .mdc-label {
+  padding-left: 2px;
+  font-size: var(--font-size-base);
+  line-height: 1.35;
 }
 
 .group-label {
@@ -169,7 +180,7 @@ dl div {
 }
 
 dt {
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -182,6 +193,52 @@ dd {
 
 mat-chip {
   width: fit-content;
+}
+
+.email-status-summary {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  color: var(--color-text-main);
+  background: rgba(223, 241, 245, 0.45);
+  border: 1px solid rgba(111, 169, 187, 0.28);
+  border-radius: var(--radius-panel);
+}
+
+.email-status-summary mat-icon {
+  flex: 0 0 auto;
+  color: var(--color-primary-strong);
+}
+
+.email-status-summary p:last-child,
+.technical-details {
+  color: var(--color-text-muted);
+}
+
+.email-status-label {
+  margin-bottom: 4px;
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.email-actions {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.technical-details {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-soft-block-bg);
+  font-size: var(--font-size-small);
+}
+
+.technical-details summary {
+  cursor: pointer;
+  color: var(--color-action);
+  font-weight: 700;
 }
 
 .import-layout {
@@ -200,7 +257,9 @@ mat-chip {
 }
 
 .import-actions {
+  align-self: start;
   padding-top: 0;
+  margin-top: 0;
 }
 
 @media (min-width: 720px) {
@@ -218,6 +277,6 @@ mat-chip {
 
   .import-layout {
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+    align-items: center;
   }
 }

@@ -94,13 +94,13 @@
       </mat-form-field>
 
       <div class="form-actions">
-        <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
-          <mat-icon aria-hidden="true">{{ editingGiftIdeaId() ? 'save' : 'add' }}</mat-icon>
-          <span>{{ editingGiftIdeaId() ? 'Сохранить' : 'Добавить идею' }}</span>
-        </button>
         <button mat-button type="button" (click)="closeForm()">
           <mat-icon aria-hidden="true">close</mat-icon>
           <span>Отмена</span>
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+          <mat-icon aria-hidden="true">{{ editingGiftIdeaId() ? 'save' : 'add' }}</mat-icon>
+          <span>{{ editingGiftIdeaId() ? 'Сохранить' : 'Добавить идею' }}</span>
         </button>
       </div>
     </form>
@@ -193,6 +193,6 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="center">
   <button mat-flat-button color="primary" type="button" (click)="close()">Закрыть</button>
 </mat-dialog-actions>

@@ -74,7 +74,15 @@
                   (selectionChange)="updateEventStatus(event, $event.value)"
                 >
                   <mat-select-trigger>
-                    <span class="status-chip">{{ getStatusLabel(event.status) }}</span>
+                    <span
+                      class="status-chip"
+                      [class.status-planned]="event.status === 'PLANNED'"
+                      [class.status-progress]="event.status === 'IN_PROGRESS'"
+                      [class.status-completed]="event.status === 'COMPLETED'"
+                      [class.status-cancelled]="event.status === 'CANCELLED'"
+                    >
+                      {{ getStatusLabel(event.status) }}
+                    </span>
                   </mat-select-trigger>
                   @for (option of statusOptions; track option.value) {
                     <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -116,7 +124,11 @@
               </div>
             </dl>
 
-            <section class="gift-summary" aria-label="Сводка по подаркам">
+            <section
+              class="gift-summary"
+              [class.empty-gift-summary]="event.giftIdeas.length === 0 && !event.selectedGiftIdea"
+              aria-label="Сводка по подаркам"
+            >
               <mat-icon aria-hidden="true">redeem</mat-icon>
               <div class="gift-summary-copy">
                 <h3>{{ getGiftSummaryTitle(event) }}</h3>
@@ -137,6 +149,10 @@
               <button mat-button type="button" (click)="openEditDialog(event)">
                 <mat-icon aria-hidden="true">edit</mat-icon>
                 <span>Редактировать</span>
+              </button>
+              <button mat-button type="button" class="delete-event-button" (click)="deleteEvent(event)">
+                <mat-icon aria-hidden="true">delete</mat-icon>
+                <span>Удалить</span>
               </button>
             </div>
           </mat-card-content>

@@ -195,7 +195,12 @@
                   <textarea matInput rows="2" formControlName="comment"></textarea>
                 </mat-form-field>
 
-                <button mat-flat-button color="primary" type="submit">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  class="form-submit-button"
+                  type="submit"
+                >
                   <mat-icon aria-hidden="true">add</mat-icon>
                   Добавить взнос
                 </button>
@@ -241,10 +246,10 @@
                             <textarea matInput rows="2" formControlName="comment"></textarea>
                           </mat-form-field>
                           <div class="item-actions">
-                            <button mat-flat-button color="primary" type="submit">Сохранить</button>
                             <button mat-button type="button" (click)="cancelContributionEdit()">
                               Отмена
                             </button>
+                            <button mat-flat-button color="primary" type="submit">Сохранить</button>
                           </div>
                         </form>
                       } @else {
@@ -484,6 +489,6 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="center">
   <button mat-flat-button color="primary" mat-dialog-close type="button">Закрыть</button>
 </mat-dialog-actions>

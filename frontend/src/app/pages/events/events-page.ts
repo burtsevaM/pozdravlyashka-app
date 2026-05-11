@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -59,6 +60,7 @@ export class EventsPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly eventsService = inject(EventsService);
   private readonly peopleService = inject(PeopleService);
+  private readonly window = inject(DOCUMENT).defaultView;
   protected readonly teamContext = inject(TeamContextService);
 
   protected readonly events = signal<CelebrationEvent[]>([]);
@@ -266,6 +268,34 @@ export class EventsPage implements OnInit {
         },
         error: (error: unknown) => {
           this.errorMessage.set(this.getActionErrorMessage(error, 'изменить статус инициативы'));
+        },
+      });
+  }
+
+  protected deleteEvent(event: CelebrationEvent): void {
+    const confirmed =
+      this.window?.confirm('Удалить инициативу? Это действие нельзя отменить.') ?? false;
+
+    if (!confirmed) {
+      return;
+    }
+
+    const activeTeamId = this.teamContext.activeTeamId();
+
+    if (!activeTeamId) {
+      return;
+    }
+
+    this.eventsService
+      .deleteEvent(activeTeamId, event.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.successMessage.set('Инициатива поздравления удалена');
+          this.events.update((events) => events.filter((item) => item.id !== event.id));
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getActionErrorMessage(error, 'удалить инициативу'));
         },
       });
   }

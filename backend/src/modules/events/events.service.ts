@@ -295,6 +295,18 @@ export class EventsService {
     return this.toCelebrationEventResponse(event, userId);
   }
 
+  async deleteEvent(
+    teamId: string,
+    userId: string,
+    eventId: string,
+  ): Promise<void> {
+    await this.ensureCanManageEvent(teamId, userId, eventId);
+
+    await this.prismaService.celebrationEvent.delete({
+      where: { id: eventId },
+    });
+  }
+
   async updateEventStatus(
     teamId: string,
     userId: string,

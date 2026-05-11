@@ -19,7 +19,7 @@ mat-card-actions {
 .eyebrow {
   margin: 0 0 6px;
   color: var(--color-primary-strong);
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -99,6 +99,7 @@ mat-card-actions mat-icon {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
 }
 
 .gift-idea-card {
@@ -141,7 +142,7 @@ mat-card-actions mat-icon {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.76rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -170,4 +171,8 @@ dd {
   .form-actions {
     grid-column: 1 / -1;
   }
+}
+
+mat-dialog-actions {
+  justify-content: center;
 }

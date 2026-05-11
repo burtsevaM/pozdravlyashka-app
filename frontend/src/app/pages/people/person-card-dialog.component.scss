@@ -23,7 +23,7 @@
 .eyebrow {
   margin: 0 0 6px;
   color: var(--color-primary-strong);
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -128,7 +128,7 @@ dl {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.76rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -220,6 +220,11 @@ mat-progress-bar {
   grid-column: 1 / -1;
 }
 
+.form-submit-button {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
 .management-form button,
 .item-actions button {
   min-height: 40px;
@@ -268,6 +273,7 @@ mat-progress-bar {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 
 .item-actions mat-icon {
@@ -283,7 +289,7 @@ textarea {
 }
 
 mat-dialog-actions {
-  padding-top: 4px;
+  padding-top: 6px;
 }
 
 @media (min-width: 900px) {
@@ -312,6 +318,6 @@ mat-dialog-actions {
 
   .item-actions button,
   .management-form button {
-    width: 100%;
+    width: auto;
   }
 }

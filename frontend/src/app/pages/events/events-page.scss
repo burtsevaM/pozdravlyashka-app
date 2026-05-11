@@ -5,7 +5,7 @@
 .eyebrow {
   margin: 0 0 8px;
   color: var(--color-primary-strong);
-  font-size: 0.8rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -158,7 +158,7 @@ mat-icon[mat-card-avatar] {
   background: var(--color-accent-soft);
   border: 1px solid rgba(243, 212, 107, 0.48);
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -191,7 +191,7 @@ mat-icon[mat-card-avatar] {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -214,33 +214,61 @@ dt {
   justify-content: center;
   min-width: 120px;
   max-width: 100%;
-  padding: 4px 8px;
+  padding: 7px 12px;
   color: var(--color-success);
   background: rgba(223, 241, 245, 0.72);
   border: 1px solid rgba(111, 169, 187, 0.28);
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
 }
 
+.status-planned {
+  color: var(--color-action);
+  background: rgba(223, 241, 245, 0.72);
+}
+
+.status-progress {
+  color: var(--color-text-main);
+  background: var(--color-accent-soft);
+  border-color: rgba(243, 212, 107, 0.48);
+}
+
+.status-completed {
+  color: var(--color-success);
+  background: rgba(223, 241, 245, 0.72);
+}
+
+.status-cancelled {
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-border);
+}
+
 .gift-summary {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px 12px;
-  align-items: start;
+  align-items: center;
   min-width: 0;
   min-height: 128px;
-  padding: 12px;
+  padding: 14px;
   background: rgba(223, 241, 245, 0.45);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
 }
 
 .gift-summary mat-icon {
+  align-self: start;
   color: var(--color-primary-strong);
+}
+
+.empty-gift-summary {
+  min-height: 118px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .gift-summary-copy {
@@ -271,15 +299,14 @@ dt {
 }
 
 .gift-summary-meta {
-  grid-column: 2;
-  justify-self: start;
-  align-self: end;
+  justify-self: end;
+  align-self: center;
   padding: 4px 8px;
   color: var(--color-text-main);
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   line-height: 1.2;
 }
@@ -298,8 +325,16 @@ dt {
   flex: 0 0 auto;
 }
 
+.delete-event-button {
+  color: var(--color-danger);
+}
+
+.delete-event-button:hover {
+  background: var(--color-danger-soft);
+}
+
 .status-field {
-  width: min(100%, 190px);
+  width: min(100%, 210px);
   flex: 0 0 auto;
   justify-self: end;
 }
@@ -312,7 +347,7 @@ dt {
 
 .status-field ::ng-deep .mat-mdc-select-trigger {
   justify-content: center;
-  min-height: 24px;
+  min-height: 36px;
 }
 
 .status-field ::ng-deep .mat-mdc-select-value {
@@ -321,13 +356,23 @@ dt {
 }
 
 .status-field ::ng-deep .mat-mdc-form-field-infix {
-  min-height: 40px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  width: auto;
+  min-height: 36px;
+  padding: 0;
 }
 
 .status-field ::ng-deep .mat-mdc-text-field-wrapper {
+  padding: 0;
   background: transparent;
+}
+
+.status-field ::ng-deep .mdc-notched-outline,
+.status-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.status-field ::ng-deep .mat-mdc-select-arrow {
+  color: var(--color-action);
 }
 
 @media (min-width: 1000px) {
@@ -362,5 +407,6 @@ dt {
 
   .gift-summary-meta {
     grid-column: 1 / -1;
+    justify-self: start;
   }
 }

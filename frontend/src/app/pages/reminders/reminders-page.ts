@@ -8,6 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import {
+  EVENT_OCCASION_LABELS,
+  EventOccasion,
+} from '../../core/models/event.models';
+import {
   Notification,
   NotificationChannel,
   NotificationFilters,
@@ -206,6 +210,25 @@ export class RemindersPage implements OnInit {
     }).format(new Date(value));
   }
 
+  protected getEventRelationLines(notification: Notification): string[] {
+    if (!notification.eventId) {
+      return [];
+    }
+
+    if (!notification.eventPersonName && !notification.eventOccasion) {
+      return ['Связано с инициативой поздравления'];
+    }
+
+    return [
+      notification.eventPersonName
+        ? `Связано с участником: ${notification.eventPersonName}`
+        : 'Связано с инициативой поздравления',
+      notification.eventOccasion
+        ? `Повод: ${this.getOccasionLabel(notification.eventOccasion)}`
+        : '',
+    ].filter(Boolean);
+  }
+
   private getNotificationFilters(): NotificationFilters {
     const activeFilter = this.activeFilter();
 
@@ -233,6 +256,10 @@ export class RemindersPage implements OnInit {
           this.errorMessage.set('Не удалось загрузить счетчик непрочитанных уведомлений');
         },
       });
+  }
+
+  private getOccasionLabel(occasion: string): string {
+    return EVENT_OCCASION_LABELS[occasion as EventOccasion] ?? occasion;
   }
 
   private replaceNotification(updatedNotification: Notification): void {

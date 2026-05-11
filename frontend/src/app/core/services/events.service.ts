@@ -50,6 +50,10 @@ export class EventsService {
     );
   }
 
+  deleteEvent(teamId: string, eventId: string) {
+    return this.httpClient.delete<void>(`${this.getEventsUrl(teamId)}/${eventId}`);
+  }
+
   updateEventStatus(teamId: string, eventId: string, data: UpdateEventStatusRequest) {
     return this.httpClient.patch<CelebrationEvent>(
       `${this.getEventsUrl(teamId)}/${eventId}/status`,
