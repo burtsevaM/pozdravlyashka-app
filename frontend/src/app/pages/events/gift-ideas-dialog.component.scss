@@ -1,9 +1,20 @@
+.mat-mdc-dialog-title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 1.32rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .gift-dialog-content {
   display: grid;
   gap: 16px;
   max-height: min(74vh, 780px);
   padding-bottom: 8px;
-  font-size: 1.03rem;
+  color: var(--color-text-main);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
 }
 
 .dialog-summary,
@@ -20,8 +31,9 @@ mat-card-actions {
 .eyebrow {
   margin: 0 0 6px;
   color: var(--color-primary-strong);
-  font-size: 0.82rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
@@ -31,7 +43,9 @@ p {
 }
 
 h3 {
-  font-size: 1.24rem;
+  color: var(--color-text-main);
+  font-size: 1.12rem;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -40,6 +54,17 @@ h3 {
 .empty-panel p,
 dt {
   color: var(--color-text-muted);
+}
+
+.dialog-summary p,
+.selection-panel p,
+.actions-row p,
+.empty-panel p,
+.gift-description,
+.gift-idea-heading p,
+dd {
+  font-size: var(--font-size-small);
+  line-height: 1.45;
 }
 
 .success-message,
@@ -108,9 +133,17 @@ mat-card-actions mat-icon {
   justify-content: center;
 }
 
+.gift-idea-form mat-form-field {
+  font-size: var(--font-size-small);
+}
+
 .gift-idea-card {
   border-radius: var(--radius-panel);
   background: var(--color-card-bg);
+}
+
+.gift-idea-card mat-card-content {
+  color: var(--color-text-main);
 }
 
 .gift-idea-card.selected-gift {
@@ -130,17 +163,12 @@ mat-card-actions mat-icon {
 .dialog-summary h3,
 .selection-panel h3,
 .gift-idea-heading h3 {
-  font-size: 1.28rem;
-}
-
-.dialog-summary p:last-child,
-.selection-panel p,
-.gift-idea-heading p {
-  font-size: 1.05rem;
+  font-size: 1.14rem;
 }
 
 .gift-description {
   margin-top: 12px;
+  font-weight: 400;
   overflow-wrap: anywhere;
 }
 
@@ -149,6 +177,7 @@ mat-card-actions mat-icon {
   margin-top: 12px;
   color: var(--color-primary-strong);
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .gift-meta {
@@ -162,14 +191,16 @@ mat-card-actions mat-icon {
 
 dt {
   margin-bottom: 3px;
-  font-size: 0.82rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
 dd {
   margin: 0;
   color: var(--color-text-main);
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -185,6 +216,8 @@ mat-card-actions {
 
 mat-card-actions button {
   flex: 0 0 auto;
+  font-size: var(--font-size-button);
+  font-weight: 600;
 }
 
 .empty-panel mat-icon {
@@ -205,4 +238,9 @@ mat-card-actions button {
 
 mat-dialog-actions {
   justify-content: center;
+}
+
+mat-dialog-actions button {
+  font-size: var(--font-size-button);
+  font-weight: 600;
 }
