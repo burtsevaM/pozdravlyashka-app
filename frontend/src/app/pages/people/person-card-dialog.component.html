@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Карточка участника</h2>
+<h2 mat-dialog-title class="dialog-title">Карточка участника</h2>
 
 <mat-dialog-content class="person-card-dialog-content">
   @if (isLoading()) {
@@ -30,7 +30,7 @@
     </section>
 
     <section class="details-grid" aria-label="Карточка участника">
-      <mat-card appearance="outlined" class="detail-card">
+      <mat-card appearance="outlined" class="detail-card prominent-detail-card">
         <mat-card-header>
           <mat-icon mat-card-avatar aria-hidden="true">person</mat-icon>
           <mat-card-title>Участник</mat-card-title>
@@ -70,7 +70,7 @@
       </mat-card>
 
       @if (currentEvent(); as event) {
-        <mat-card appearance="outlined" class="detail-card">
+        <mat-card appearance="outlined" class="detail-card prominent-detail-card">
           <mat-card-header>
             <mat-icon mat-card-avatar aria-hidden="true">event</mat-icon>
             <mat-card-title>Текущая инициатива</mat-card-title>
@@ -337,8 +337,12 @@
               </p>
             }
 
-            <form class="management-form" [formGroup]="deputyForm" (ngSubmit)="saveDeputy()">
-              <mat-form-field appearance="outline">
+            <form
+              class="management-form deputy-form"
+              [formGroup]="deputyForm"
+              (ngSubmit)="saveDeputy()"
+            >
+              <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Заместитель</mat-label>
                 <mat-select formControlName="deputyId">
                   <mat-option value="">Не назначен</mat-option>
@@ -349,9 +353,18 @@
                   }
                 </mat-select>
               </mat-form-field>
-              <button mat-flat-button color="primary" type="submit">Сохранить</button>
+              <button mat-flat-button color="primary" class="form-submit-button" type="submit">
+                Сохранить
+              </button>
               @if (event.deputyId) {
-                <button mat-button type="button" (click)="removeDeputy()">Снять заместителя</button>
+                <button
+                  mat-button
+                  class="form-submit-button"
+                  type="button"
+                  (click)="removeDeputy()"
+                >
+                  Снять заместителя
+                </button>
               }
             </form>
 
@@ -361,7 +374,7 @@
               [formGroup]="delegationForm"
               (ngSubmit)="transferOrganizer()"
             >
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Новый организатор</mat-label>
                 <mat-select formControlName="toUserId">
                   @for (member of teamMembers(); track member.userId) {
@@ -377,28 +390,32 @@
                   <mat-error>Выберите организатора</mat-error>
                 }
               </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Дата начала</mat-label>
-                <input matInput type="date" formControlName="startDate" />
-                @if (
-                  delegationForm.controls.startDate.touched &&
-                  delegationForm.controls.startDate.hasError('required')
-                ) {
-                  <mat-error>Укажите дату начала</mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Дата окончания</mat-label>
-                <input matInput type="date" formControlName="endDate" />
-              </mat-form-field>
+              <div class="date-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Дата начала</mat-label>
+                  <input matInput type="date" formControlName="startDate" />
+                  @if (
+                    delegationForm.controls.startDate.touched &&
+                    delegationForm.controls.startDate.hasError('required')
+                  ) {
+                    <mat-error>Укажите дату начала</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Дата окончания</mat-label>
+                  <input matInput type="date" formControlName="endDate" />
+                </mat-form-field>
+              </div>
               <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Причина</mat-label>
                 <textarea matInput rows="2" formControlName="reason"></textarea>
               </mat-form-field>
-              <button mat-flat-button color="primary" type="submit">Передать права</button>
+              <button mat-flat-button color="primary" class="form-submit-button" type="submit">
+                Передать права
+              </button>
             </form>
 
-            <h4 class="section-subtitle">История передачи прав</h4>
+            <h4 class="section-subtitle section-subtitle-centered">История передачи прав</h4>
             @if (delegations().length > 0) {
               <div class="item-list">
                 @for (delegation of delegations(); track delegation.id) {
@@ -418,13 +435,13 @@
                 }
               </div>
             } @else {
-              <p class="empty-text">Передачи прав пока не было.</p>
+              <p class="empty-text empty-text-centered">Передачи прав пока не было.</p>
             }
           </mat-card-content>
         </mat-card>
       }
 
-      <mat-card appearance="outlined" class="detail-card">
+      <mat-card appearance="outlined" class="detail-card wide-card">
         <mat-card-header>
           <mat-icon mat-card-avatar aria-hidden="true">redeem</mat-icon>
           <mat-card-title>История подарков</mat-card-title>

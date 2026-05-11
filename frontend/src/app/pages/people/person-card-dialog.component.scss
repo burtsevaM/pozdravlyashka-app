@@ -1,3 +1,7 @@
+.dialog-title {
+  text-align: center;
+}
+
 .person-card-dialog-content {
   display: grid;
   gap: 16px;
@@ -100,6 +104,12 @@ dt {
 
 .detail-card mat-card-title {
   font-size: 1rem;
+}
+
+.prominent-detail-card mat-card-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .wide-card {
@@ -225,6 +235,13 @@ mat-progress-bar {
   justify-self: center;
 }
 
+.date-fields {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .management-form button,
 .item-actions button {
   min-height: 40px;
@@ -284,6 +301,11 @@ mat-progress-bar {
   margin-top: 18px;
 }
 
+.section-subtitle-centered,
+.empty-text-centered {
+  text-align: center;
+}
+
 textarea {
   resize: vertical;
 }
@@ -305,6 +327,7 @@ mat-dialog-actions {
   }
 
   .money-summary,
+  .date-fields,
   .management-form,
   .contribution-edit-form,
   .contribution-main {
