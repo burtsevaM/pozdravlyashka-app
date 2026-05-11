@@ -313,7 +313,7 @@ dt {
 
 .event-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
   justify-content: center;
@@ -323,6 +323,16 @@ dt {
 
 .event-actions button {
   flex: 0 0 auto;
+}
+
+.event-actions .delete-event-button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+}
+
+.event-actions .delete-event-button mat-icon {
+  margin-right: 0;
 }
 
 .delete-event-button {
@@ -398,6 +408,14 @@ dt {
   .event-actions button {
     flex: 1 1 150px;
     max-width: 220px;
+  }
+
+  .event-actions {
+    flex-wrap: wrap;
+  }
+
+  .event-actions .delete-event-button {
+    flex: 0 0 40px;
   }
 
   .status-field {
