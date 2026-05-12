@@ -2,6 +2,7 @@ export type AuthUser = {
   id: string;
   name: string;
   email: string;
+  birthDate: string | null;
 };
 
 export type AuthResponse = {
@@ -15,6 +16,7 @@ export type CurrentUserResponse = {
 
 export type UpdateProfileRequest = {
   name: string;
+  birthDate?: string | null;
 };
 
 export type LoginRequest = {
@@ -26,4 +28,5 @@ export type RegisterRequest = {
   name: string;
   email: string;
   password: string;
+  birthDate: string;
 };

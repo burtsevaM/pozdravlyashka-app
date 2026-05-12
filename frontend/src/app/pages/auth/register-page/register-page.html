@@ -27,6 +27,14 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>Дата рождения*</mat-label>
+          <input matInput type="date" formControlName="birthDate" autocomplete="bday" />
+          @if (form.controls.birthDate.touched && form.controls.birthDate.invalid) {
+            <mat-error>Укажите дату рождения</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Пароль</mat-label>
           <input matInput type="password" formControlName="password" autocomplete="new-password" />
           @if (form.controls.password.touched && form.controls.password.invalid) {

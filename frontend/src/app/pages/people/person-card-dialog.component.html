@@ -337,6 +337,12 @@
               </p>
             }
 
+            @if (!canManageEventRoles()) {
+              <p class="permission-note">
+                Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.
+              </p>
+            }
+
             <form
               class="management-form deputy-form"
               [formGroup]="deputyForm"
@@ -344,7 +350,7 @@
             >
               <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Заместитель</mat-label>
-                <mat-select formControlName="deputyId">
+                <mat-select formControlName="deputyId" [disabled]="!canManageEventRoles()">
                   <mat-option value="">Не назначен</mat-option>
                   @for (member of teamMembers(); track member.userId) {
                     <mat-option [value]="member.userId"
@@ -353,7 +359,13 @@
                   }
                 </mat-select>
               </mat-form-field>
-              <button mat-flat-button color="primary" class="form-submit-button" type="submit">
+              <button
+                mat-flat-button
+                color="primary"
+                class="form-submit-button"
+                type="submit"
+                [disabled]="!canManageEventRoles()"
+              >
                 Сохранить
               </button>
               @if (event.deputyId) {
@@ -362,6 +374,7 @@
                   class="form-submit-button"
                   type="button"
                   (click)="removeDeputy()"
+                  [disabled]="!canManageEventRoles()"
                 >
                   Снять заместителя
                 </button>
@@ -376,7 +389,7 @@
             >
               <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Новый организатор</mat-label>
-                <mat-select formControlName="toUserId">
+                <mat-select formControlName="toUserId" [disabled]="!canManageEventRoles()">
                   @for (member of teamMembers(); track member.userId) {
                     <mat-option [value]="member.userId"
                       >{{ member.name }} · {{ member.email }}</mat-option
@@ -393,7 +406,12 @@
               <div class="date-fields">
                 <mat-form-field appearance="outline">
                   <mat-label>Дата начала</mat-label>
-                  <input matInput type="date" formControlName="startDate" />
+                  <input
+                    matInput
+                    type="date"
+                    formControlName="startDate"
+                    [readonly]="!canManageEventRoles()"
+                  />
                   @if (
                     delegationForm.controls.startDate.touched &&
                     delegationForm.controls.startDate.hasError('required')
@@ -403,14 +421,30 @@
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>Дата окончания</mat-label>
-                  <input matInput type="date" formControlName="endDate" />
+                  <input
+                    matInput
+                    type="date"
+                    formControlName="endDate"
+                    [readonly]="!canManageEventRoles()"
+                  />
                 </mat-form-field>
               </div>
               <mat-form-field appearance="outline" class="form-wide">
                 <mat-label>Причина</mat-label>
-                <textarea matInput rows="2" formControlName="reason"></textarea>
+                <textarea
+                  matInput
+                  rows="2"
+                  formControlName="reason"
+                  [readonly]="!canManageEventRoles()"
+                ></textarea>
               </mat-form-field>
-              <button mat-flat-button color="primary" class="form-submit-button" type="submit">
+              <button
+                mat-flat-button
+                color="primary"
+                class="form-submit-button"
+                type="submit"
+                [disabled]="!canManageEventRoles()"
+              >
                 Передать права
               </button>
             </form>

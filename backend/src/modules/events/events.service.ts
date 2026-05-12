@@ -638,7 +638,7 @@ export class EventsService {
     eventId: string,
     assignDeputyDto: AssignDeputyDto,
   ): Promise<CelebrationEventResponse> {
-    await this.ensureCanManageEvent(teamId, userId, eventId);
+    await this.ensureCanManageEventRoles(teamId, userId, eventId);
 
     if (assignDeputyDto.deputyId) {
       await this.ensureUserInTeam(teamId, assignDeputyDto.deputyId);
@@ -670,7 +670,7 @@ export class EventsService {
     userId: string,
     eventId: string,
   ): Promise<CelebrationEventResponse> {
-    await this.ensureCanManageEvent(teamId, userId, eventId);
+    await this.ensureCanManageEventRoles(teamId, userId, eventId);
 
     const event = await this.prismaService.celebrationEvent.update({
       where: { id: eventId },
@@ -689,17 +689,7 @@ export class EventsService {
     eventId: string,
     createDelegationDto: CreateDelegationDto,
   ): Promise<TransferOrganizerResponse> {
-    const membership = await this.teamsService.ensureTeamMember(teamId, userId);
-    const event = await this.findTeamEventOrThrow(teamId, eventId);
-
-    if (
-      event.organizerId !== userId &&
-      !this.isTeamManagementRole(membership.role)
-    ) {
-      throw new ForbiddenException(
-        'Недостаточно прав для передачи прав организатора',
-      );
-    }
+    const event = await this.ensureCanManageEventRoles(teamId, userId, eventId);
 
     if (!event.organizerId) {
       throw new BadRequestException('У инициативы не назначен организатор');
@@ -920,6 +910,26 @@ export class EventsService {
     ) {
       throw new ForbiddenException(
         'Недостаточно прав для управления инициативой',
+      );
+    }
+
+    return event;
+  }
+
+  private async ensureCanManageEventRoles(
+    teamId: string,
+    userId: string,
+    eventId: string,
+  ): Promise<CelebrationEventWithRelations> {
+    const membership = await this.teamsService.ensureTeamMember(teamId, userId);
+    const event = await this.findTeamEventOrThrow(teamId, eventId);
+
+    if (
+      event.organizerId !== userId &&
+      !this.isTeamManagementRole(membership.role)
+    ) {
+      throw new ForbiddenException(
+        'Недостаточно прав для изменения ответственных по инициативе.',
       );
     }
 

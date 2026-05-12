@@ -96,7 +96,9 @@ export class AuthService {
 
     try {
       const parsedUser: unknown = JSON.parse(rawUser);
-      return this.isAuthUser(parsedUser) ? parsedUser : null;
+      return this.isAuthUser(parsedUser)
+        ? { ...parsedUser, birthDate: parsedUser.birthDate ?? null }
+        : null;
     } catch {
       return null;
     }
@@ -112,7 +114,10 @@ export class AuthService {
     return (
       typeof user['id'] === 'string' &&
       typeof user['name'] === 'string' &&
-      typeof user['email'] === 'string'
+      typeof user['email'] === 'string' &&
+      (typeof user['birthDate'] === 'string' ||
+        user['birthDate'] === null ||
+        user['birthDate'] === undefined)
     );
   }
 }

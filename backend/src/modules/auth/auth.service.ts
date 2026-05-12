@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -37,6 +38,7 @@ export class AuthService {
           name: registerDto.name.trim(),
           email,
           passwordHash,
+          birthDate: this.parseDateOnly(registerDto.birthDate),
         },
       });
 
@@ -90,6 +92,13 @@ export class AuthService {
       where: { id: userId },
       data: {
         name: updateProfileDto.name,
+        ...(updateProfileDto.birthDate !== undefined
+          ? {
+              birthDate: updateProfileDto.birthDate
+                ? this.parseDateOnly(updateProfileDto.birthDate)
+                : null,
+            }
+          : {}),
       },
     });
 
@@ -116,7 +125,33 @@ export class AuthService {
       id: user.id,
       name: user.name,
       email: user.email,
+      birthDate: user.birthDate ? this.formatDateOnly(user.birthDate) : null,
     };
+  }
+
+  private parseDateOnly(value: string): Date {
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (
+      date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month - 1 ||
+      date.getUTCDate() !== day
+    ) {
+      throw new BadRequestException(
+        'Дата рождения должна существовать и иметь формат YYYY-MM-DD',
+      );
+    }
+
+    return date;
+  }
+
+  private formatDateOnly(value: Date): string {
+    const year = value.getUTCFullYear();
+    const month = String(value.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(value.getUTCDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   private isUniqueConstraintError(error: unknown): boolean {

@@ -84,6 +84,15 @@ dt {
   border-radius: var(--radius-panel);
 }
 
+.permission-note {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  color: var(--color-primary-strong);
+  background: rgba(223, 241, 245, 0.55);
+  border: 1px solid rgba(111, 169, 187, 0.28);
+  border-radius: var(--radius-panel);
+}
+
 .details-grid {
   display: grid;
   gap: 12px;

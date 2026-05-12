@@ -44,6 +44,11 @@
           <input matInput type="email" formControlName="email" />
         </mat-form-field>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Дата рождения</mat-label>
+          <input matInput type="date" formControlName="birthDate" autocomplete="bday" />
+        </mat-form-field>
+
         <div class="card-actions">
           <button mat-flat-button color="primary" type="submit" [disabled]="isSavingProfile()">
             <mat-icon aria-hidden="true">save</mat-icon>
@@ -108,7 +113,7 @@
             <p>Организатор и заместитель назначаются в карточке инициативы поздравления.</p>
           </div>
 
-          <div class="card-actions">
+          <div class="card-actions team-save-actions">
             <button
               mat-flat-button
               color="primary"

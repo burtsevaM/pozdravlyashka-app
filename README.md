@@ -133,7 +133,7 @@ must use app passwords.
 
 The `/settings` page contains real MVP settings instead of a placeholder:
 
-- profile name can be edited through `PATCH /api/auth/profile`;
+- profile name and birth date can be edited through `PATCH /api/auth/profile`;
 - the active team name can be edited by OWNER/ADMIN through `PATCH /api/teams/:teamId`;
 - notification channels and reminder days are saved in `UserNotificationSettings`;
 - reminder generation respects disabled in-app/email channels and disabled day offsets;
@@ -262,7 +262,8 @@ Implemented in this stage:
 - contribution status and summary are calculated from real database data;
 - an initiative can have a saved deputy organizer;
 - organizer rights can be transferred to another team member and saved in `Delegation` history;
-- management actions are allowed only for the organizer, deputy, OWNER or ADMIN.
+- collection management is allowed for the organizer, deputy, OWNER or ADMIN;
+- deputy assignment and organizer transfer are allowed only for the organizer, OWNER or ADMIN.
 
 Manual check:
 

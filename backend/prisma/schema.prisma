@@ -58,6 +58,7 @@ model User {
   name            String
   email           String             @unique
   passwordHash    String
+  birthDate       DateTime?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   createdTeams    Team[]             @relation("TeamCreator")

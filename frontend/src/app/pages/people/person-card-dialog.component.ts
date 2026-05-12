@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -32,6 +32,7 @@ import { TeamMember } from '../../core/models/team.models';
 import { ContributionsService } from '../../core/services/contributions.service';
 import { DelegationsService } from '../../core/services/delegations.service';
 import { EventsService } from '../../core/services/events.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PeopleService } from '../../core/services/people.service';
 import { TeamsService } from '../../core/services/teams.service';
 
@@ -49,6 +50,10 @@ type EventStatusOption = {
 type PersonStatusOption = {
   value: PersonStatus;
   label: string;
+};
+
+type ApiErrorResponse = {
+  message?: string | string[];
 };
 
 @Component({
@@ -73,6 +78,7 @@ export class PersonCardDialogComponent implements OnInit {
   private readonly data = inject<PersonCardDialogData>(MAT_DIALOG_DATA);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly authService = inject(AuthService);
   private readonly contributionsService = inject(ContributionsService);
   private readonly delegationsService = inject(DelegationsService);
   private readonly eventsService = inject(EventsService);
@@ -90,6 +96,21 @@ export class PersonCardDialogComponent implements OnInit {
   protected readonly actionErrorMessage = signal<string | null>(null);
   protected readonly successMessage = signal<string | null>(null);
   protected readonly editingContributionId = signal<string | null>(null);
+  protected readonly canManageEventRoles = computed(() => {
+    const event = this.currentEvent();
+    const userId = this.authService.currentUser()?.id;
+
+    if (!event || !userId) {
+      return false;
+    }
+
+    if (event.organizerId === userId) {
+      return true;
+    }
+
+    const membership = this.teamMembers().find((member) => member.userId === userId);
+    return membership?.role === 'OWNER' || membership?.role === 'ADMIN';
+  });
 
   protected readonly contributionForm = this.formBuilder.group({
     userId: ['', [Validators.required]],
@@ -364,6 +385,13 @@ export class PersonCardDialogComponent implements OnInit {
       return;
     }
 
+    if (!this.canManageEventRoles()) {
+      this.actionErrorMessage.set(
+        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
+      );
+      return;
+    }
+
     const deputyId = this.deputyForm.controls.deputyId.value || null;
     this.actionErrorMessage.set(null);
 
@@ -389,6 +417,13 @@ export class PersonCardDialogComponent implements OnInit {
       return;
     }
 
+    if (!this.canManageEventRoles()) {
+      this.actionErrorMessage.set(
+        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
+      );
+      return;
+    }
+
     this.actionErrorMessage.set(null);
 
     this.delegationsService
@@ -409,7 +444,18 @@ export class PersonCardDialogComponent implements OnInit {
   protected transferOrganizer(): void {
     const event = this.currentEvent();
 
-    if (!event || this.delegationForm.invalid) {
+    if (!event) {
+      return;
+    }
+
+    if (!this.canManageEventRoles()) {
+      this.actionErrorMessage.set(
+        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
+      );
+      return;
+    }
+
+    if (this.delegationForm.invalid) {
       this.delegationForm.markAllAsTouched();
       return;
     }
@@ -546,6 +592,12 @@ export class PersonCardDialogComponent implements OnInit {
       return `Не удалось ${action}: frontend не смог отправить запрос.`;
     }
 
+    const backendMessage = this.getBackendErrorMessage(error);
+
+    if (backendMessage) {
+      return `Не удалось ${action}: ${backendMessage}`;
+    }
+
     if (error.status === 0) {
       return `Не удалось ${action}: backend недоступен или нет сети.`;
     }
@@ -559,5 +611,16 @@ export class PersonCardDialogComponent implements OnInit {
     }
 
     return `Не удалось ${action}: запрос завершился ошибкой.`;
+  }
+
+  private getBackendErrorMessage(error: HttpErrorResponse): string | null {
+    const response = error.error as ApiErrorResponse | undefined;
+    const message = response?.message;
+
+    if (Array.isArray(message)) {
+      return message.join('; ');
+    }
+
+    return message ?? null;
   }
 }

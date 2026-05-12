@@ -61,6 +61,7 @@ export class SettingsPage implements OnInit {
   protected readonly profileForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
     email: [{ value: '', disabled: true }],
+    birthDate: [''],
   });
 
   protected readonly teamForm = this.formBuilder.group({
@@ -94,6 +95,7 @@ export class SettingsPage implements OnInit {
   protected readonly teamMembers = signal<TeamMember[]>([]);
 
   protected readonly profileNameControl = this.profileForm.controls.name;
+  protected readonly profileBirthDateControl = this.profileForm.controls.birthDate;
   protected readonly teamNameControl = this.teamForm.controls.name;
   protected readonly teamMemberEmailControl = this.teamMemberForm.controls.email;
 
@@ -124,13 +126,23 @@ export class SettingsPage implements OnInit {
     this.clearMessages();
 
     this.authService
-      .updateProfile({ name })
+      .updateProfile({
+        name,
+        birthDate: this.profileBirthDateControl.value || null,
+      })
       .pipe(
         finalize(() => this.isSavingProfile.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: () => this.successMessage.set('Профиль сохранен'),
+        next: ({ user }) => {
+          this.profileForm.patchValue({
+            name: user.name,
+            email: user.email,
+            birthDate: user.birthDate ?? '',
+          });
+          this.successMessage.set('Профиль сохранен');
+        },
         error: (error: unknown) => {
           this.errorMessage.set(this.getRequestErrorMessage(error, 'сохранить профиль'));
         },
@@ -307,6 +319,7 @@ export class SettingsPage implements OnInit {
           this.profileForm.patchValue({
             name: user.name,
             email: user.email,
+            birthDate: user.birthDate ?? '',
           });
         },
         error: (error: unknown) => {

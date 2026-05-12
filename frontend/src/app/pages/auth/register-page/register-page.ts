@@ -33,6 +33,7 @@ export class RegisterPage {
   protected readonly form = this.formBuilder.group({
     name: ['', [Validators.required, Validators.minLength(1)]],
     email: ['', [Validators.required, Validators.email]],
+    birthDate: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 

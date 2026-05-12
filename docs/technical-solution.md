@@ -83,10 +83,10 @@ JWT_EXPIRES_IN=1d
 
 Available endpoints:
 
-- `POST /api/auth/register` - creates a user and returns `accessToken`.
+- `POST /api/auth/register` - creates a user with required birth date and returns `accessToken`.
 - `POST /api/auth/login` - checks email and password and returns `accessToken`.
 - `GET /api/auth/me` - returns current user by bearer token.
-- `PATCH /api/auth/profile` - updates only the current user's profile name.
+- `PATCH /api/auth/profile` - updates the current user's profile name and birth date.
 
 ## Teams And People MVP
 
@@ -167,8 +167,9 @@ general event calendar.
 Money collection, deputy assignment and organizer transfer are managed inside
 the initiative details dialog. Contributions are unique per `eventId/userId`
 and use `ContributionStatus`. The backend checks that the selected user belongs
-to the team, that the event belongs to the URL team and that only the organizer,
-deputy or team OWNER/ADMIN can change collection, deputy or delegation data.
+to the team and that the event belongs to the URL team. The organizer, deputy or
+team OWNER/ADMIN can manage collection data, but only the current organizer or
+team OWNER/ADMIN can assign or remove a deputy and transfer organizer rights.
 Regular team members can view initiatives, gift ideas and contribution summary.
 When the birthday person's email matches organizer email, event responses
 include `organizerIsBirthdayPerson` so the frontend can recommend assigning a
