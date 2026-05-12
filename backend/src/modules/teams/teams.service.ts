@@ -124,7 +124,7 @@ export class TeamsService {
       membership.role !== TeamRole.ADMIN
     ) {
       throw new ForbiddenException(
-        'Добавлять пользователей может только владелец или администратор коллектива',
+        'У вас нет доступа к добавлению пользователей в коллектив.',
       );
     }
 

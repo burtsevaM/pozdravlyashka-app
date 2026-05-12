@@ -148,6 +148,10 @@
                 {{ summary.pendingCount }}
               </p>
 
+              @if (!canManageContributions()) {
+                <p class="permission-note">{{ contributionsAccessHint }}</p>
+              }
+
               <form
                 class="management-form"
                 [formGroup]="contributionForm"
@@ -155,7 +159,7 @@
               >
                 <mat-form-field appearance="outline">
                   <mat-label>Участник сбора</mat-label>
-                  <mat-select formControlName="userId">
+                  <mat-select formControlName="userId" [disabled]="!canManageContributions()">
                     @for (member of availableContributionMembers; track member.userId) {
                       <mat-option [value]="member.userId"
                         >{{ member.name }} · {{ member.email }}</mat-option
@@ -172,7 +176,14 @@
 
                 <mat-form-field appearance="outline">
                   <mat-label>Сумма</mat-label>
-                  <input matInput type="number" min="0.01" step="0.01" formControlName="amount" />
+                  <input
+                    matInput
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    formControlName="amount"
+                    [readonly]="!canManageContributions()"
+                  />
                   @if (
                     contributionForm.controls.amount.touched &&
                     contributionForm.controls.amount.invalid
@@ -183,7 +194,7 @@
 
                 <mat-form-field appearance="outline">
                   <mat-label>Статус</mat-label>
-                  <mat-select formControlName="status">
+                  <mat-select formControlName="status" [disabled]="!canManageContributions()">
                     @for (option of contributionStatusOptions; track option.value) {
                       <mat-option [value]="option.value">{{ option.label }}</mat-option>
                     }
@@ -192,7 +203,12 @@
 
                 <mat-form-field appearance="outline" class="form-wide">
                   <mat-label>Комментарий</mat-label>
-                  <textarea matInput rows="2" formControlName="comment"></textarea>
+                  <textarea
+                    matInput
+                    rows="2"
+                    formControlName="comment"
+                    [readonly]="!canManageContributions()"
+                  ></textarea>
                 </mat-form-field>
 
                 <button
@@ -200,6 +216,7 @@
                   color="primary"
                   class="form-submit-button"
                   type="submit"
+                  [disabled]="!canManageContributions()"
                 >
                   <mat-icon aria-hidden="true">add</mat-icon>
                   Добавить взнос
@@ -225,6 +242,7 @@
                               min="0.01"
                               step="0.01"
                               formControlName="amount"
+                              [readonly]="!canManageContributions()"
                             />
                             @if (
                               contributionEditForm.controls.amount.touched &&
@@ -235,7 +253,7 @@
                           </mat-form-field>
                           <mat-form-field appearance="outline">
                             <mat-label>Статус</mat-label>
-                            <mat-select formControlName="status">
+                            <mat-select formControlName="status" [disabled]="!canManageContributions()">
                               @for (option of contributionStatusOptions; track option.value) {
                                 <mat-option [value]="option.value">{{ option.label }}</mat-option>
                               }
@@ -243,13 +261,25 @@
                           </mat-form-field>
                           <mat-form-field appearance="outline" class="form-wide">
                             <mat-label>Комментарий</mat-label>
-                            <textarea matInput rows="2" formControlName="comment"></textarea>
+                            <textarea
+                              matInput
+                              rows="2"
+                              formControlName="comment"
+                              [readonly]="!canManageContributions()"
+                            ></textarea>
                           </mat-form-field>
                           <div class="item-actions">
                             <button mat-button type="button" (click)="cancelContributionEdit()">
                               Отмена
                             </button>
-                            <button mat-flat-button color="primary" type="submit">Сохранить</button>
+                            <button
+                              mat-flat-button
+                              color="primary"
+                              type="submit"
+                              [disabled]="!canManageContributions()"
+                            >
+                              Сохранить
+                            </button>
                           </div>
                         </form>
                       } @else {
@@ -273,6 +303,7 @@
                             mat-button
                             type="button"
                             (click)="updateContributionStatus(contribution, 'PAID')"
+                            [disabled]="!canManageContributions()"
                           >
                             <mat-icon aria-hidden="true">done</mat-icon>
                             Сдал
@@ -281,6 +312,7 @@
                             mat-button
                             type="button"
                             (click)="updateContributionStatus(contribution, 'PENDING')"
+                            [disabled]="!canManageContributions()"
                           >
                             <mat-icon aria-hidden="true">schedule</mat-icon>
                             Не сдал
@@ -289,6 +321,7 @@
                             mat-button
                             type="button"
                             (click)="startContributionEdit(contribution)"
+                            [disabled]="!canManageContributions()"
                           >
                             <mat-icon aria-hidden="true">edit</mat-icon>
                             Изменить
@@ -298,6 +331,7 @@
                             color="warn"
                             type="button"
                             (click)="deleteContribution(contribution.id)"
+                            [disabled]="!canManageContributions()"
                           >
                             <mat-icon aria-hidden="true">delete</mat-icon>
                             Удалить
@@ -338,9 +372,7 @@
             }
 
             @if (!canManageEventRoles()) {
-              <p class="permission-note">
-                Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.
-              </p>
+              <p class="permission-note">{{ eventRolesAccessHint }}</p>
             }
 
             <form

@@ -28,6 +28,9 @@ type ApiErrorResponse = {
   message?: string | string[];
 };
 
+const ADD_TEAM_MEMBER_ACCESS_MESSAGE =
+  'У вас нет доступа к добавлению пользователей в коллектив.';
+
 @Component({
   selector: 'app-settings-page',
   imports: [
@@ -205,9 +208,7 @@ export class SettingsPage implements OnInit {
     }
 
     if (!this.canEditActiveTeam()) {
-      this.errorMessage.set(
-        'Добавлять пользователей может только владелец или администратор коллектива.',
-      );
+      this.errorMessage.set(ADD_TEAM_MEMBER_ACCESS_MESSAGE);
       return;
     }
 
@@ -478,7 +479,7 @@ export class SettingsPage implements OnInit {
     }
 
     if (error.status === 403) {
-      return 'Не удалось добавить пользователя в коллектив: нет доступа или недостаточно прав.';
+      return ADD_TEAM_MEMBER_ACCESS_MESSAGE;
     }
 
     return 'Не удалось добавить пользователя в коллектив: запрос завершился ошибкой.';

@@ -528,7 +528,12 @@ export class EventsService {
     eventId: string,
     createContributionDto: CreateContributionDto,
   ): Promise<ContributionSummaryResponse> {
-    const event = await this.ensureCanManageEvent(teamId, userId, eventId);
+    const event = await this.ensureCanManageEvent(
+      teamId,
+      userId,
+      eventId,
+      'У вас нет доступа к управлению взносами.',
+    );
     await this.ensureUserInTeam(teamId, createContributionDto.userId);
 
     const existingContribution =
@@ -568,7 +573,12 @@ export class EventsService {
     contributionId: string,
     updateContributionDto: UpdateContributionDto,
   ): Promise<ContributionSummaryResponse> {
-    const event = await this.ensureCanManageEvent(teamId, userId, eventId);
+    const event = await this.ensureCanManageEvent(
+      teamId,
+      userId,
+      eventId,
+      'У вас нет доступа к управлению взносами.',
+    );
     await this.findEventContributionOrThrow(eventId, contributionId);
 
     const data: Prisma.ContributionUpdateInput = {};
@@ -601,7 +611,12 @@ export class EventsService {
     contributionId: string,
     updateContributionStatusDto: UpdateContributionStatusDto,
   ): Promise<ContributionSummaryResponse> {
-    const event = await this.ensureCanManageEvent(teamId, userId, eventId);
+    const event = await this.ensureCanManageEvent(
+      teamId,
+      userId,
+      eventId,
+      'У вас нет доступа к управлению взносами.',
+    );
     await this.findEventContributionOrThrow(eventId, contributionId);
 
     await this.prismaService.contribution.update({
@@ -621,7 +636,12 @@ export class EventsService {
     eventId: string,
     contributionId: string,
   ): Promise<ContributionSummaryResponse> {
-    const event = await this.ensureCanManageEvent(teamId, userId, eventId);
+    const event = await this.ensureCanManageEvent(
+      teamId,
+      userId,
+      eventId,
+      'У вас нет доступа к управлению взносами.',
+    );
     await this.findEventContributionOrThrow(eventId, contributionId);
 
     await this.prismaService.contribution.delete({
@@ -898,6 +918,7 @@ export class EventsService {
     teamId: string,
     userId: string,
     eventId: string,
+    forbiddenMessage = 'Недостаточно прав для управления инициативой',
   ): Promise<CelebrationEventWithRelations> {
     const membership = await this.teamsService.ensureTeamMember(teamId, userId);
     const event = await this.findTeamEventOrThrow(teamId, eventId);
@@ -908,9 +929,7 @@ export class EventsService {
       event.organizerId !== userId &&
       event.deputyId !== userId
     ) {
-      throw new ForbiddenException(
-        'Недостаточно прав для управления инициативой',
-      );
+      throw new ForbiddenException(forbiddenMessage);
     }
 
     return event;
@@ -929,7 +948,7 @@ export class EventsService {
       !this.isTeamManagementRole(membership.role)
     ) {
       throw new ForbiddenException(
-        'Недостаточно прав для изменения ответственных по инициативе.',
+        'У вас нет доступа к изменению ответственных по инициативе.',
       );
     }
 

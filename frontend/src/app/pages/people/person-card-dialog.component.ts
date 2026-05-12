@@ -56,6 +56,14 @@ type ApiErrorResponse = {
   message?: string | string[];
 };
 
+const CONTRIBUTIONS_ACCESS_MESSAGE = 'У вас нет доступа к управлению взносами.';
+const EVENT_ROLES_ACCESS_MESSAGE =
+  'У вас нет доступа к изменению ответственных по инициативе.';
+const CONTRIBUTIONS_ACCESS_HINT =
+  'У вас нет доступа к управлению взносами. Отмечать, кто сдал деньги, может организатор инициативы, заместитель, владелец или администратор коллектива.';
+const EVENT_ROLES_ACCESS_HINT =
+  'У вас нет доступа к изменению ответственных. Назначать заместителя и передавать права может только организатор, владелец или администратор коллектива.';
+
 @Component({
   selector: 'app-person-card-dialog',
   imports: [
@@ -111,6 +119,23 @@ export class PersonCardDialogComponent implements OnInit {
     const membership = this.teamMembers().find((member) => member.userId === userId);
     return membership?.role === 'OWNER' || membership?.role === 'ADMIN';
   });
+  protected readonly canManageContributions = computed(() => {
+    const event = this.currentEvent();
+    const userId = this.authService.currentUser()?.id;
+
+    if (!event || !userId) {
+      return false;
+    }
+
+    if (event.organizerId === userId || event.deputyId === userId) {
+      return true;
+    }
+
+    const membership = this.teamMembers().find((member) => member.userId === userId);
+    return membership?.role === 'OWNER' || membership?.role === 'ADMIN';
+  });
+  protected readonly contributionsAccessHint = CONTRIBUTIONS_ACCESS_HINT;
+  protected readonly eventRolesAccessHint = EVENT_ROLES_ACCESS_HINT;
 
   protected readonly contributionForm = this.formBuilder.group({
     userId: ['', [Validators.required]],
@@ -252,7 +277,16 @@ export class PersonCardDialogComponent implements OnInit {
   protected addContribution(): void {
     const event = this.currentEvent();
 
-    if (!event || this.contributionForm.invalid) {
+    if (!event) {
+      return;
+    }
+
+    if (!this.canManageContributions()) {
+      this.actionErrorMessage.set(CONTRIBUTIONS_ACCESS_MESSAGE);
+      return;
+    }
+
+    if (this.contributionForm.invalid) {
       this.contributionForm.markAllAsTouched();
       return;
     }
@@ -287,6 +321,11 @@ export class PersonCardDialogComponent implements OnInit {
   }
 
   protected startContributionEdit(contribution: Contribution): void {
+    if (!this.canManageContributions()) {
+      this.actionErrorMessage.set(CONTRIBUTIONS_ACCESS_MESSAGE);
+      return;
+    }
+
     this.editingContributionId.set(contribution.id);
     this.contributionEditForm.setValue({
       amount: String(contribution.amount),
@@ -302,7 +341,16 @@ export class PersonCardDialogComponent implements OnInit {
   protected saveContribution(contributionId: string): void {
     const event = this.currentEvent();
 
-    if (!event || this.contributionEditForm.invalid) {
+    if (!event) {
+      return;
+    }
+
+    if (!this.canManageContributions()) {
+      this.actionErrorMessage.set(CONTRIBUTIONS_ACCESS_MESSAGE);
+      return;
+    }
+
+    if (this.contributionEditForm.invalid) {
       this.contributionEditForm.markAllAsTouched();
       return;
     }
@@ -337,6 +385,11 @@ export class PersonCardDialogComponent implements OnInit {
       return;
     }
 
+    if (!this.canManageContributions()) {
+      this.actionErrorMessage.set(CONTRIBUTIONS_ACCESS_MESSAGE);
+      return;
+    }
+
     this.actionErrorMessage.set(null);
 
     this.contributionsService
@@ -358,6 +411,11 @@ export class PersonCardDialogComponent implements OnInit {
     const event = this.currentEvent();
 
     if (!event) {
+      return;
+    }
+
+    if (!this.canManageContributions()) {
+      this.actionErrorMessage.set(CONTRIBUTIONS_ACCESS_MESSAGE);
       return;
     }
 
@@ -386,9 +444,7 @@ export class PersonCardDialogComponent implements OnInit {
     }
 
     if (!this.canManageEventRoles()) {
-      this.actionErrorMessage.set(
-        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
-      );
+      this.actionErrorMessage.set(EVENT_ROLES_ACCESS_MESSAGE);
       return;
     }
 
@@ -418,9 +474,7 @@ export class PersonCardDialogComponent implements OnInit {
     }
 
     if (!this.canManageEventRoles()) {
-      this.actionErrorMessage.set(
-        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
-      );
+      this.actionErrorMessage.set(EVENT_ROLES_ACCESS_MESSAGE);
       return;
     }
 
@@ -449,9 +503,7 @@ export class PersonCardDialogComponent implements OnInit {
     }
 
     if (!this.canManageEventRoles()) {
-      this.actionErrorMessage.set(
-        'Изменять заместителя и организатора может только организатор, владелец или администратор коллектива.',
-      );
+      this.actionErrorMessage.set(EVENT_ROLES_ACCESS_MESSAGE);
       return;
     }
 
@@ -592,6 +644,16 @@ export class PersonCardDialogComponent implements OnInit {
       return `Не удалось ${action}: frontend не смог отправить запрос.`;
     }
 
+    if (error.status === 403) {
+      if (this.isContributionAction(action)) {
+        return CONTRIBUTIONS_ACCESS_MESSAGE;
+      }
+
+      if (this.isEventRolesAction(action)) {
+        return EVENT_ROLES_ACCESS_MESSAGE;
+      }
+    }
+
     const backendMessage = this.getBackendErrorMessage(error);
 
     if (backendMessage) {
@@ -606,11 +668,27 @@ export class PersonCardDialogComponent implements OnInit {
       return `Не удалось ${action}: войдите в аккаунт заново.`;
     }
 
+    if (error.status === 403) {
+      return `Не удалось ${action}: нет доступа или недостаточно прав.`;
+    }
+
     if (error.status === 404) {
       return `Не удалось ${action}: данные не найдены.`;
     }
 
     return `Не удалось ${action}: запрос завершился ошибкой.`;
+  }
+
+  private isContributionAction(action: string): boolean {
+    return action.includes('взнос') || action.includes('статус взноса');
+  }
+
+  private isEventRolesAction(action: string): boolean {
+    return (
+      action.includes('заместител') ||
+      action.includes('организатор') ||
+      action.includes('передачи прав')
+    );
   }
 
   private getBackendErrorMessage(error: HttpErrorResponse): string | null {
