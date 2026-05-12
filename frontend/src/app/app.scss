@@ -144,25 +144,6 @@
   background: var(--color-primary-soft);
 }
 
-.notification-count {
-  position: absolute;
-  top: 8px;
-  right: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  color: var(--color-text-main);
-  background: var(--color-card-bg);
-  border: 1px solid rgba(221, 231, 236, 0.9);
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .logout-button mat-icon {
   margin-right: 6px;
 }
