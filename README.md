@@ -1,40 +1,374 @@
-# Pozdravlyashka
+# Поздравляшка
 
-«Поздравляшка» - MVP-приложение для командных поздравлений: база участников, история подарков, идеи, голосования, сборы и напоминания.
+«Поздравляшка» - веб-приложение для организации коллективных поздравлений, учета участников, идей подарков, бюджета, взносов и напоминаний внутри коллектива.
 
-## Stack
+Статус проекта: учебный MVP. Это рабочая минимально жизнеспособная версия, которую можно показать на защите и развивать дальше.
 
-- Frontend: Angular, TypeScript, Angular Material, SCSS, PWA
-- Backend: NestJS, TypeScript, Prisma
-- Database: PostgreSQL
-- Email: Nodemailer, Mailpit for local demo mode
-- Import: exceljs
-- Run: Docker Compose
+## О проекте
 
-## Structure
+В коллективах дни рождения, сбор денег и выбор подарков часто живут в чатах, таблицах и памяти одного ответственного человека. Из-за этого легко забыть дату, потерять идею подарка, дважды подарить одно и то же или не понять, кто уже сдал деньги.
+
+«Поздравляшка» собирает эти процессы в одном месте:
+
+- хранит список людей коллектива;
+- показывает ближайшие дни рождения и активные инициативы поздравлений;
+- позволяет создавать инициативы поздравлений к конкретной дате и поводу;
+- помогает собирать идеи подарков и голосовать за них;
+- хранит итоговый выбранный подарок;
+- учитывает бюджет и взносы участников;
+- позволяет назначить организатора и заместителя для конкретного поздравления;
+- поддерживает передачу прав организатора другому пользователю коллектива;
+- показывает историю подарков у участника;
+- отправляет напоминания внутри приложения и в email-режиме через SMTP;
+- импортирует участников из Excel-файла по шаблону.
+
+Проект рассчитан на простой сценарий: коллектив заранее готовит поздравление, выбирает подарок, собирает деньги и не теряет историю.
+
+## Основной функционал
+
+### Панель
+
+- создание и выбор активного коллектива;
+- краткая сводка по возможностям проекта;
+- ближайшие дни рождения активного коллектива на 30 дней;
+- список инициатив поздравлений;
+- подсказка, сколько инициатив еще без выбранного итогового подарка.
+
+### Участники
+
+- просмотр людей активного коллектива;
+- добавление участника поздравлений вручную;
+- редактирование данных участника;
+- архивирование участника;
+- карточка участника;
+- дата рождения, email, группа или отдел, предпочтения и комментарии;
+- статус участника: активный, неактивный или архивный;
+- история подарков;
+- инициативы поздравлений, связанные с участником.
+
+### Поздравления
+
+- создание инициативы поздравления для человека из списка коллектива;
+- выбор повода: день рождения, корпоратив, профессиональный праздник, юбилей, проводы, поддержка или другое;
+- просмотр текущих инициатив;
+- изменение даты, повода, бюджета и статуса инициативы;
+- идеи подарков с описанием, примерной ценой и ссылкой;
+- голосование за подарок;
+- один голос пользователя на одну инициативу, при новом голосе старый переносится;
+- выбор итогового подарка;
+- запрет удаления идеи, если она уже выбрана итоговым подарком;
+- учет бюджета и взносов;
+- статусы взносов: не сдал, сдал, отменен;
+- назначение заместителя;
+- передача прав организатора;
+- история передачи прав.
+
+### Импорт Excel
+
+- загрузка участников из `.xlsx`;
+- ограничение файла до 5 МБ;
+- работа с фиксированным шаблоном;
+- проверка файла перед импортом;
+- предпросмотр валидных и ошибочных строк;
+- сохранение только валидных строк;
+- импорт прошлых подарков в историю подарков;
+- пропуск дублей по ФИО и дате рождения.
+
+Ожидаемые колонки файла:
+
+| ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий |
+|---|---|---|---|---|---|---|
+| Иванова Анна Сергеевна | 15.05.1992 | anna@example.com | Маркетинг | Сертификат | 2025 | Любит книги |
+
+Обязательные колонки: `ФИО`, `Дата рождения`. Поддерживаются даты Excel, `DD.MM.YYYY` и `YYYY-MM-DD`.
+
+### Напоминания
+
+- список уведомлений пользователя;
+- счетчик непрочитанных уведомлений;
+- фильтр по всем и непрочитанным уведомлениям;
+- ручная проверка напоминаний кнопкой «Проверить напоминания»;
+- напоминания за 14, 7, 3, 1 день и в день события;
+- уведомления о назначении заместителем;
+- уведомления о передаче прав организатора;
+- отметка одного уведомления как прочитанного;
+- отметка всех уведомлений как прочитанных;
+- удаление уведомлений;
+- email-напоминания через SMTP, в локальном dev-режиме письма видны в Mailpit.
+
+### Настройки
+
+- профиль пользователя;
+- имя пользователя и дата рождения;
+- просмотр email пользователя;
+- активный коллектив;
+- переименование активного коллектива владельцем или администратором;
+- добавление зарегистрированного пользователя в коллектив по email;
+- просмотр пользователей коллектива и их ролей;
+- настройка каналов уведомлений;
+- настройка сроков напоминаний;
+- просмотр статуса email-отправки;
+- скачивание шаблона Excel.
+
+## Роли и права
+
+### Пользователь
+
+Пользователь - это человек, который зарегистрировался на сайте и входит по email и паролю. Именно пользователь может быть владельцем коллектива, организатором, заместителем, автором идеи подарка или участником голосования.
+
+### Участник поздравлений
+
+Участник поздравлений - это человек из списка коллектива, которого можно поздравлять. Он хранится в разделе «Участники».
+
+Важно: участник поздравлений не всегда является пользователем сайта. Например, в список можно добавить преподавателя или одногруппника только как поздравляемого человека, даже если он не регистрировался в приложении.
+
+### Коллектив
+
+Коллектив - группа людей, внутри которой ведутся участники, инициативы поздравлений, идеи подарков, взносы и напоминания. Пользователь видит только те коллективы, в которые он добавлен.
+
+### OWNER / владелец
+
+OWNER создается автоматически, когда пользователь создает коллектив.
+
+Владелец может:
+
+- видеть коллектив и его данные;
+- редактировать название коллектива;
+- добавлять зарегистрированных пользователей в коллектив по email;
+- назначать заместителя в инициативе;
+- передавать права организатора в инициативе;
+- управлять взносами в инициативе;
+- выполнять обычные действия участника коллектива.
+
+### ADMIN / администратор
+
+ADMIN - пользователь с расширенными правами управления коллективом.
+
+В текущей реализации администратор может:
+
+- редактировать название коллектива;
+- добавлять зарегистрированных пользователей в коллектив по email;
+- назначать заместителя в инициативе;
+- передавать права организатора в инициативе;
+- управлять взносами;
+- выполнять обычные действия участника коллектива.
+
+В интерфейсе добавление пользователя через настройки сейчас добавляет его с ролью `MEMBER`.
+
+### MEMBER / участник коллектива
+
+MEMBER - обычный пользователь коллектива.
+
+Он может:
+
+- просматривать доступные данные своего коллектива;
+- видеть людей, инициативы и уведомления;
+- добавлять и редактировать людей в коллективе;
+- создавать инициативы поздравлений;
+- добавлять, редактировать и удалять идеи подарков;
+- голосовать за подарок;
+- выбирать итоговый подарок;
+- менять статус инициативы.
+
+Обычный участник не может:
+
+- добавлять пользователей в коллектив;
+- переименовывать коллектив;
+- назначать заместителя, если он не организатор инициативы;
+- передавать права организатора, если он не организатор инициативы;
+- управлять взносами, если он не организатор и не заместитель.
+
+### Организатор инициативы
+
+Организатор отвечает за конкретное поздравление. При создании инициативы организатором автоматически становится пользователь, который ее создал.
+
+Организатор может:
+
+- управлять взносами по своей инициативе;
+- назначить или снять заместителя;
+- передать права организатора другому пользователю коллектива;
+- видеть историю передачи прав.
+
+### Заместитель
+
+Заместитель помогает организатору с конкретной инициативой.
+
+Заместитель может:
+
+- управлять взносами по инициативе;
+- получать напоминания по инициативе.
+
+Заместитель не может самовольно назначать себя организатором и не меняет ответственных, если он не является организатором, владельцем или администратором коллектива.
+
+Важно: организатор и заместитель выбираются из пользователей коллектива, а не просто из списка поздравляемых людей.
+
+## Как работает логика коллективов и поздравлений
+
+1. Пользователь регистрируется и создает коллектив.
+2. Создатель коллектива получает роль `OWNER`.
+3. В коллектив добавляют людей, которых можно поздравлять. Это записи раздела «Участники».
+4. Если другому человеку нужен доступ к сайту, он сначала регистрируется, а OWNER или ADMIN добавляет его в коллектив по email.
+5. Для участника поздравлений создается инициатива: выбирается дата, повод и бюджет.
+6. Создатель инициативы становится организатором.
+7. Пользователи коллектива предлагают идеи подарков и голосуют.
+8. Один пользователь может иметь только один голос в рамках инициативы.
+9. По результатам обсуждения выбирается итоговый подарок.
+10. Организатор, заместитель, OWNER или ADMIN ведут взносы: кто сколько должен сдать и кто уже сдал.
+11. Организатор, OWNER или ADMIN могут назначить заместителя.
+12. Организатор, OWNER или ADMIN могут передать права организатора другому пользователю коллектива.
+13. Передача прав сохраняется в истории.
+14. Напоминания создаются для активных инициатив со статусами `PLANNED` и `IN_PROGRESS`.
+
+Если организатор совпадает с именинником и заместитель назначен, напоминание получает заместитель. Если заместителя нет, приложение предупреждает, что лучше назначить другого ответственного.
+
+## Демонстрационный сценарий для защиты
+
+Перед защитой лучше заранее подготовить 2-3 аккаунта, один общий коллектив, несколько участников поздравлений и одну заполненную инициативу.
+
+1. Войти в аккаунт демонстрационного пользователя.
+2. Открыть «Панель» и показать активный коллектив, ближайшие дни рождения и список инициатив.
+3. Перейти в «Участники» и показать список людей коллектива.
+4. Открыть карточку участника и показать ФИО, дату рождения, email, группу или отдел, статус, предпочтения и комментарий.
+5. В карточке участника показать историю подарков и связанные инициативы.
+6. Перейти в «Поздравления».
+7. Открыть инициативу поздравления.
+8. Показать в инициативе:
+   - повод и дату события;
+   - статус;
+   - бюджет;
+   - организатора;
+   - заместителя;
+   - идеи подарков;
+   - голоса;
+   - итоговый подарок;
+   - сбор денег;
+   - взносы;
+   - передачу прав организатора;
+   - историю передачи прав.
+9. Открыть «Идеи подарков» и показать добавление идеи, голосование и выбор итогового подарка.
+10. Открыть «Импорт Excel» и показать выбор файла, проверку строк и сохранение валидных данных.
+11. Открыть «Напоминания» и показать уведомления, счетчик непрочитанных и кнопку «Проверить напоминания».
+12. Открыть «Настройки» и показать:
+    - профиль пользователя;
+    - дату рождения пользователя;
+    - активный коллектив;
+    - список пользователей коллектива;
+    - добавление пользователя по email;
+    - настройки уведомлений;
+    - скачивание шаблона Excel;
+    - статус email-отправки.
+
+### Что сказать на защите
+
+«Проект автоматизирует организацию коллективных поздравлений. В нем можно вести участников коллектива, создавать инициативы поздравлений, выбирать подарок голосованием, учитывать бюджет и взносы, назначать ответственных и получать напоминания. Это помогает коллективу не забывать о важных датах и прозрачно организовывать сбор денег и выбор подарка».
+
+Еще можно добавить:
+
+- «Пользователь сайта и участник поздравлений - разные сущности. Пользователь входит в систему, а участник поздравлений - это человек, которого поздравляют».
+- «Доступ к коллективу не появляется автоматически. Пользователь должен быть добавлен владельцем или администратором по email».
+- «Права на взносы и ответственных ограничены: если кнопка недоступна, значит у аккаунта недостаточно прав».
+
+## Что важно знать перед показом
+
+- Чтобы другой человек увидел коллектив, он должен сначала зарегистрироваться на сайте.
+- После регистрации OWNER или ADMIN добавляет пользователя в коллектив по email.
+- Если пользователь зарегистрировался с новой почтой, он не увидит старый коллектив автоматически.
+- Если кнопка недоступна, обычно у пользователя нет прав на это действие.
+- Заместитель и организатор выбираются из пользователей коллектива, а не из обычного списка поздравляемых людей.
+- Для демонстрации лучше заранее подготовить 2-3 аккаунта и один общий коллектив.
+- Не удаляйте базу перед защитой, если в ней уже есть демо-данные.
+- Для показа email-напоминаний в локальном режиме откройте Mailpit: `http://localhost:8025`.
+
+## Техническая часть
+
+| Часть | Используется в проекте |
+|---|---|
+| Frontend | Angular 21, TypeScript |
+| UI | Angular Material, SCSS |
+| PWA | Angular service worker и manifest |
+| Backend | NestJS 11, TypeScript |
+| API | REST API с глобальным префиксом `/api` |
+| База данных | PostgreSQL 16 |
+| ORM | Prisma |
+| Авторизация | JWT, Passport JWT |
+| Пароли | bcrypt-хеши, пароль не хранится в открытом виде |
+| Импорт Excel | exceljs |
+| Email | Nodemailer |
+| Локальная почта | Mailpit |
+| Планировщик | `@nestjs/schedule`, ежедневная проверка напоминаний в 09:00 |
+| Пакетный менеджер | npm |
+| Локальная инфраструктура | Docker Compose для PostgreSQL и Mailpit |
+
+## Архитектура проекта
 
 ```text
-frontend/          Angular application
-backend/           NestJS API
-docs/              short project documentation
-docker-compose.yml PostgreSQL and Mailpit
+frontend/                         клиентская часть Angular
+frontend/src/app/pages/           страницы приложения
+frontend/src/app/core/services/   frontend-сервисы для работы с API
+frontend/src/app/core/models/     TypeScript-модели данных
+backend/                          серверная часть NestJS
+backend/prisma/schema.prisma      Prisma-схема базы данных
+backend/prisma/migrations/        миграции базы данных
+backend/src/modules/auth/         регистрация, вход, профиль и JWT
+backend/src/modules/teams/        коллективы и пользователи коллективов
+backend/src/modules/people/       участники поздравлений и история подарков
+backend/src/modules/events/       инициативы, идеи подарков, голоса, взносы, заместители и передачи прав
+backend/src/modules/imports/      импорт участников из Excel
+backend/src/modules/notifications/ уведомления
+backend/src/modules/reminders/    генерация напоминаний
+backend/src/modules/settings/     настройки уведомлений и email-статус
+backend/src/modules/mail/         отправка email
+backend/src/modules/health/       health-check endpoints
+docs/                             дополнительные короткие документы по проекту
+docker-compose.yml                PostgreSQL и Mailpit для локального запуска
 ```
 
-## Quick Start
+## Локальный запуск
+
+### Требования
+
+- Node.js;
+- npm;
+- Docker и Docker Compose;
+- свободные порты `3000`, `4200`, `5432`, `1025`, `8025`.
+
+### 1. Запустить PostgreSQL и Mailpit
+
+Из корня проекта:
 
 ```bash
 docker compose up -d postgres mailpit
 ```
 
+Можно также использовать npm-скрипт из корня:
+
+```bash
+npm run docker:up
+```
+
+Он поднимает все сервисы из `docker-compose.yml`.
+
+### 2. Настроить backend
+
 ```bash
 cd backend
 cp .env.example .env
 npm install
-npx prisma validate
 npx prisma migrate dev
 npx prisma generate
 npm run start:dev
 ```
+
+Backend по умолчанию запускается на `http://localhost:3000`.
+
+Проверки доступности API:
+
+- `GET http://localhost:3000/api/health`
+- `GET http://localhost:3000/api/health/db`
+
+### 3. Запустить frontend
+
+В отдельном терминале:
 
 ```bash
 cd frontend
@@ -42,274 +376,173 @@ npm install
 npm start
 ```
 
-API health check: `GET http://localhost:3000/api/health`.
-Database health check: `GET http://localhost:3000/api/health/db`.
-Mailpit UI for dev email: `http://localhost:8025`.
+Frontend запускается на `http://localhost:4200`.
 
-Auth endpoints:
+Frontend сейчас обращается к API по адресу `http://localhost:3000/api`, это указано в `frontend/src/environments/environment.ts`.
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `PATCH /api/auth/profile`
+### 4. Открыть локальные страницы
 
-Teams endpoints:
+- приложение: `http://localhost:4200`;
+- backend API: `http://localhost:3000/api`;
+- Mailpit для локальных email: `http://localhost:8025`.
 
-- `POST /api/teams`
-- `GET /api/teams`
-- `GET /api/teams/:teamId`
-- `PATCH /api/teams/:teamId`
-- `GET /api/teams/:teamId/members`
+## Переменные окружения
 
-People endpoints:
+Backend использует `backend/.env`. Шаблон есть в `backend/.env.example`.
 
-- `POST /api/teams/:teamId/people`
-- `GET /api/teams/:teamId/people`
-- `GET /api/teams/:teamId/people/:personId` - full person card with gift history and related celebration initiatives
-- `PATCH /api/teams/:teamId/people/:personId`
-- `PATCH /api/teams/:teamId/people/:personId/archive`
-- `GET /api/teams/:teamId/people/upcoming-birthdays?days=30`
+Основные переменные:
 
-Gift history endpoints:
+| Переменная | Для чего нужна |
+|---|---|
+| `DATABASE_URL` | строка подключения к PostgreSQL |
+| `API_PORT` | порт backend, по умолчанию `3000` |
+| `JWT_SECRET` | секрет для подписи JWT |
+| `JWT_EXPIRES_IN` | срок жизни JWT, например `1d` |
+| `EMAIL_MODE` | `dev` для Mailpit или `smtp` для реальной отправки |
+| `EMAIL_HOST` | SMTP-хост |
+| `EMAIL_PORT` | SMTP-порт |
+| `EMAIL_SECURE` | использовать защищенное SMTP-соединение |
+| `EMAIL_USER` | SMTP-пользователь |
+| `EMAIL_PASSWORD` | пароль приложения для SMTP |
+| `EMAIL_FROM` | отправитель писем |
 
-- `GET /api/teams/:teamId/people/:personId/gift-history`
-- `POST /api/teams/:teamId/people/:personId/gift-history`
-- `PATCH /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId`
-- `DELETE /api/teams/:teamId/people/:personId/gift-history/:giftHistoryId`
+Пример локальной строки подключения из шаблона:
 
-Celebration event endpoints:
+```env
+DATABASE_URL="postgresql://pozdravlyashka:pozdravlyashka@localhost:5432/pozdravlyashka?schema=public"
+API_PORT=3000
+JWT_SECRET=change-me-in-local-env
+JWT_EXPIRES_IN=1d
+EMAIL_MODE=dev
+EMAIL_HOST=localhost
+EMAIL_PORT=1025
+EMAIL_SECURE=false
+EMAIL_FROM="Поздравляшка <no-reply@pozdravlyashka.local>"
+```
 
-- `GET /api/teams/:teamId/events?status=PLANNED&personId=:personId`
-- `POST /api/teams/:teamId/events`
-- `GET /api/teams/:teamId/events/:eventId`
-- `PATCH /api/teams/:teamId/events/:eventId`
-- `PATCH /api/teams/:teamId/events/:eventId/status`
-- `GET /api/teams/:teamId/events/:eventId/gift-ideas`
-- `POST /api/teams/:teamId/events/:eventId/gift-ideas`
-- `PATCH /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId`
-- `DELETE /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId`
-- `POST /api/teams/:teamId/events/:eventId/gift-ideas/:ideaId/vote`
-- `DELETE /api/teams/:teamId/events/:eventId/vote`
-- `PATCH /api/teams/:teamId/events/:eventId/selected-gift`
-- `DELETE /api/teams/:teamId/events/:eventId/selected-gift`
-- `GET /api/teams/:teamId/events/:eventId/contributions`
-- `POST /api/teams/:teamId/events/:eventId/contributions`
-- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId`
-- `PATCH /api/teams/:teamId/events/:eventId/contributions/:contributionId/status`
-- `DELETE /api/teams/:teamId/events/:eventId/contributions/:contributionId`
-- `PATCH /api/teams/:teamId/events/:eventId/deputy`
-- `DELETE /api/teams/:teamId/events/:eventId/deputy`
-- `POST /api/teams/:teamId/events/:eventId/delegations`
-- `GET /api/teams/:teamId/events/:eventId/delegations`
+Не храните реальные SMTP-пароли и секреты в README или в публичном репозитории.
 
-Import endpoints:
+## Работа с базой данных
 
-- `POST /api/teams/:teamId/imports/people/preview`
-- `POST /api/teams/:teamId/imports/people/commit`
-- `GET /api/teams/:teamId/imports/people/template`
+- Prisma schema находится в `backend/prisma/schema.prisma`.
+- Миграции находятся в `backend/prisma/migrations`.
+- Для локального применения миграций используется `npx prisma migrate dev`.
+- Для генерации Prisma Client используется `npx prisma generate`.
+- В backend также есть npm-скрипты:
+  - `npm run prisma:validate`;
+  - `npm run prisma:migrate`;
+  - `npm run prisma:generate`;
+  - `npm run prisma:studio`.
+- Не удаляйте базу перед защитой, если там уже подготовлены демо-данные.
 
-Settings endpoints:
+## Подготовка демо-данных
 
-- `GET /api/settings/notifications`
-- `PATCH /api/settings/notifications`
-- `GET /api/settings/email-status`
+1. Запустить PostgreSQL, backend и frontend.
+2. Зарегистрировать аккаунт организатора.
+3. Создать коллектив на странице «Панель».
+4. Зарегистрировать еще 1-2 пользователей с другими email.
+5. Войти под организатором и добавить этих пользователей в коллектив в «Настройках».
+6. Добавить 5-7 участников поздравлений вручную или через Excel.
+7. Для одного участника заполнить предпочтения, комментарий и историю подарков.
+8. Создать инициативу поздравления с ближайшей датой.
+9. Добавить 2-3 идеи подарков.
+10. Проголосовать за подарок разными пользователями.
+11. Выбрать итоговый подарок.
+12. Добавить бюджет и несколько взносов.
+13. Назначить заместителя.
+14. Передать права организатора другому пользователю и показать историю передачи.
+15. Создать инициативу на дату через 1, 3, 7 или 14 дней, чтобы удобно показать напоминания.
+16. Открыть «Напоминания» и нажать «Проверить напоминания».
+17. Если нужен показ email, открыть Mailpit на `http://localhost:8025`.
 
-Notifications endpoints:
+## Частые вопросы на защите
 
-- `GET /api/notifications`
-- `GET /api/notifications/unread-count`
-- `PATCH /api/notifications/:notificationId/read`
-- `PATCH /api/notifications/read-all`
-- `DELETE /api/notifications/:notificationId`
-- `POST /api/reminders/run`
+### Зачем нужен проект?
 
-Backend `.env` must contain `DATABASE_URL`, `JWT_SECRET` and `JWT_EXPIRES_IN`.
-Email reminders use Nodemailer. In dev mode Mailpit receives messages on SMTP
-port `1025` and exposes UI on `http://localhost:8025`. Real sending is enabled
-with `EMAIL_MODE=smtp` and SMTP variables in `backend/.env`; Mail.ru and Yandex
-must use app passwords.
+Чтобы коллектив не забывал важные даты, заранее выбирал подарки, прозрачно собирал деньги и хранил историю поздравлений.
 
-## Settings MVP
+### Чем пользователь отличается от участника поздравления?
 
-The `/settings` page contains real MVP settings instead of a placeholder:
+Пользователь входит на сайт по email и паролю. Участник поздравления - это запись человека в коллективе, которого можно поздравлять. Он может вообще не иметь аккаунта.
 
-- profile name and birth date can be edited through `PATCH /api/auth/profile`;
-- the active team name can be edited by OWNER/ADMIN through `PATCH /api/teams/:teamId`;
-- notification channels and reminder days are saved in `UserNotificationSettings`;
-- reminder generation respects disabled in-app/email channels and disabled day offsets;
-- email status shows `mode`, `host`, `port`, `secure`, `from` and Mailpit URL without returning SMTP password or other secrets;
-- Excel import template is downloaded as `people-import-template.xlsx` from the protected team import endpoint.
+### Почему другой аккаунт не видит коллектив?
 
-Default organizer and deputy are informational in settings: they are assigned
-inside a concrete celebration initiative.
-Useful Prisma scripts: `npm run prisma:validate`, `npm run prisma:migrate`,
-`npm run prisma:generate`, `npm run prisma:studio`.
+Потому что коллективы видны только пользователям, которые добавлены в них через настройки по email.
 
-## Celebration Event Occasions
+### Кто может добавить пользователя в коллектив?
 
-Инициативы поздравлений теперь хранят повод события. По умолчанию используется
-«День рождения», поэтому основной сценарий дней рождения остается главным и не
-ломается. Дополнительно поддерживаются: «Корпоратив», «Профессиональный
-праздник», «Юбилей», «Проводы», «Поддержка» и «Другое». Это позволяет вести
-разные коллективные события без превращения приложения в универсальный
-календарь.
+Владелец (`OWNER`) или администратор (`ADMIN`). Пользователь должен заранее зарегистрироваться на сайте.
 
-## MVP Teams And People
+### Кто может назначить заместителя?
 
-Implemented in this stage:
+Организатор инициативы, владелец коллектива или администратор.
 
-- user teams with membership-based access;
-- manual people management inside a team;
-- archived people hidden from active lists;
-- upcoming birthdays for the active team on dashboard.
+### Кто может передать права организатора?
 
-Manual check:
+Организатор инициативы, владелец коллектива или администратор. Новый организатор должен быть пользователем этого коллектива.
 
-1. Run PostgreSQL with `docker compose up -d postgres`.
-2. Start backend and frontend.
-3. Register or log in.
-4. Create a team on dashboard.
-5. Add a person on `/people`.
-6. Edit and archive the person.
-7. Check that dashboard shows upcoming birthdays for the active team.
+### Что делает заместитель?
 
-## Excel Import MVP
+Заместитель помогает вести конкретное поздравление: может управлять взносами и получать напоминания по инициативе.
 
-The `/import` page imports people into the active team from a fixed `.xlsx`
-template. The file must be up to 5 MB. The first row must contain headers.
+### Как учитываются взносы?
 
-Expected columns:
+Для инициативы задается бюджет. Затем ответственный добавляет пользователей коллектива в сбор, указывает сумму и статус: не сдал, сдал или отменен. Приложение считает собранную сумму, остаток и прогресс.
 
-| ФИО | Дата рождения | Email | Группа/отдел | Прошлый подарок | Год подарка | Комментарий |
-|---|---|---|---|---|---|---|
-| Иванова Анна | 15.05.2005 | anna@example.com | Группа 102-43 | Сертификат Ozon | 2025 | Подарок от группы |
+### Как работает голосование за подарок?
 
-Rules:
+Пользователи коллектива добавляют идеи подарков и голосуют. У одного пользователя один голос на инициативу. Если он голосует за другую идею, голос переносится.
 
-- required columns: `ФИО`, `Дата рождения`;
-- supported birth date formats: Excel date, `DD.MM.YYYY`, `YYYY-MM-DD`;
-- `Email`, `Группа/отдел`, `Прошлый подарок`, `Год подарка`, `Комментарий` are optional;
-- if email is filled, it must be valid;
-- if gift year is filled, it must be a number;
-- `GiftHistory` is created only when `Прошлый подарок` is filled;
-- imported gift history is shown in each person's card on `/people`;
-- empty rows are ignored;
-- duplicate people by full name and birth date are skipped.
+### Зачем нужен импорт Excel?
 
-Manual import check:
+Чтобы быстро загрузить список людей коллектива и прошлые подарки, а не вводить все вручную.
 
-1. Run PostgreSQL, backend and frontend.
-2. Register or log in.
-3. Create or select a team on dashboard.
-4. Open `/import`, choose a valid `.xlsx` file and click `Проверить файл`.
-5. Confirm valid and invalid rows are shown in preview.
-6. Click `Сохранить валидные строки`.
-7. Open `/people` and confirm imported people and their gift history are listed.
-8. Open dashboard and confirm upcoming birthdays appear when dates are within 30 days.
-9. Check `GiftHistory` in the database for rows with previous gifts.
+### Где хранятся данные?
 
-## Person Card, Gift History And Events MVP
+Данные хранятся в PostgreSQL. Backend работает с ними через Prisma.
 
-Implemented in this stage:
+### Безопасно ли хранится пароль?
 
-- `/people/:personId` opens a real person card from backend and PostgreSQL;
-- gift history can be viewed, added, edited and deleted manually;
-- `/events` shows real celebration initiatives for the active team;
-- an initiative can be created for a person, opened, edited and moved through statuses;
-- all new endpoints require JWT and check that the user belongs to the team from URL.
+Пароль не хранится в открытом виде. При регистрации backend сохраняет bcrypt-хеш пароля. Авторизация работает через JWT-токен.
 
-Manual check:
+### Что будет, если email-напоминание не отправится?
 
-1. Log in to the application.
-2. Create or select a team.
-3. Add or import a person.
-4. Open the person's card from `/people`.
-5. Add a gift history record.
-6. Create a celebration initiative from the person card.
-7. Open `/events` and confirm the initiative is listed.
-8. Change the initiative status.
-9. Refresh the page and confirm gift history and status are still saved.
+В уведомлении сохраняется статус отправки и сообщение об ошибке. В dev-режиме письма отправляются в Mailpit.
 
-## Gift Ideas, Voting And Final Gift MVP
+### Можно ли использовать проект не только для дней рождения?
 
-Implemented in this stage:
+Да. В инициативе есть поле «Повод»: день рождения, корпоратив, профессиональный праздник, юбилей, проводы, поддержка или другое.
 
-- gift ideas are stored in PostgreSQL for a concrete celebration initiative;
-- team members can add, edit and delete gift ideas on `/events`;
-- each user has one vote per initiative, and voting for another idea replaces the previous vote;
-- a team member can select one idea as the final gift, which is stored on the initiative;
-- selected final gifts are returned in event lists and person cards.
+## Статус проекта
 
-Manual check:
+Статус: учебный MVP.
 
-1. Log in to the application.
-2. Create or select a team.
-3. Create a person.
-4. Create a celebration initiative.
-5. Open the initiative on `/events`.
-6. Add several gift ideas.
-7. Vote for one idea.
-8. Vote for another idea and confirm the vote moved.
-9. Select the final gift.
-10. Refresh the page and confirm votes and final gift remain.
-11. Try to delete the final gift and confirm the app shows an error.
+В проекте реализованы основные функции для демонстрации:
 
-## Contributions, Deputy And Delegation MVP
+- регистрация и вход;
+- коллективы и роли;
+- участники поздравлений;
+- история подарков;
+- импорт Excel;
+- инициативы поздравлений;
+- идеи подарков и голосование;
+- итоговый подарок;
+- бюджет и взносы;
+- заместители и передача прав организатора;
+- уведомления и напоминания;
+- локальная email-демонстрация через Mailpit.
 
-Implemented in this stage:
+Возможные будущие улучшения:
 
-- money collection is stored in PostgreSQL as `Contribution` records for a concrete celebration initiative;
-- contribution status and summary are calculated from real database data;
-- an initiative can have a saved deputy organizer;
-- organizer rights can be transferred to another team member and saved in `Delegation` history;
-- collection management is allowed for the organizer, deputy, OWNER or ADMIN;
-- deputy assignment and organizer transfer are allowed only for the organizer, OWNER or ADMIN.
+- полноценные email-приглашения в коллектив;
+- более детальная настройка ролей;
+- календарная интеграция;
+- расширенные email-уведомления;
+- аналитика бюджета и истории подарков;
+- улучшенный деплой;
+- отдельная админ-панель для управления ролями.
 
-Manual check:
-
-1. Log in to the application.
-2. Create or select a team.
-3. Create a celebration initiative.
-4. Open initiative details from `/events`.
-5. Add a contribution, mark it as «Сдал», edit the amount and delete it.
-6. Assign a deputy and refresh the page.
-7. Transfer organizer rights to another team member.
-8. Confirm the organizer changed and delegation history appeared.
-9. Refresh the page and confirm contributions, deputy and delegation history remain.
-10. Try invalid cases: zero or negative amount, duplicate contribution, non-member deputy, non-member new organizer and end date before start date.
-
-## Notifications And Email Reminders MVP
-
-Implemented in this stage:
-
-- in-app notifications are stored in PostgreSQL as `Notification` records;
-- `/reminders` shows persisted notifications after page refresh;
-- notifications can be marked as read, marked all read and deleted;
-- the header shows unread notifications count;
-- event reminders are generated for 14/7/3/1/0 days before an active initiative;
-- organizer and deputy receive reminders, with deputy priority when the organizer is the birthday person;
-- email reminders are sent through Nodemailer and tracked as `EMAIL` notifications;
-- repeated runs skip duplicates by event, user, channel, type and reminder offset;
-- assigning a deputy and transferring organizer rights create in-app notifications.
-
-Manual check:
-
-1. Run `docker compose up -d postgres mailpit`.
-2. Start backend and frontend.
-3. Register or log in.
-4. Create or select a team.
-5. Create a person.
-6. Create a celebration initiative with date in 1, 3, 7 or 14 days.
-7. Open `/reminders`.
-8. Click `Проверить напоминания`.
-9. Confirm an in-app notification appeared and unread count increased.
-10. Open Mailpit at `http://localhost:8025` and confirm the email arrived.
-11. Mark the notification as read and confirm unread count decreased.
-12. Mark all as read and confirm the count is 0.
-13. Delete a notification and confirm it disappeared.
-14. Run reminders again and confirm duplicate notifications are skipped.
-
-## Docs
+## Дополнительные документы
 
 - [Project overview](docs/project-overview.md)
 - [Technical solution](docs/technical-solution.md)
