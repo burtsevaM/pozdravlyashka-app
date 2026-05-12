@@ -1,6 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Team, TeamMember, TeamRole } from '@prisma/client';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Team, TeamMember, TeamRole } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 
@@ -105,6 +112,74 @@ export class TeamsService {
     }));
   }
 
+  async addTeamMember(
+    teamId: string,
+    userId: string,
+    addTeamMemberDto: AddTeamMemberDto,
+  ): Promise<TeamMemberResponse> {
+    const membership = await this.ensureTeamMember(teamId, userId);
+
+    if (
+      membership.role !== TeamRole.OWNER &&
+      membership.role !== TeamRole.ADMIN
+    ) {
+      throw new ForbiddenException(
+        'Добавлять пользователей может только владелец или администратор коллектива',
+      );
+    }
+
+    const role = addTeamMemberDto.role ?? TeamRole.MEMBER;
+
+    if (role === TeamRole.OWNER) {
+      throw new BadRequestException(
+        'Добавить пользователя с ролью владельца нельзя',
+      );
+    }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { email: addTeamMemberDto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        'Пользователь с таким email не найден. Сначала он должен зарегистрироваться.',
+      );
+    }
+
+    const existingMembership = await this.prismaService.teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId,
+          userId: user.id,
+        },
+      },
+      include: { user: true },
+    });
+
+    if (existingMembership) {
+      throw new ConflictException('Пользователь уже состоит в коллективе.');
+    }
+
+    try {
+      const member = await this.prismaService.teamMember.create({
+        data: {
+          teamId,
+          userId: user.id,
+          role,
+        },
+        include: { user: true },
+      });
+
+      return this.toTeamMemberResponse(member);
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException('Пользователь уже состоит в коллективе.');
+      }
+
+      throw error;
+    }
+  }
+
   async updateTeam(
     teamId: string,
     userId: string,
@@ -160,5 +235,23 @@ export class TeamsService {
       createdAt: team.createdAt,
       role,
     };
+  }
+
+  private toTeamMemberResponse(
+    member: TeamMember & { user: { name: string; email: string } },
+  ): TeamMemberResponse {
+    return {
+      userId: member.userId,
+      name: member.user.name,
+      email: member.user.email,
+      role: member.role,
+    };
+  }
+
+  private isUniqueConstraintError(error: unknown): boolean {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
   }
 }

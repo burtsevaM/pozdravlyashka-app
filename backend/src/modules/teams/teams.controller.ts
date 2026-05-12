@@ -12,6 +12,7 @@ import {
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../auth/types/auth-user.type';
+import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import {
@@ -58,6 +59,19 @@ export class TeamsController {
     @Param('teamId', ParseUUIDPipe) teamId: string,
   ): Promise<TeamMemberResponse[]> {
     return this.teamsService.getTeamMembers(teamId, request.user.id);
+  }
+
+  @Post(':teamId/members')
+  addTeamMember(
+    @Req() request: AuthenticatedRequest,
+    @Param('teamId', ParseUUIDPipe) teamId: string,
+    @Body() addTeamMemberDto: AddTeamMemberDto,
+  ): Promise<TeamMemberResponse> {
+    return this.teamsService.addTeamMember(
+      teamId,
+      request.user.id,
+      addTeamMemberDto,
+    );
   }
 
   @Patch(':teamId')

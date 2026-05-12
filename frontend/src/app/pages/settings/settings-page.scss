@@ -99,6 +99,62 @@ mat-icon[mat-card-avatar] {
   margin-top: 16px;
 }
 
+.team-members-section {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.member-add-form {
+  display: grid;
+  gap: 10px;
+}
+
+.member-add-form button {
+  min-height: 48px;
+}
+
+.team-members-list {
+  display: grid;
+  gap: 10px;
+}
+
+.inline-loading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--color-text-muted);
+}
+
+.member-list {
+  display: grid;
+  gap: 8px;
+}
+
+.member-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.member-row mat-icon {
+  flex: 0 0 auto;
+  color: var(--color-primary-strong);
+}
+
+.member-row p {
+  color: var(--color-text-main);
+  font-weight: 700;
+}
+
+.member-row span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  overflow-wrap: anywhere;
+}
+
 .card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -277,6 +333,11 @@ mat-chip {
 
   .wide-card {
     grid-column: 1 / -1;
+  }
+
+  .member-add-form {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
   }
 
 }

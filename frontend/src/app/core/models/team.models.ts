@@ -25,3 +25,8 @@ export type CreateTeamRequest = {
 export type UpdateTeamRequest = {
   name: string;
 };
+
+export type AddTeamMemberRequest = {
+  email: string;
+  role?: TeamRole;
+};

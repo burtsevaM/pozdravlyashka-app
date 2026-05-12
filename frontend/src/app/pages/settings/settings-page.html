@@ -120,6 +120,83 @@
             </button>
           </div>
         </form>
+
+        <mat-divider />
+
+        <section class="team-members-section" aria-label="Участники коллектива">
+          <div>
+            <p class="group-label">Добавить пользователя в коллектив</p>
+            <p class="info-note">Пользователь должен быть уже зарегистрирован на сайте.</p>
+          </div>
+
+          <form
+            class="member-add-form"
+            [formGroup]="teamMemberForm"
+            (ngSubmit)="addTeamMember()"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>Email пользователя</mat-label>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                maxlength="254"
+                autocomplete="email"
+                [readonly]="!canEditActiveTeam()"
+              />
+              @if (
+                teamMemberEmailControl.touched &&
+                teamMemberEmailControl.hasError('required')
+              ) {
+                <mat-error>Введите email</mat-error>
+              }
+              @if (
+                teamMemberEmailControl.touched &&
+                teamMemberEmailControl.hasError('email')
+              ) {
+                <mat-error>Введите корректный email</mat-error>
+              }
+            </mat-form-field>
+
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="isAddingTeamMember() || !canEditActiveTeam()"
+            >
+              <mat-icon aria-hidden="true">person_add</mat-icon>
+              <span>Добавить</span>
+            </button>
+          </form>
+
+          @if (!canEditActiveTeam()) {
+            <p class="info-note">Добавлять пользователей может владелец или администратор коллектива.</p>
+          }
+
+          <div class="team-members-list" aria-live="polite">
+            <p class="group-label">Участники коллектива</p>
+            @if (isLoadingTeamMembers()) {
+              <div class="inline-loading">
+                <mat-spinner diameter="22" />
+                <span>Загрузка участников...</span>
+              </div>
+            } @else if (teamMembers().length > 0) {
+              <div class="member-list">
+                @for (member of teamMembers(); track member.userId) {
+                  <div class="member-row">
+                    <mat-icon aria-hidden="true">person</mat-icon>
+                    <div>
+                      <p>{{ member.name }}</p>
+                      <span>{{ member.email }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state-text">Участники пока не загружены.</p>
+            }
+          </div>
+        </section>
       } @else {
         <div class="empty-state">
           <mat-icon aria-hidden="true">group_add</mat-icon>

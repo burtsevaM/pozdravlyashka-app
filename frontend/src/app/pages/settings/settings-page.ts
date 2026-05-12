@@ -16,11 +16,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { finalize } from 'rxjs';
 import { EmailStatus } from '../../core/models/settings.models';
+import { TeamMember } from '../../core/models/team.models';
 import { AuthService } from '../../core/services/auth.service';
 import { ImportsService } from '../../core/services/imports.service';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { TeamContextService } from '../../core/services/team-context.service';
+import { TeamsService } from '../../core/services/teams.service';
 
 type ApiErrorResponse = {
   message?: string | string[];
@@ -53,6 +55,7 @@ export class SettingsPage implements OnInit {
   private readonly importsService = inject(ImportsService);
   private readonly notificationsService = inject(NotificationsService);
   private readonly settingsService = inject(SettingsService);
+  private readonly teamsService = inject(TeamsService);
   protected readonly teamContext = inject(TeamContextService);
 
   protected readonly profileForm = this.formBuilder.group({
@@ -62,6 +65,10 @@ export class SettingsPage implements OnInit {
 
   protected readonly teamForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
+  });
+
+  protected readonly teamMemberForm = this.formBuilder.group({
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
   });
 
   protected readonly notificationForm = this.formBuilder.group({
@@ -78,13 +85,17 @@ export class SettingsPage implements OnInit {
   protected readonly isLoading = signal(false);
   protected readonly isSavingProfile = signal(false);
   protected readonly isSavingTeam = signal(false);
+  protected readonly isAddingTeamMember = signal(false);
+  protected readonly isLoadingTeamMembers = signal(false);
   protected readonly isSavingNotifications = signal(false);
   protected readonly isDownloadingTemplate = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly successMessage = signal<string | null>(null);
+  protected readonly teamMembers = signal<TeamMember[]>([]);
 
   protected readonly profileNameControl = this.profileForm.controls.name;
   protected readonly teamNameControl = this.teamForm.controls.name;
+  protected readonly teamMemberEmailControl = this.teamMemberForm.controls.email;
 
   protected readonly canEditActiveTeam = computed(() => {
     const role = this.teamContext.activeTeam()?.role;
@@ -129,6 +140,7 @@ export class SettingsPage implements OnInit {
   protected selectTeam(teamId: string): void {
     this.teamContext.setActiveTeam(teamId);
     this.patchTeamForm();
+    this.loadTeamMembers(teamId);
     this.clearMessages();
   }
 
@@ -167,6 +179,56 @@ export class SettingsPage implements OnInit {
           this.errorMessage.set(
             this.getRequestErrorMessage(error, 'сохранить настройки коллектива'),
           );
+        },
+      });
+  }
+
+  protected addTeamMember(): void {
+    const activeTeam = this.teamContext.activeTeam();
+    const email = this.teamMemberEmailControl.value.trim().toLowerCase();
+
+    if (!activeTeam) {
+      this.errorMessage.set('Сначала создайте или выберите коллектив на главной панели.');
+      return;
+    }
+
+    if (!this.canEditActiveTeam()) {
+      this.errorMessage.set(
+        'Добавлять пользователей может только владелец или администратор коллектива.',
+      );
+      return;
+    }
+
+    if (!email) {
+      this.teamMemberEmailControl.setErrors({ required: true });
+      this.teamMemberForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.teamMemberForm.invalid) {
+      this.teamMemberForm.markAllAsTouched();
+      return;
+    }
+
+    this.isAddingTeamMember.set(true);
+    this.clearMessages();
+
+    this.teamsService
+      .addTeamMember(activeTeam.id, { email, role: 'MEMBER' })
+      .pipe(
+        finalize(() => this.isAddingTeamMember.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (member) => {
+          this.teamMemberForm.reset({ email: '' });
+          this.teamMembers.update((members) =>
+            this.upsertAndSortTeamMember(members, member),
+          );
+          this.successMessage.set('Пользователь добавлен в коллектив');
+        },
+        error: (error: unknown) => {
+          this.errorMessage.set(this.getTeamMemberRequestErrorMessage(error));
         },
       });
   }
@@ -256,7 +318,10 @@ export class SettingsPage implements OnInit {
       .loadTeams()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => this.patchTeamForm(),
+        next: () => {
+          this.patchTeamForm();
+          this.loadTeamMembers();
+        },
         error: (error: unknown) => {
           this.errorMessage.set(this.getRequestErrorMessage(error, 'загрузить коллективы'));
         },
@@ -294,6 +359,44 @@ export class SettingsPage implements OnInit {
     this.teamForm.patchValue({
       name: this.teamContext.activeTeam()?.name ?? '',
     });
+  }
+
+  private loadTeamMembers(teamId = this.teamContext.activeTeamId()): void {
+    if (!teamId) {
+      this.teamMembers.set([]);
+      return;
+    }
+
+    this.isLoadingTeamMembers.set(true);
+
+    this.teamsService
+      .getTeamMembers(teamId)
+      .pipe(
+        finalize(() => this.isLoadingTeamMembers.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (members) => this.teamMembers.set(members),
+        error: (error: unknown) => {
+          this.errorMessage.set(
+            this.getRequestErrorMessage(error, 'загрузить участников коллектива'),
+          );
+        },
+      });
+  }
+
+  private upsertAndSortTeamMember(members: TeamMember[], member: TeamMember): TeamMember[] {
+    return [...members.filter((item) => item.userId !== member.userId), member].sort(
+      (first, second) => {
+        const nameCompare = first.name.localeCompare(second.name, 'ru');
+
+        if (nameCompare !== 0) {
+          return nameCompare;
+        }
+
+        return first.email.localeCompare(second.email, 'ru');
+      },
+    );
   }
 
   private saveBlob(blob: Blob, fileName: string): void {
@@ -340,6 +443,32 @@ export class SettingsPage implements OnInit {
     }
 
     return `Не удалось ${action}: запрос завершился ошибкой.`;
+  }
+
+  private getTeamMemberRequestErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Не удалось добавить пользователя в коллектив.';
+    }
+
+    const backendMessage = this.getBackendErrorMessage(error);
+
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    if (error.status === 0) {
+      return 'Не удалось добавить пользователя в коллектив: backend недоступен или нет сети.';
+    }
+
+    if (error.status === 401) {
+      return 'Не удалось добавить пользователя в коллектив: войдите в аккаунт заново.';
+    }
+
+    if (error.status === 403) {
+      return 'Не удалось добавить пользователя в коллектив: нет доступа или недостаточно прав.';
+    }
+
+    return 'Не удалось добавить пользователя в коллектив: запрос завершился ошибкой.';
   }
 
   private getBackendErrorMessage(error: HttpErrorResponse): string | null {

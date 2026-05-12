@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import {
+  AddTeamMemberRequest,
   CreateTeamRequest,
   TeamMember,
   TeamWithRole,
@@ -33,5 +34,9 @@ export class TeamsService {
 
   getTeamMembers(teamId: string) {
     return this.httpClient.get<TeamMember[]>(`${environment.apiUrl}/teams/${teamId}/members`);
+  }
+
+  addTeamMember(teamId: string, request: AddTeamMemberRequest) {
+    return this.httpClient.post<TeamMember>(`${environment.apiUrl}/teams/${teamId}/members`, request);
   }
 }
